@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PlayerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\LevelPowerGalacticTrait;
@@ -32,6 +34,14 @@ class Player
     #[ORM\ManyToOne(inversedBy: 'players')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Guild $guild = null;
+
+    #[ORM\OneToMany(mappedBy: 'player', targetEntity: UnitPlayer::class, orphanRemoval: true)]
+    private Collection $unitPlayers;
+
+    public function __construct()
+    {
+        $this->unitPlayers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -94,6 +104,36 @@ class Player
     public function setGuild(?Guild $guild): self
     {
         $this->guild = $guild;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UnitPlayer>
+     */
+    public function getUnitPlayers(): Collection
+    {
+        return $this->unitPlayers;
+    }
+
+    public function addUnitPlayer(UnitPlayer $unitPlayer): self
+    {
+        if (!$this->unitPlayers->contains($unitPlayer)) {
+            $this->unitPlayers->add($unitPlayer);
+            $unitPlayer->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUnitPlayer(UnitPlayer $unitPlayer): self
+    {
+        if ($this->unitPlayers->removeElement($unitPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($unitPlayer->getPlayer() === $this) {
+                $unitPlayer->setPlayer(null);
+            }
+        }
 
         return $this;
     }

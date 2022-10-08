@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AbilityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -38,6 +40,14 @@ class Ability
     #[ORM\ManyToOne(inversedBy: 'abilities')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Hero $hero = null;
+
+    #[ORM\OneToMany(mappedBy: 'ability', targetEntity: HeroPlayerAbility::class, orphanRemoval: true)]
+    private Collection $heroPlayerAbilities;
+
+    public function __construct()
+    {
+        $this->heroPlayerAbilities = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -136,6 +146,36 @@ class Ability
     public function setHero(?Hero $hero): self
     {
         $this->hero = $hero;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HeroPlayerAbility>
+     */
+    public function getHeroPlayerAbilities(): Collection
+    {
+        return $this->heroPlayerAbilities;
+    }
+
+    public function addHeroPlayerAbility(HeroPlayerAbility $heroPlayerAbility): self
+    {
+        if (!$this->heroPlayerAbilities->contains($heroPlayerAbility)) {
+            $this->heroPlayerAbilities->add($heroPlayerAbility);
+            $heroPlayerAbility->setAbility($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHeroPlayerAbility(HeroPlayerAbility $heroPlayerAbility): self
+    {
+        if ($this->heroPlayerAbilities->removeElement($heroPlayerAbility)) {
+            // set the owning side to null (unless already changed)
+            if ($heroPlayerAbility->getAbility() === $this) {
+                $heroPlayerAbility->setAbility(null);
+            }
+        }
 
         return $this;
     }

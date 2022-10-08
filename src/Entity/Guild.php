@@ -27,9 +27,13 @@ class Guild
     #[ORM\OneToMany(mappedBy: 'guild', targetEntity: Player::class, orphanRemoval: true)]
     private Collection $players;
 
+    #[ORM\ManyToMany(targetEntity: Squad::class, mappedBy: 'guilds')]
+    private Collection $squads;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
+        $this->squads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,6 +90,33 @@ class Guild
             if ($player->getGuild() === $this) {
                 $player->setGuild(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Squad>
+     */
+    public function getSquads(): Collection
+    {
+        return $this->squads;
+    }
+
+    public function addSquad(Squad $squad): self
+    {
+        if (!$this->squads->contains($squad)) {
+            $this->squads->add($squad);
+            $squad->addGuild($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSquad(Squad $squad): self
+    {
+        if ($this->squads->removeElement($squad)) {
+            $squad->removeGuild($this);
         }
 
         return $this;

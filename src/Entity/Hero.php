@@ -11,22 +11,16 @@ use App\Entity\Unit;
 #[ORM\Entity(repositoryClass: HeroRepository::class)]
 class Hero extends Unit
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
     #[ORM\OneToMany(mappedBy: 'hero', targetEntity: Ability::class, orphanRemoval: true)]
     private Collection $abilities;
+
+    #[ORM\OneToMany(mappedBy: 'hero', targetEntity: HeroPlayer::class, orphanRemoval: true)]
+    private Collection $heroPlayers;
 
     public function __construct()
     {
         $this->abilities = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->heroPlayers = new ArrayCollection();
     }
 
     /**
@@ -53,6 +47,36 @@ class Hero extends Unit
             // set the owning side to null (unless already changed)
             if ($ability->getHero() === $this) {
                 $ability->setHero(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HeroPlayer>
+     */
+    public function getHeroPlayers(): Collection
+    {
+        return $this->heroPlayers;
+    }
+
+    public function addHeroPlayer(HeroPlayer $heroPlayer): self
+    {
+        if (!$this->heroPlayers->contains($heroPlayer)) {
+            $this->heroPlayers->add($heroPlayer);
+            $heroPlayer->setHero($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHeroPlayer(HeroPlayer $heroPlayer): self
+    {
+        if ($this->heroPlayers->removeElement($heroPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($heroPlayer->getHero() === $this) {
+                $heroPlayer->setHero(null);
             }
         }
 
