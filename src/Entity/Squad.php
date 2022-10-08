@@ -27,7 +27,7 @@ class Squad
     #[ORM\ManyToMany(targetEntity: Guild::class, inversedBy: 'squads')]
     private Collection $guilds;
 
-    #[ORM\OneToMany(mappedBy: 'squad', targetEntity: Squadunit::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'squad', targetEntity: SquadUnit::class, orphanRemoval: true)]
     private Collection $units;
 
     public function __construct()
@@ -102,14 +102,14 @@ class Squad
     }
 
     /**
-     * @return Collection<int, Squadunit>
+     * @return Collection<int, SquadUnit>
      */
     public function getUnits(): Collection
     {
         return $this->units;
     }
 
-    public function addUnit(Squadunit $unit): self
+    public function addUnit(SquadUnit $unit): self
     {
         if (!$this->units->contains($unit)) {
             $this->units->add($unit);
@@ -119,7 +119,7 @@ class Squad
         return $this;
     }
 
-    public function removeUnit(Squadunit $unit): self
+    public function removeUnit(SquadUnit $unit): self
     {
         if ($this->units->removeElement($unit)) {
             // set the owning side to null (unless already changed)

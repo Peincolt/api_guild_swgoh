@@ -6,10 +6,9 @@ use App\Repository\UnitRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\MappedSuperclass;
 use App\Entity\Traits\InformationTrait;
 
-#[ORM\Entity(repositoryClass: Unit::class)]
+#[ORM\Entity(repositoryClass: UnitRepository::class)]
 #[ORM\InheritanceType("JOINED")]
 #[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
 #[ORM\DiscriminatorMap(array('ship' => 'Ship', 'hero'=>'Hero'))]
@@ -28,7 +27,7 @@ class Unit
     #[ORM\Column]
     private array $categories = [];
 
-    #[ORM\OneToMany(mappedBy: 'unit', targetEntity: Squadunit::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'unit', targetEntity: SquadUnit::class, orphanRemoval: true)]
     private Collection $squadunits;
 
     public function __construct()
@@ -66,14 +65,14 @@ class Unit
     }
 
     /**
-     * @return Collection<int, Squadunit>
+     * @return Collection<int, SquadUnit>
      */
     public function getSquadunits(): Collection
     {
         return $this->squadunits;
     }
 
-    public function addSquadunit(Squadunit $squadunit): self
+    public function addSquadunit(SquadUnit $squadunit): self
     {
         if (!$this->squadunits->contains($squadunit)) {
             $this->squadunits->add($squadunit);
@@ -83,7 +82,7 @@ class Unit
         return $this;
     }
 
-    public function removeSquadunit(Squadunit $squadunit): self
+    public function removeSquadunit(SquadUnit $squadunit): self
     {
         if ($this->squadunits->removeElement($squadunit)) {
             // set the owning side to null (unless already changed)

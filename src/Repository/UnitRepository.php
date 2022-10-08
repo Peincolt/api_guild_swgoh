@@ -40,7 +40,7 @@ class UnitRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return SquadUnit[] Returns an array of SquadUnit objects
+//     * @return Unit[] Returns an array of Unit objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class UnitRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?SquadUnit
+//    public function findOneBySomeField($value): ?Unit
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')
