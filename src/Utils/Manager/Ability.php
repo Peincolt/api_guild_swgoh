@@ -29,24 +29,24 @@ class Ability
                         'base_id' => $arrayData['base_id']
                     ]
                 );
-                if (empty($ability)) {
-                    $ability = new AbilityEntity();
-                    $hero = $this->heroRepository->findOneBy(
-                        [
-                            'base_id' => $arrayData['character_base_id']
-                        ]
-                    );
-                    if (!empty($hero)) {
+                $hero = $this->heroRepository->findOneBy(
+                    [
+                        'base_id' => $arrayData['character_base_id']
+                    ]
+                );
+                if (!empty($hero)) {
+                    if (empty($ability)) {
+                        $ability = new AbilityEntity();
                         $ability->setHero($hero);
                         $this->entityManagerInterface->persist($ability);
                     }
+                    $ability = $this->fillObjectWithArray($ability, $arrayData); 
+                    if ($count >= 1000) {
+                        $this->entityManagerInterface->flush();
+                        $count = 0;
+                    }
+                    $count++;
                 }
-                $ability = $this->fillObjectWithArray($ability, $arrayData);
-                if ($count >= 1000) {
-                    $this->entityManagerInterface->flush();
-                    $count = 0;
-                }
-                $count++;
             }
             $this->entityManagerInterface->flush();
             return true;

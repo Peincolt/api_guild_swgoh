@@ -18,7 +18,7 @@ class SquadUnit
 
     #[ORM\ManyToOne(inversedBy: 'units')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?squad $squad = null;
+    private ?Squad $squad = null;
 
     #[ORM\ManyToOne(inversedBy: 'squadunits')]
     #[ORM\JoinColumn(nullable: false)]
@@ -41,12 +41,12 @@ class SquadUnit
         return $this;
     }
 
-    public function getSquad(): ?squad
+    public function getSquad(): ?Squad
     {
         return $this->squad;
     }
 
-    public function setSquad(?squad $squad): self
+    public function setSquad(?Squad $squad): self
     {
         $this->squad = $squad;
 
