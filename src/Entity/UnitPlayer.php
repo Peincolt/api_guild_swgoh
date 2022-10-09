@@ -6,12 +6,19 @@ use App\Repository\UnitPlayerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\LevelPowerGalacticTrait;
-use Doctrine\ORM\Mapping\MappedSuperclass;
 
-#[ORM\MappedSuperclass]
+#[ORM\Entity(repositoryClass: UnitPlayerRepository::class)]
+#[ORM\InheritanceType("JOINED")]
+#[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
+#[ORM\DiscriminatorMap(array('ship' => 'ShipPlayer', 'hero'=>'HeroPlayer'))]
 class UnitPlayer
 {
     use LevelPowerGalacticTrait;
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $number_stars = null;
@@ -28,6 +35,10 @@ class UnitPlayer
     #[ORM\ManyToOne(inversedBy: 'unitPlayers')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Player $player = null;
+
+    #[ORM\ManyToOne(inversedBy: 'playerUnits')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Unit $unit = null;
 
     public function getId(): ?int
     {
@@ -90,6 +101,18 @@ class UnitPlayer
     public function setPlayer(?Player $player): self
     {
         $this->player = $player;
+
+        return $this;
+    }
+
+    public function getUnit(): ?Unit
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(?Unit $unit): self
+    {
+        $this->unit = $unit;
 
         return $this;
     }

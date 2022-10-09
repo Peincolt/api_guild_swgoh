@@ -30,9 +30,13 @@ class Unit
     #[ORM\OneToMany(mappedBy: 'unit', targetEntity: SquadUnit::class, orphanRemoval: true)]
     private Collection $squadunits;
 
+    #[ORM\OneToMany(mappedBy: 'unit', targetEntity: UnitPlayer::class, orphanRemoval: true)]
+    private Collection $playerUnits;
+
     public function __construct()
     {
         $this->squadunits = new ArrayCollection();
+        $this->playerUnits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -88,6 +92,36 @@ class Unit
             // set the owning side to null (unless already changed)
             if ($squadunit->getUnit() === $this) {
                 $squadunit->setUnit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlayerUnit>
+     */
+    public function getPlayerUnits(): Collection
+    {
+        return $this->playerUnits;
+    }
+
+    public function addPlayerUnit(PlayerUnit $playerUnit): self
+    {
+        if (!$this->playerUnits->contains($playerUnit)) {
+            $this->playerUnits->add($playerUnit);
+            $playerUnit->setUnit($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayerUnit(PlayerUnit $playerUnit): self
+    {
+        if ($this->playerUnits->removeElement($playerUnit)) {
+            // set the owning side to null (unless already changed)
+            if ($playerUnit->getUnit() === $this) {
+                $playerUnit->setUnit(null);
             }
         }
 

@@ -71,10 +71,10 @@ class UnitCommand extends Command
             if (!empty($result) && is_array($result)) {
                 $output->writeln(
                     [
-                        '<bg=red;fg=white>Erreur lors de la synchronisation</fg>',
-                        '<bg=red;fg=white>===========================</fg>',
-                        '<bg=red;fg=white>Voilà le message d\'erreur :</fg>',
-                        '<bg=red;fg=white>'.$result['error_message'].'</fg>'
+                        '<fg=red>Erreur lors de la synchronisation',
+                        '===========================',
+                        'Voilà le message d\'erreur :',
+                        $result['error_message'].'</>'
                     ]
                 );
                 return Command::FAILURE;
@@ -101,10 +101,10 @@ class UnitCommand extends Command
         } else {
             $output->writeln(
                 [
-                    '<bg=red;fg=white>Erreur lors de la synchronisation</fg>',
-                    '<bg=red;fg=white>===========================</fg>',
-                    '<bg=red;fg=white>Voilà le message d\'erreur :</fg>',
-                    '<bg=red;fg=white>'.$result['error_message'].'</fg>'
+                    '<fg=red>Erreur lors de la synchronisation',
+                    '===========================',
+                    'Voilà le message d\'erreur :',
+                    $result['error_message'].'</>'
                 ]
             );
             return Command::FAILURE;

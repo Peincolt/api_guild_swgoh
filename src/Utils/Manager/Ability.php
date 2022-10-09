@@ -40,7 +40,7 @@ class Ability
                         $ability->setHero($hero);
                         $this->entityManagerInterface->persist($ability);
                     }
-                    $ability = $this->fillObjectWithArray($ability, $arrayData); 
+                    $ability = $this->fillAbility($ability, $arrayData); 
                     if ($count >= 1000) {
                         $this->entityManagerInterface->flush();
                         $count = 0;
@@ -54,7 +54,7 @@ class Ability
         return $data;
     }
 
-    public function fillObjectWithArray(
+    public function fillAbility(
         AbilityEntity $ability,
         array $array
     ) :AbilityEntity {

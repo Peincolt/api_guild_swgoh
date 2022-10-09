@@ -26,23 +26,36 @@ class SwgohGg
                 "GET",
                 $this->baseUrl . "guild-profile/" . $id
             )->toArray();
+            if (empty($guild['data'])) {
+                return array(
+                    'error_message' => 'La guilde que vous essayez de synchroniser n\existe pas'
+                );
+            }
             return $guild;
         } catch (Exception $e) {
-            $arrayReturn['error_code'] = $e->getCode();
-            $arrayReturn['error_message'] = $e->getMessage();
-            return $arrayReturn;
+            return array(
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage()
+            );
         }
     }
 
     public function fetchPlayer(string $allyCode)
     {
         try {
-            return $this->client->request(
+            $response = $this->client->request(
                 "GET",
                 $this->baseUrl . "player/" . $allyCode
-            )->toArray();
+            );
+            if ($response->getStatusCode() == 404) {
+                throw new Exception('Le joueur que vous essayez de synchroniser n\'existe pas', 404);
+            }
+            return $response->toArray();
         } catch (Exception $e) {
-            return false;
+            return array(
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage()
+            );
         }
         
     }
@@ -59,9 +72,10 @@ class SwgohGg
                 $this->baseUrl.$this->getRouteByEntityName($type)
             )->toArray();
         } catch (Exception $e) {
-            $arrayReturn['error_code'] = $e->getCode();
-            $arrayReturn['error_message'] = $e->getMessage();
-            return $arrayReturn;
+            return array(
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage()
+            );
         }
         
     }
@@ -81,9 +95,10 @@ class SwgohGg
         try {
             return $this->client->request("GET", $this->baseUrl .'abilities')->toArray();
         } catch (Exception $e) {
-            $arrayReturn['error_code'] = $e->getCode();
-            $arrayReturn['error_message'] = $e->getMessage();
-            return $arrayReturn;
+            return array(
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage()
+            );
         }
     }
 

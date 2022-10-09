@@ -11,17 +11,14 @@ use App\Entity\UnitPlayer;
 #[ORM\Entity(repositoryClass: HeroPlayerRepository::class)]
 class HeroPlayer extends UnitPlayer
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'heroPlayers')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Hero $hero = null;
-
     #[ORM\OneToMany(mappedBy: 'heroPlayer', targetEntity: HeroPlayerAbility::class, orphanRemoval: true)]
     private Collection $abilities;
+
+    #[ORM\Column]
+    private ?int $gear_level = null;
+
+    #[ORM\Column]
+    private ?int $relic_level = null;
 
     public function __construct()
     {
@@ -31,18 +28,6 @@ class HeroPlayer extends UnitPlayer
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getHero(): ?Hero
-    {
-        return $this->hero;
-    }
-
-    public function setHero(?Hero $hero): self
-    {
-        $this->hero = $hero;
-
-        return $this;
     }
 
     /**
@@ -71,6 +56,30 @@ class HeroPlayer extends UnitPlayer
                 $heroPlayerAbility->setHeroPlayer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGearLevel(): ?int
+    {
+        return $this->gear_level;
+    }
+
+    public function setGearLevel(int $gear_level): self
+    {
+        $this->gear_level = $gear_level;
+
+        return $this;
+    }
+
+    public function getRelicLevel(): ?int
+    {
+        return $this->relic_level;
+    }
+
+    public function setRelicLevel(int $relic_level): self
+    {
+        $this->relic_level = $relic_level;
 
         return $this;
     }

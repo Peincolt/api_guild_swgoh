@@ -19,7 +19,7 @@ class Guild
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $galactical_puissance = null;
+    private ?string $galactic_power = null;
 
     #[ORM\Column]
     private ?int $number_players = null;
@@ -41,14 +41,14 @@ class Guild
         return $this->id;
     }
 
-    public function getGalacticalPuissance(): ?string
+    public function getGalacticPower(): ?string
     {
-        return $this->galactical_puissance;
+        return $this->galactic_power;
     }
 
-    public function setGalacticalPuissance(string $galactical_puissance): self
+    public function setGalacticPower(string $galactic_power): self
     {
-        $this->galactical_puissance = $galactical_puissance;
+        $this->galactic_power = $galactic_power;
 
         return $this;
     }

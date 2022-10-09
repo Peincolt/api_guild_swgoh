@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\InformationTrait;
 use App\Repository\PlayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,6 +13,7 @@ use App\Entity\Traits\LevelPowerGalacticTrait;
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
 class Player
 {
+    use InformationTrait;
     use LevelPowerGalacticTrait;
 
     #[ORM\Id]
@@ -29,7 +31,7 @@ class Player
     private ?int $ships_galactic_power = null;
 
     #[ORM\Column]
-    private ?int $heros_gelactic_power = null;
+    private ?int $heroes_gelactic_power = null;
 
     #[ORM\ManyToOne(inversedBy: 'players')]
     #[ORM\JoinColumn(nullable: false)]
@@ -84,14 +86,14 @@ class Player
         return $this;
     }
 
-    public function getHerosGelacticPower(): ?int
+    public function getHeroesGelacticPower(): ?int
     {
-        return $this->heros_gelactic_power;
+        return $this->heroes_gelactic_power;
     }
 
-    public function setHerosGelacticPower(int $heros_gelactic_power): self
+    public function setHeroesGelacticPower(int $heroes_gelactic_power): self
     {
-        $this->heros_gelactic_power = $heros_gelactic_power;
+        $this->heroes_gelactic_power = $heroes_gelactic_power;
 
         return $this;
     }
