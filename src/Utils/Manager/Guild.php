@@ -26,6 +26,7 @@ class Guild
     {
         $arrayActualMembers = array();
         $dataGuild = $this->swgohGg->fetchGuild($idGuild);
+        $count = 0;
         if (isset($dataGuild['error_message'])) {
             return $dataGuild;
         }
@@ -38,10 +39,10 @@ class Guild
 
         if (empty($guild)) {
             $guild = new GuildEntity();
-            $this->_entityManagerInterface->persist($guild);
         }
 
         $guild = $this->fillGuild($guild, $dataGuild['data']);
+        $this->guildRepository->save($guild, true);
 
         if (!empty($outputInterface)) {
             $outputInterface->writeln(
@@ -57,11 +58,18 @@ class Guild
         foreach ($dataGuild['data']['members'] as $guildPlayerData) {
             array_push($arrayActualMembers, $guildPlayerData);
             $result = $this->playerManager
-                ->updatePlayer($guildPlayerData['ally_code'], $guild);
-            if (isset($result['error_message'])) {
+                ->updatePlayerWithApi($guildPlayerData['ally_code'], $guild);
+            if (is_array($result)) {
                 return $result;
             }
+            /*if ($count == 10) {
+                $this->entityManagerInterface->flush();
+                $count = 0;
+            } else {
+                $count++;
+            }*/
         }
+        $this->guildRepository->save($guild, true);
     }
 
     public function updateGuildPlayers(array $dataGuild, bool $characters = false, bool $ships = false)

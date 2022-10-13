@@ -2,6 +2,9 @@
 
 namespace App\Entity\Traits;
 
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
+
 trait LevelPowerGalacticTrait
 {
     #[ORM\Column(type: Types::SMALLINT)]

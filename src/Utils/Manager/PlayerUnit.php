@@ -3,6 +3,7 @@
 namespace App\Utils\Manager;
 
 use App\Entity\Player;
+use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
 use App\Repository\HeroPlayerRepository;
 use App\Repository\ShipPlayerRepository;
@@ -73,6 +74,17 @@ class PlayerUnit
             $arrayReturn['error_code'] = $e->getCode();
             return $arrayReturn;
         }
+    }
+
+    public function fillUnitPlayer(UnitPlayerEntity $unitPlayer, array $data) :UnitPlayerEntity
+    {
+        $unitPlayer->setNumberStars($data['rarity']);
+        $unitPlayer->setLevel($data['level']);
+        $unitPlayer->setGalacticalPower($data['power']);
+        $unitPlayer->setSpeed($data['stats']['5']);
+        $unitPlayer->setLife($data['stats']['1']);
+        $unitPlayer->setProtection($data['stats']['28']);
+        return $unitPlayer;
     }
 
     public function createPlayerShip(array $data, Player $player)

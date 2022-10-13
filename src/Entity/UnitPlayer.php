@@ -32,7 +32,7 @@ class UnitPlayer
     #[ORM\Column]
     private ?int $speed = null;
 
-    #[ORM\ManyToOne(inversedBy: 'unitPlayers')]
+    #[ORM\ManyToOne(inversedBy: 'unitPlayers', cascade: array('persist'))]
     #[ORM\JoinColumn(nullable: false)]
     private ?Player $player = null;
 

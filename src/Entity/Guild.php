@@ -12,7 +12,7 @@ use App\Entity\Traits\InformationTrait;
 class Guild
 {
     use InformationTrait;
-    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
