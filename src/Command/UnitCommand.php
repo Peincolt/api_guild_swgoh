@@ -98,16 +98,15 @@ class UnitCommand extends Command
                 ]
             );
             return Command::SUCCESS;
-        } else {
-            $output->writeln(
-                [
-                    '<fg=red>Erreur lors de la synchronisation',
-                    '===========================',
-                    'Voilà le message d\'erreur :',
-                    $result['error_message'].'</>'
-                ]
-            );
-            return Command::FAILURE;
         }
+        $output->writeln(
+            [
+                '<fg=red>Erreur lors de la synchronisation',
+                '===========================',
+                'Voilà le message d\'erreur :',
+                $result['error_message'].'</>'
+            ]
+        );
+        return Command::FAILURE;
     }
 }

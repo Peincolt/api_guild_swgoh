@@ -3,15 +3,20 @@
 namespace App\Utils\Manager;
 
 use App\Entity\Player;
-use App\Entity\HeroPlayer as HeroPlayerEntity;
-use App\Repository\HeroPlayerRepository;
+use App\Entity\HeroPlayerAbility;
 use App\Repository\HeroRepository;
+use App\Repository\AbilityRepository;
+use App\Repository\HeroPlayerRepository;
+use App\Entity\HeroPlayer as HeroPlayerEntity;
+use App\Repository\HeroPlayerAbilityRepository;
 
 class HeroPlayer extends PlayerUnit
 {
     public function __construct(
         private HeroPlayerRepository $heroPlayerRepository,
         private HeroRepository $heroRepository,
+        private AbilityRepository $abilityRepository,
+        private HeroPlayerAbilityRepository $heroPlayerAbilityRepository
     ) {}
 
     public function createHeroPlayer(Player $player, array $data)
@@ -51,6 +56,45 @@ class HeroPlayer extends PlayerUnit
             $heroPlayer->setRelicLevel($data['relic_tier'] - 2);
         } else {
             $heroPlayer->setRelicLevel(0);
+        }
+        if (count($data['omicron_abilities']) > 0) {
+            foreach ($data['omicron_abilities'] as $omicronAbilityName) {
+                $omicronAbility = $this->abilityRepository->findOneBy(
+                    [
+                        'hero' => $heroPlayer->getUnit(),
+                        'base_id' => $omicronAbilityName
+                    ]
+                );
+
+                if (!empty($heroPlayer->getId())) {
+                    $heroPlayerOmicronAbility = $this->heroPlayerAbilityRepository
+                        ->findOneby(
+                            [
+                                'ability' => $omicronAbility,
+                                'heroPlayer' => $heroPlayer->getId()
+                            ]
+                        );
+                    if (empty($heroPlayerOmicronAbility)) {
+                        $databaseHeroPlayerOmicronAbility = new HeroPlayerAbility();
+                        $this->heroPlayerAbilityRepository->save(
+                            $databaseHeroPlayerOmicronAbility,
+                            false
+                        );
+                        $databaseHeroPlayerOmicronAbility
+                            ->setAbility($omicronAbility);
+                        $databaseHeroPlayerOmicronAbility
+                            ->setHeroPlayer($heroPlayer);
+                        $databaseHeroPlayerOmicronAbility
+                            ->setIsOmicronLearned(true);
+                        foreach ($data['ability_data'] as $abilityData) {
+                            if ($abilityData['id'] == $omicronAbilityName) {
+                                $databaseHeroPlayerOmicronAbility
+                                    ->setIsZetaLearned(($abilityData['is_zeta'] == 'true' ? true : false));
+                            }
+                        }
+                    }
+                }
+            }
         }
         return $heroPlayer;
     }

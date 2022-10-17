@@ -62,12 +62,6 @@ class Guild
             if (is_array($result)) {
                 return $result;
             }
-            /*if ($count == 10) {
-                $this->entityManagerInterface->flush();
-                $count = 0;
-            } else {
-                $count++;
-            }*/
         }
         $this->guildRepository->save($guild, true);
     }

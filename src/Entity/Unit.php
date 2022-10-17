@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\UnitRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\UnitPlayer;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UnitRepository;
 use App\Entity\Traits\InformationTrait;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+
 
 #[ORM\Entity(repositoryClass: UnitRepository::class)]
 #[ORM\InheritanceType("JOINED")]
@@ -106,7 +108,7 @@ class Unit
         return $this->playerUnits;
     }
 
-    public function addPlayerUnit(PlayerUnit $playerUnit): self
+    public function addPlayerUnit(UnitPlayer $playerUnit): self
     {
         if (!$this->playerUnits->contains($playerUnit)) {
             $this->playerUnits->add($playerUnit);
@@ -116,7 +118,7 @@ class Unit
         return $this;
     }
 
-    public function removePlayerUnit(PlayerUnit $playerUnit): self
+    public function removePlayerUnit(UnitPlayer $playerUnit): self
     {
         if ($this->playerUnits->removeElement($playerUnit)) {
             // set the owning side to null (unless already changed)

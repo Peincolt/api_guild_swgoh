@@ -25,11 +25,6 @@ class HeroPlayer extends UnitPlayer
         $this->abilities = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     /**
      * @return Collection<int, HeroPlayerAbility>
      */
