@@ -3,11 +3,12 @@
 namespace App\Utils\Manager;
 
 use App\Entity\Player;
+use App\Utils\Manager\UnitPlayer;
 use App\Repository\ShipRepository;
 use App\Repository\ShipPlayerRepository;
 use App\Entity\ShipPlayer as ShipPlayerEntity;
 
-class ShipPlayer extends PlayerUnit
+class ShipPlayer extends UnitPlayer
 {
     public function __construct(
         private ShipPlayerRepository $shipPlayerRepository,

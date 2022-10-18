@@ -3,12 +3,14 @@
 namespace App\Utils\Manager;
 
 use Exception;
+use App\Entity\Unit;
 use App\Utils\Service\Api\SwgohGg;
-use App\Utils\Manager\Player as playerManager;
 use App\Repository\GuildRepository;
 use App\Entity\Guild as GuildEntity;
 use App\Repository\PlayerRepository;
+use App\Repository\SquadRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Utils\Manager\Player as playerManager;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Guild
@@ -18,7 +20,7 @@ class Guild
         private EntityManagerInterface $entityManagerInterface,
         private GuildRepository $guildRepository,
         private PlayerManager $playerManager,
-        private PlayerRepository $playerRepository
+        private PlayerRepository $playerRepository,
     )
     {}
 
@@ -64,6 +66,13 @@ class Guild
             }
         }
         $this->guildRepository->save($guild, true);
+    }
+
+    public function getUnitPlayersData(GuildEntity $guild, Unit $unit)
+    {
+        foreach ($guild->getPlayers() as $player) {
+
+        }
     }
 
     public function updateGuildPlayers(array $dataGuild, bool $characters = false, bool $ships = false)

@@ -2,33 +2,29 @@
 
 namespace App\Utils\Service\Extract;
 
+use ReflectionClass;
 use App\Entity\Guild;
 use App\Entity\Squad;
-use App\Repository\GuildRepository;
 use App\Repository\SquadRepository;
-use App\Repository\SquadUnitRepository;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use ReflectionClass;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 
 class ExcelSquad
 {
     //private $squadService;
 
     public function __construct(
-        private SquadRepository $squadRepository, 
-        //SquadService $squadService, 
-        private GuildRepository $guildRepository,
-        private SquadUnitRepository $squadUnitRepository
+        private SquadRepository $squadRepository,  
+        private UnitPlayerManager $unitPlayerManager
     )
     {}
 
     public function constructSpreadShitViaCommand(Guild $guild, string $option)
     {
-        $squads = $this->squadRepository->findBy(
-            [
-                'guild' => $guild,
-                'used_for' => $this->translateType($option)
-            ]
+        $squads = $this->squadRepository->getGuildSquad(
+            $guild,
+            $this->translateType($option)
         );
 
         return $this->constructSpreadShit($guild, $squads);
@@ -100,14 +96,14 @@ class ExcelSquad
                 $sheet->setCellValue('A'.$numberLineStatUnit, 'Nombre de G13 :');
             }
             
-            $squadData = $this->squadService
-                ->getPlayerSquadInformation($squad, $guild);
-            foreach ($squadData as $player => $data) {
+            $squadGuildData = $this->unitPlayerManager
+                ->getGuildPlayerUnitBySquad($guild, $squad);
+            foreach ($squadGuildData as $player => $data) {
                 $sheet->setCellValue('A'.$startData, $player);
                 $startLetter = "B";
-                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getSquadUnits()) + 1).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getSquadUnits())).($startData).",\"*G13*\")");
-                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getSquadUnits()) + 2).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getSquadUnits())).($startData).",\"*G12*\")");
-                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getSquadUnits()) + 3).($startData),"=".count($squad->getSquadUnits())."-".$this->incrementLetter($startLetter,count($squad->getSquadUnits()) + 2).($startData)."-".$this->incrementLetter($startLetter,count($squad->getSquadUnits()) + 1).($startData));
+                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 1).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getUnits())).($startData).",\"*G13*\")");
+                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 2).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getUnits())).($startData).",\"*G12*\")");
+                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 3).($startData),"=".count($squad->getUnits())."-".$this->incrementLetter($startLetter,count($squad->getUnits()) + 2).($startData)."-".$this->incrementLetter($startLetter,count($squad->getUnits()) + 1).($startData));
                 foreach ($data as $arrayValueUnit) {
                     if ($squad->getType() == "hero") {
                         $chain = $arrayValueUnit['rarity'].'* G'.$arrayValueUnit['gear_level'].' R'.$arrayValueUnit['relic_level'].' ('.$arrayValueUnit['speed'].')';
@@ -134,7 +130,7 @@ class ExcelSquad
             }
         }
         $writer = new Xlsx($spreadSheet);
-        $writer->save($folder.'/'.$guild->getName().' - '.$type.'.xlsx');
+        $writer->save("F:\Code\api_guild_swgoh\\".$guild->getName().".xlsx");
     }
 
     public function getStyleByGear(String $gearLevel)
@@ -171,7 +167,7 @@ class ExcelSquad
                 return "defense";
                 break;
             default:
-                return "all";
+                return null;
                 break;
         }
     }

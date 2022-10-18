@@ -78,11 +78,13 @@ class ExcelCommand extends Command
                     $type = "t";
                     break;
             }
+        } else {
+            $type = "t";
         }
 
         $output->writeln('Début de la génération de la matrice Excel...');
 
-        $result = $this->excelSquad->constructSpreadShit(
+        $result = $this->excelSquad->constructSpreadShitViaCommand(
             $guild,
             $type
         );

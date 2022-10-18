@@ -2,9 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Guild;
 use App\Entity\Squad;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Squad>
@@ -38,6 +39,24 @@ class SquadRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    public function getGuildSquad(Guild $guild, string $type = null)
+    {
+        $query = $this->createQueryBuilder('s')
+            ->andWhere(':guild MEMBER OF s.guilds')
+            ->setParameter(':guild', $guild);
+        if (!empty($type)) {
+            $query->andWhere('s.used_for = :usedFor')
+                ->setParameter(':usedFor', $type);
+        }
+        return $query->getQuery()
+            ->getResult();
+
+    }
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
 
 //    /**
 //     * @return Squad[] Returns an array of Squad objects

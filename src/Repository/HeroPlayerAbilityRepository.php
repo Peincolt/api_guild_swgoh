@@ -2,9 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\HeroPlayer;
 use App\Entity\HeroPlayerAbility;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<HeroPlayerAbility>
@@ -37,6 +38,16 @@ class HeroPlayerAbilityRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function getTwOmicron(HeroPlayer $heroPlayer)
+    {
+        return $this->createQueryBuilder('hpa')
+            ->join('hpa.ability', 'a', 'WITH', 'hpa.ability = a and a.omicron_mode = 8')
+            ->andWhere('hpa.heroPlayer = :heroPlayer')
+            ->setParameter('heroPlayer', $heroPlayer)
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

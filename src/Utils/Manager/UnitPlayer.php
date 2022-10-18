@@ -2,17 +2,22 @@
 
 namespace App\Utils\Manager;
 
+use Exception;
+use App\Entity\Unit;
+use ReflectionClass;
+use App\Entity\Guild;
+use App\Entity\Squad;
 use App\Entity\Player;
-use App\Entity\UnitPlayer as UnitPlayerEntity;
-use App\Repository\HeroPlayerAbilityRepository;
+use App\Entity\HeroPlayer;
+use App\Repository\UnitRepository;
 use App\Repository\HeroPlayerRepository;
 use App\Repository\ShipPlayerRepository;
 use App\Repository\UnitPlayerRepository;
-use App\Repository\UnitRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use App\Entity\UnitPlayer as UnitPlayerEntity;
+use App\Repository\HeroPlayerAbilityRepository;
 
-class PlayerUnit 
+class UnitPlayer 
 {
     public function __construct(
         private EntityManagerInterface $entityManagerInterface,
@@ -22,6 +27,72 @@ class PlayerUnit
         private UnitRepository $unitRepository,
         private UnitPlayerRepository $unitPlayerRepository
     ) {}
+
+    public function getGuildPlayerUnitBySquad(Guild $guild, Squad $squad)
+    {
+        $arrayData = array();
+        foreach ($squad->getUnits() as $squadUnit) {
+            $unit = $squadUnit->getUnit();
+            foreach ($guild->getPlayers() as $player) {
+                $arrayData[$player->getName()][$unit->getName()] = $this->getPlayerUnitByPlayerAndUnit($player, $unit);
+            }
+        }
+        return $arrayData;
+    }
+
+    public function getPlayerUnitByPlayerAndUnit(Player $player, Unit $unit)
+    {
+        
+        $unitPlayerData = $this->unitPlayerRepository->findOneBy(
+            [
+                'unit' => $unit,
+                'player' => $player
+            ]
+        );
+
+        return $this->fillExtractPlayerUnit($unitPlayerData);
+    }
+
+    private function fillExtractPlayerUnit(UnitPlayerEntity $unitPlayer = null)
+    {
+        if (!empty($unitPlayer)) {
+            $heroReflectionClass = new ReflectionClass($unitPlayer->getUnit());
+            $arrayPlayerData = [
+                'rarity' => $unitPlayer->getNumberStars(),
+                'level' => $unitPlayer->getLevel(),
+                'speed' => $unitPlayer->getSpeed(),
+                'life' => $unitPlayer->getLife(),
+                'protection' => $unitPlayer->getProtection()
+            ];
+            if ($heroReflectionClass->getShortName() == 'Hero') {
+                $arrayPlayerData['gear_level'] = $unitPlayer->getGearLevel();
+                $arrayPlayerData['relic_level'] = $unitPlayer->getRelicLevel();
+                $playerTwOmicrons = $this->getUnitPlayerOmicron($unitPlayer);
+                if (!empty($playerTwOmicrons)) {
+                    foreach ($playerTwOmicrons as $omicron) {
+                        $arrayPlayerData['omicrons'][] = $omicron->getAbility()->getName();
+                    }
+                }
+            }
+            return $arrayPlayerData;
+        }
+
+        return array(
+            'rarity' => 0,
+            'level' => 0,
+            'gear_level' => 0,
+            'relic_level' => 0,
+            'speed' => 0,
+            'life' => 0,
+            'protection' => 0        
+        );
+    }
+
+    public function getUnitPlayerOmicron(HeroPlayer $heroPlayer)
+    {
+        return $this->heroPlayerAbilityRepository
+            ->getTwOmicron($heroPlayer);
+    }
 
     public function getPlayerUnit(array $data, Player $player, string $type)
     {

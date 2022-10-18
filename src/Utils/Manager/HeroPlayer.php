@@ -4,13 +4,14 @@ namespace App\Utils\Manager;
 
 use App\Entity\Player;
 use App\Entity\HeroPlayerAbility;
+use App\Utils\Manager\UnitPlayer;
 use App\Repository\HeroRepository;
 use App\Repository\AbilityRepository;
 use App\Repository\HeroPlayerRepository;
 use App\Entity\HeroPlayer as HeroPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
 
-class HeroPlayer extends PlayerUnit
+class HeroPlayer extends UnitPlayer
 {
     public function __construct(
         private HeroPlayerRepository $heroPlayerRepository,
