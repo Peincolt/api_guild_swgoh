@@ -8,6 +8,7 @@ use App\Repository\UnitRepository;
 use App\Entity\Traits\InformationTrait;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: UnitRepository::class)]
@@ -46,6 +47,7 @@ class Unit
         return $this->id;
     }
 
+    #[Groups(['api_unit'])]
     public function getBaseId(): ?string
     {
         return $this->base_id;
@@ -58,6 +60,7 @@ class Unit
         return $this;
     }
 
+    #[Groups(['api_unit'])]
     public function getCategories(): array
     {
         return $this->categories;
