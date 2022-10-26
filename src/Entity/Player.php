@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use App\Entity\Traits\LevelPowerGalacticTrait;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
@@ -62,6 +63,7 @@ class Player
         return $this;
     }
 
+    #[Groups('api_player')]
     public function getGearGiven(): ?int
     {
         return $this->gear_given;
@@ -74,6 +76,7 @@ class Player
         return $this;
     }
 
+    #[Groups('api_player')]
     public function getShipsGalacticPower(): ?int
     {
         return $this->ships_galactic_power;
@@ -86,6 +89,7 @@ class Player
         return $this;
     }
 
+    #[Groups('api_player')]
     public function getHeroesGelacticPower(): ?int
     {
         return $this->heroes_gelactic_power;

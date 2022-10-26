@@ -55,6 +55,7 @@ class HeroPlayer extends UnitPlayer
         return $this;
     }
 
+    #[Groups('api_player_unit')]
     public function getGearLevel(): ?int
     {
         return $this->gear_level;
@@ -67,6 +68,7 @@ class HeroPlayer extends UnitPlayer
         return $this;
     }
 
+    #[Groups('api_player_unit')]
     public function getRelicLevel(): ?int
     {
         return $this->relic_level;

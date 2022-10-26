@@ -47,7 +47,7 @@ class Unit
         return $this->id;
     }
 
-    #[Groups(['api_unit'])]
+    #[Groups(['api_unit','api_player_unit'])]
     public function getBaseId(): ?string
     {
         return $this->base_id;

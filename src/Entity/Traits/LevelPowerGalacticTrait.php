@@ -4,6 +4,7 @@ namespace App\Entity\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 trait LevelPowerGalacticTrait
 {
@@ -13,6 +14,7 @@ trait LevelPowerGalacticTrait
     #[ORM\Column]
     private ?int $galactical_power = null;
 
+    #[Groups('api_player')]
     public function getLevel(): ?int
     {
         return $this->level;
@@ -25,6 +27,7 @@ trait LevelPowerGalacticTrait
         return $this;
     }
 
+    #[Groups('api_player')]
     public function getGalacticalPower(): ?int
     {
         return $this->galactical_power;

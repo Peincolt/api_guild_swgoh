@@ -9,6 +9,7 @@ use App\Utils\Service\Api\SwgohGg;
 use App\Utils\Manager\HeroPlayer as HeroPlayerManager;
 use App\Utils\Manager\ShipPlayer as ShipPlayerManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class Player
 {
@@ -16,11 +17,12 @@ class Player
         private SwgohGg $swgohGg, 
         private HeroPlayerManager $heroPlayerManager, 
         private ShipPlayerManager $shipPlayerManager,
-        private PlayerRepository $playerRepository
+        private PlayerRepository $playerRepository,
+        private SerializerInterface $serializerInterface
     ) 
     {}
 
-    public function updatePlayerWithApi(string $allyCode, Guild $guild)
+    public function updatePlayerWithApi(string $allyCode, Guild $guild) :bool|array
     {
         $count = 0;
         $playerData = $this->swgohGg->fetchPlayer($allyCode);
@@ -101,23 +103,8 @@ class Player
         $this->_entityManager->flush();
     }
 
-    public function updatePlayerByApi(int $allyCode, bool $characters = false, bool $ships = false)
+    public function getPlayerDataApi(PlayerEntity $player)
     {
-        $playerDatas = $this->_swgoh->fetchPlayer($allyCode);
-        if (is_array($playerDatas)) {
-            $this->updatePlayer($playerDatas, $characters, $ships);
-            return true;
-        }
-        return false;
-    }
-
-    public function getFields()
-    {
-        $arrayReturn = array();
-        $arrayReturn['name'] = 'Nom';
-        $arrayReturn['galactical_puissance'] = 'Puissance galactique';
-        $arrayReturn['characters_galactical_puissance'] = 'Puissance galactique des héros';
-        $arrayReturn['ships_galactical_puissance'] = 'Puissance galactique des vaisseaux';
-        return $arrayReturn;
+        
     }
 }
