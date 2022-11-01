@@ -9,5 +9,8 @@ use App\Repository\ShipPlayerRepository;
 #[ORM\Entity(repositoryClass: ShipPlayerRepository::class)]
 class ShipPlayer extends UnitPlayer
 {
-
+    public function __construct()
+    {
+        
+    }
 }

@@ -12,6 +12,7 @@ use App\Repository\SquadRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Utils\Manager\Player as playerManager;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class Guild
 {
@@ -21,6 +22,7 @@ class Guild
         private GuildRepository $guildRepository,
         private PlayerManager $playerManager,
         private PlayerRepository $playerRepository,
+        private SerializerInterface $serializer
     )
     {}
 
@@ -68,46 +70,6 @@ class Guild
         $this->guildRepository->save($guild, true);
     }
 
-    public function getUnitPlayersData(GuildEntity $guild, Unit $unit)
-    {
-        foreach ($guild->getPlayers() as $player) {
-
-        }
-    }
-
-    public function updateGuildPlayers(array $dataGuild, bool $characters = false, bool $ships = false)
-    {
-        $arrayActualMembers = array();
-        $guild = $this->_entityManagerInterface
-            ->getRepository(EntityGuild::class)
-            ->findOneBy(
-                [
-                    'id_swgoh' => $dataGuild['data']['guild_id']
-                ]
-            );
-        foreach ($dataGuild['data']['members'] as $guildPlayerData) {
-            array_push($arrayActualMembers, $guildPlayerData['player_name']);
-            $playerData = $this->_swgohGg->fetchPlayer(
-                $guildPlayerData['ally_code']
-            );
-            $this->_playerHelper->updatePlayerGuild(
-                $guild,
-                $playerData,
-                $characters,
-                $ships
-            );
-        }
-        $playersOut = $this->_playerRepository->getOldMembers(
-            $guild,
-            $arrayActualMembers
-        );
-        foreach ($playersOut as $player) {
-            $this->_entityManagerInterface->remove($player);
-        }
-        $this->_entityManagerInterface->flush();
-        return 200;
-    }
-
     public function fillGuild(GuildEntity $guild, array $data) :GuildEntity
     {
         $guild->setName($data['name']);
@@ -117,59 +79,14 @@ class Guild
         return $guild;
     }
 
-    public function getFormGuild()
+    public function getGuildDataApi(GuildEntity $guild)
     {
         $arrayReturn = array();
-        $guilds = $this->_entityManagerInterface
-            ->getRepository('App\Entity\Guild')
-            ->findAll();
-
-        foreach ($guilds as $guild) {
-            $arrayReturn[$guild->getName()] = $guild->getId();
+        $arrayReturn['data'] = $this->serializer->normalize($guild, null, ['groups' => ['api_guild']]);
+        foreach ($guild->getPlayers() as $player) {
+            $arrayReturn['players'][] = $this->playerManager
+                ->getPlayerDataApi($player);
         }
-
         return $arrayReturn;
     }
-
-    public function getHeroesGalacticalPower(EntityGuild $guild)
-    {
-        $galacticalPower = 0;
-        $players = $guild->getPlayers();
-        foreach ($players as $player) {
-            $galacticalPower+= intval($player->getCharactersGalacticalPuissance());
-        }
-        return $galacticalPower;
-    }
-
-    public function getShipsGalacticalPower(EntityGuild $guild)
-    {
-        $galacticalPower = 0;
-        $players = $guild->getPlayers();
-        foreach ($players as $player) {
-            $galacticalPower+= intval($player->getShipsGalacticalPuissance());
-        }
-        return $galacticalPower;
-    }
-
-    public function getHeroesNumber(EntityGuild $guild)
-    {
-        $heroesNumber = 0;
-        $players = $guild->getPlayers();
-        foreach ($players as $player) {
-            $heroesNumber+= intval(count($player->getCharacters()));
-        }
-        return $heroesNumber;
-    }
-
-    public function getShipsNumber(EntityGuild $guild)
-    {
-        $shipsNumber = 0;
-        $players = $guild->getPlayers();
-        foreach ($players as $player) {
-            $shipsNumber+= intval(count($player->getShips()));
-        }
-        return $shipsNumber;
-    }
-
-
 }

@@ -9,18 +9,22 @@ use App\Utils\Service\Api\SwgohGg;
 use App\Utils\Manager\HeroPlayer as HeroPlayerManager;
 use App\Utils\Manager\ShipPlayer as ShipPlayerManager;
 use Doctrine\ORM\EntityManagerInterface;
+use ReflectionClass;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class Player
+class Player extends BaseManager
 {
     public function __construct(
+        EntityManagerInterface $entityManagerInterface,
         private SwgohGg $swgohGg, 
         private HeroPlayerManager $heroPlayerManager, 
         private ShipPlayerManager $shipPlayerManager,
         private PlayerRepository $playerRepository,
-        private SerializerInterface $serializerInterface
+        private SerializerInterface $serializer
     ) 
-    {}
+    {
+        parent::__construct($entityManagerInterface);
+    }
 
     public function updatePlayerWithApi(string $allyCode, Guild $guild) :bool|array
     {
@@ -105,6 +109,52 @@ class Player
 
     public function getPlayerDataApi(PlayerEntity $player)
     {
-        
+        $arrayReturn = array();
+        $arrayReturn['data'] = $this->serializer->normalize($player, null, ['groups' => ['api_player']]);
+        return array_merge($arrayReturn, $this->getPlayerUnits($player));
+    }
+
+    public function getPlayerHeroesApi(PlayerEntity $player)
+    {
+        return $this->getPlayerUnits($player, 'heroes');
+    }
+
+    public function getPlayerShipsApi(PlayerEntity $player)
+    {
+        return $this->getPlayerUnits($player, 'ships');
+    }
+
+    public function getPlayerUnits(PlayerEntity $player, string $type = null)
+    {
+        $arrayReturn = array();
+        $units = $player->getUnitPlayers();
+        foreach ($units as $unit) {
+            $classInformation = new ReflectionClass($unit);
+            if ($classInformation->getShortName() == 'HeroPlayer') {
+                $unitTypeName = 'heroes';
+            } else {
+                $unitTypeName = 'ships';
+            }
+
+            if (empty($type) || $type == $unitTypeName) {
+                $unitInformation = array_merge(
+                    $this->serializer->normalize($unit, null,
+                        [
+                            'groups' => [
+                                'api_player_unit'
+                            ]
+                        ]
+                    ), $this->serializer->normalize($unit->getUnit(), null,
+                        [
+                            'groups' => [
+                                'api_player_unit'
+                            ]
+                        ]
+                    )
+                );
+                $arrayReturn[$unitTypeName][] = $unitInformation;
+            }
+        }
+        return $arrayReturn;
     }
 }

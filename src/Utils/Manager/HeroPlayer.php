@@ -4,21 +4,26 @@ namespace App\Utils\Manager;
 
 use App\Entity\Player;
 use App\Entity\HeroPlayerAbility;
-use App\Utils\Manager\UnitPlayer;
 use App\Repository\HeroRepository;
+use App\Utils\Manager\BaseManager;
 use App\Repository\AbilityRepository;
 use App\Repository\HeroPlayerRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\HeroPlayer as HeroPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
 
 class HeroPlayer extends UnitPlayer
 {
     public function __construct(
+        EntityManagerInterface $entityManagerInterface,
         private HeroPlayerRepository $heroPlayerRepository,
         private HeroRepository $heroRepository,
         private AbilityRepository $abilityRepository,
         private HeroPlayerAbilityRepository $heroPlayerAbilityRepository
-    ) {}
+    ) {
+        BaseManager::__construct($entityManagerInterface);
+        $this->setRepositoryByClassName(HeroPlayerEntity::class);
+    }
 
     public function createHeroPlayer(Player $player, array $data)
     {

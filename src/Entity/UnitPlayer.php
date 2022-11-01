@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UnitPlayerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use App\Entity\Traits\LevelPowerGalacticTrait;
 
 #[ORM\Entity(repositoryClass: UnitPlayerRepository::class)]
@@ -45,6 +46,7 @@ class UnitPlayer
         return $this->id;
     }
 
+    #[Groups('api_player_unit')]
     public function getNumberStars(): ?int
     {
         return $this->number_stars;
@@ -57,6 +59,7 @@ class UnitPlayer
         return $this;
     }
 
+    #[Groups('api_player_unit')]
     public function getProtection(): ?int
     {
         return $this->protection;
@@ -69,6 +72,7 @@ class UnitPlayer
         return $this;
     }
 
+    #[Groups('api_player_unit')]
     public function getLife(): ?int
     {
         return $this->life;
@@ -81,6 +85,7 @@ class UnitPlayer
         return $this;
     }
 
+    #[Groups('api_player_unit')]
     public function getSpeed(): ?int
     {
         return $this->speed;

@@ -3,23 +3,40 @@
 namespace App\Controller\Api\Player;
 
 use App\Entity\Player;
-use App\Controller\Api\ApiBaseController;
 use App\Utils\Manager\Player as PlayerManager;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class PlayerController extends AbstractController
 {
-    protected $serializer;
+    public function __construct(
+        private PlayerManager $playerManager
+    ) {
+
+    }
 
     #[Route('/player/{id_swgoh}', name: 'api_player', methods: ['GET'])]
-    public function getHeroes(Player $player, PlayerManager $playerManager): JsonResponse
+    public function getPlayerData(Player $player): JsonResponse
     {
         return $this->json(
-            $playerManager->getPlayerDataApi($player)
+            $this->playerManager->getPlayerDataApi($player)
+        );
+    }
+
+    #[Route('/player/{id_swgoh}/heroes', name: 'api_player_heroes', methods: ['GET'])]
+    public function getPlayerHeroes(Player $player): JsonResponse
+    {
+        return $this->json(
+            $this->playerManager->getPlayerHeroesApi($player)
+        );
+    }
+
+    #[Route('/player/{id_swgoh}/ships', name: 'api_player_ships', methods: ['GET'])]
+    public function getPlayerShips(Player $player): JsonResponse
+    {
+        return $this->json(
+            $this->playerManager->getPlayerShipsApi($player)
         );
     }
 }

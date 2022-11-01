@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\InformationTrait;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: GuildRepository::class)]
 class Guild
@@ -41,6 +42,7 @@ class Guild
         return $this->id;
     }
 
+    #[Groups('api_guild')]
     public function getGalacticPower(): ?string
     {
         return $this->galactic_power;
@@ -53,6 +55,7 @@ class Guild
         return $this;
     }
 
+    #[Groups('api_guild')]
     public function getNumberPlayers(): ?int
     {
         return $this->number_players;

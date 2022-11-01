@@ -3,17 +3,22 @@
 namespace App\Utils\Manager;
 
 use App\Entity\Player;
-use App\Utils\Manager\UnitPlayer;
 use App\Repository\ShipRepository;
+use App\Utils\Manager\BaseManager;
 use App\Repository\ShipPlayerRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\ShipPlayer as ShipPlayerEntity;
 
 class ShipPlayer extends UnitPlayer
 {
     public function __construct(
+        EntityManagerInterface $entityManagerInterface,
         private ShipPlayerRepository $shipPlayerRepository,
-        private ShipRepository $shipRepository,
-    ) {}
+        private ShipRepository $shipRepository
+    ) {
+        BaseManager::__construct($entityManagerInterface);
+        $this->setRepositoryByClassName(ShipPlayerEntity::class);
+    }
 
     public function createShiplayer(Player $player, array $data)
     {
@@ -30,7 +35,7 @@ class ShipPlayer extends UnitPlayer
                         'player' => $player
                     ]
                 );
-            if (empty($heroPlayer)) {
+            if (empty($shipPlayer)) {
                 $shipPlayer = new ShipPlayerEntity();
                 $shipPlayer->setUnit($ship);
                 $shipPlayer->setPlayer($player);
