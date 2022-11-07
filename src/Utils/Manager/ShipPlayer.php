@@ -17,7 +17,7 @@ class ShipPlayer extends UnitPlayer
         private ShipRepository $shipRepository
     ) {
         BaseManager::__construct($entityManagerInterface);
-        $this->setRepositoryByClassName(ShipPlayerEntity::class);
+        $this->setRepositoryByClass(ShipPlayerEntity::class);
     }
 
     public function createShiplayer(Player $player, array $data)

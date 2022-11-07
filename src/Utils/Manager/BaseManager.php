@@ -19,7 +19,7 @@ class BaseManager
         return $this->entityManagerInterface;
     }
 
-    public function setRepositoryByClassName($class)
+    public function setRepositoryByClass($class)
     {
         $this->repository = $this->entityManager->getRepository($class);
     }

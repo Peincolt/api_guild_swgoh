@@ -22,7 +22,7 @@ class HeroPlayer extends UnitPlayer
         private HeroPlayerAbilityRepository $heroPlayerAbilityRepository
     ) {
         BaseManager::__construct($entityManagerInterface);
-        $this->setRepositoryByClassName(HeroPlayerEntity::class);
+        $this->setRepositoryByClass(HeroPlayerEntity::class);
     }
 
     public function createHeroPlayer(Player $player, array $data)

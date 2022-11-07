@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SquadRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -41,6 +42,7 @@ class Squad
         return $this->id;
     }
 
+    #[Groups('api_guild_squad')]
     public function getName(): ?string
     {
         return $this->name;
@@ -53,6 +55,7 @@ class Squad
         return $this;
     }
 
+    #[Groups('api_guild_squad')]
     public function getUsedFor(): ?string
     {
         return $this->used_for;
@@ -65,6 +68,7 @@ class Squad
         return $this;
     }
 
+    #[Groups('api_guild_squad')]
     public function getType(): ?string
     {
         return $this->type;

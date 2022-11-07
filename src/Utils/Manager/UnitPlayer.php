@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class UnitPlayer extends BaseManager
@@ -31,11 +32,12 @@ class UnitPlayer extends BaseManager
         private HeroPlayerAbilityRepository $heroPlayerAbilityRepository,
         private UnitRepository $unitRepository,
         private UnitPlayerRepository $unitPlayerRepository,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private TranslatorInterface $translator 
     ) {
         parent::__construct($entityManagerInterface);
-        $this->normalizers = [new ObjectNormalizer()];
-        $this->serializer = new SerializerInterface($this->normalizers, []);
+        /*$this->normalizers = [new ObjectNormalizer()];
+        $this->serializer = new SerializerInterface($this->normalizers, []);*/
     }
 
     public function getGuildPlayerUnitBySquad(Guild $guild, Squad $squad)
@@ -80,7 +82,11 @@ class UnitPlayer extends BaseManager
                 $playerTwOmicrons = $this->getUnitPlayerOmicron($unitPlayer);
                 if (!empty($playerTwOmicrons)) {
                     foreach ($playerTwOmicrons as $omicron) {
-                        $arrayPlayerData['omicrons'][] = $omicron->getAbility()->getName();
+                        $arrayPlayerData['omicrons'][] = $this->translator->trans(
+                            $omicron->getAbility()->getName(),
+                            [],
+                            'ability'
+                        );
                     }
                 }
             }
