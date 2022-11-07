@@ -29,6 +29,7 @@ class Squad
     private Collection $guilds;
 
     #[ORM\OneToMany(mappedBy: 'squad', targetEntity: SquadUnit::class, orphanRemoval: true)]
+    #[ORM\OrderBy(['show_order' => 'ASC'])]
     private Collection $units;
 
     public function __construct()
@@ -42,7 +43,7 @@ class Squad
         return $this->id;
     }
 
-    #[Groups('api_guild_squad')]
+    #[Groups(['api_squad'])]
     public function getName(): ?string
     {
         return $this->name;
@@ -55,7 +56,7 @@ class Squad
         return $this;
     }
 
-    #[Groups('api_guild_squad')]
+    #[Groups(['api_squad'])]
     public function getUsedFor(): ?string
     {
         return $this->used_for;
@@ -68,7 +69,7 @@ class Squad
         return $this;
     }
 
-    #[Groups('api_guild_squad')]
+    #[Groups(['api_squad'])]
     public function getType(): ?string
     {
         return $this->type;

@@ -110,18 +110,18 @@ class Player extends BaseManager
     public function getPlayerDataApi(PlayerEntity $player)
     {
         $arrayReturn = array();
-        $arrayReturn['data'] = $this->serializer->normalize($player, null, ['groups' => ['api_player']]);
+        $arrayReturn = $this->serializer->normalize($player, null, ['groups' => ['api_player']]);
         return array_merge($arrayReturn, $this->getPlayerUnits($player));
     }
 
     public function getPlayerHeroesApi(PlayerEntity $player)
     {
-        return $this->getPlayerUnits($player, 'heroes');
+        return $this->getPlayerUnits($player, 'heroes')['heroes'];
     }
 
     public function getPlayerShipsApi(PlayerEntity $player)
     {
-        return $this->getPlayerUnits($player, 'ships');
+        return $this->getPlayerUnits($player, 'ships')['ships'];
     }
 
     public function getPlayerUnits(PlayerEntity $player, string $type = null)

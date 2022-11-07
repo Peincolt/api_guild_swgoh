@@ -82,7 +82,7 @@ class Guild
     public function getGuildDataApi(GuildEntity $guild)
     {
         $arrayReturn = array();
-        $arrayReturn['data'] = $this->serializer->normalize($guild, null, ['groups' => ['api_guild']]);
+        $arrayReturn = $this->serializer->normalize($guild, null, ['groups' => ['api_guild']]);
         foreach ($guild->getPlayers() as $player) {
             $arrayReturn['players'][] = $this->playerManager
                 ->getPlayerDataApi($player);

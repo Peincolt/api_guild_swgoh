@@ -19,47 +19,66 @@ class Squad extends BaseManager
         $this->setRepositoryByClass(SquadEntity::class);
     }
 
-    public function getSquadDataByGuild(Guild $guild, bool $all)
+    public function getSquadDataByGuild(Guild $guild)
     {
         $arrayReturn = array();
         $squads = $this->getRepository()->getGuildSquad($guild);
 
         foreach ($squads as $squad) {
             $arrayReturn[$squad->getName()] = $this->getSquadData(
-                $squad,
-                $guild,
-                $all
+                $squad
             );
         }
 
         return $arrayReturn;
     }
 
-    public function getSquadData(SquadEntity $squad, Guild $guild, bool $all)
+    public function getSquadDataPlayer(SquadEntity $squad, Guild $guild)
     {
-        $arrayReturn = $this->serializer->normalize(
-            $squad,
-            null,
-            [
-                'groups' => [
-                    'api_guild_squad'
-                ]
-            ]
-        );
+        $arrayReturn = $this->getSquadData($squad);
 
-        if ($guild && $all) {
-            foreach ($squad->getUnits() as $squadUnit) {
-                $unit = $squadUnit->getUnit();
-                foreach ($guild->getPlayers() as $player) {
-                    $arrayReturn[$squad->getName()]['units'][$unit->getName()][$player->getName()] = $this->unitPlayerManager
-                            ->getPlayerUnitByPlayerAndUnit(
-                                $player,
-                                $unit
-                            );
-                }
+        foreach ($squad->getUnits() as $squadUnit) {
+            $unit = $squadUnit->getUnit();
+            foreach ($guild->getPlayers() as $player) {
+                $arrayReturn[$squad->getName()]['units'][$unit->getBaseId()][$player->getName()] = $this->unitPlayerManager
+                        ->getPlayerUnitByPlayerAndUnit(
+                            $player,
+                            $unit
+                        );
             }
         }
 
         return $arrayReturn;
+    }
+
+    public function getSquadUnitsData(SquadEntity $squad)
+    {
+        $arrayReturn = $this->getSquadData($squad);
+        foreach ($squad->getUnits() as $squadUnit) {
+            $arrayReturn['units'][] = $this->serializer->normalize(
+                $squadUnit->getUnit(),
+                null,
+                [
+                    'groups' => [
+                        'api_squad_unit'
+                    ]
+                ]
+            );
+        }
+
+        return $arrayReturn;
+    }
+
+    public function getSquadData(SquadEntity $squad)
+    {
+        return $this->serializer->normalize(
+            $squad,
+            null,
+            [
+                'groups' => [
+                    'api_squad'
+                ]
+            ]
+        );
     }
 }

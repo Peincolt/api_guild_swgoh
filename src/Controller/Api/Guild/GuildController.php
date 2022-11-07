@@ -43,7 +43,7 @@ class GuildController extends AbstractController
     public function getGuildSquadData(Guild $guild, Squad $squad): JsonResponse
     {
         return $this->json(
-            $this->squadManager->getSquadData($squad, $guild, true)
+            $this->squadManager->getSquadDataPlayer($squad, $guild)
         );
     }
 }
