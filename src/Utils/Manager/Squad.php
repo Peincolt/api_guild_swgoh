@@ -2,18 +2,24 @@
 
 namespace App\Utils\Manager;
 
+use App\Entity\Unit;
 use App\Entity\Guild;
+use App\Entity\SquadUnit;
+use Symfony\Component\Form\Form;
 use App\Entity\Squad as SquadEntity;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Squad extends BaseManager
 {
     public function __construct(
         EntityManagerInterface $entityManagerInterface,
         private SerializerInterface $serializer,
-        private UnitPlayerManager $unitPlayerManager
+        private UnitPlayerManager $unitPlayerManager,
+        private ValidatorInterface $validator
     ) {
         parent::__construct($entityManagerInterface);
         $this->setRepositoryByClass(SquadEntity::class);
@@ -78,6 +84,87 @@ class Squad extends BaseManager
                 'groups' => [
                     'api_squad'
                 ]
+            ]
+        );
+    }
+
+    public function createSquadFromArray(array $params)
+    {
+        $arrayReturn = array();
+        $squad = new SquadEntity();
+        $this->getEntityManager()->persist($squad);
+        $squad = $this->fillSquadFromArray($params);
+        $errors = $this->validator->validate($squad);
+        if (empty($errors) > 0) {
+            $this->getEntityManager()->flush($squad);
+            $arrayReturn['result']['message'] = 'L\'escouade a bien été créé';
+        } else {
+            foreach($errors as $error) {
+                $arrayReturn['result']['errors'][] = $error->getMessage();
+            }
+        }
+        return $arrayReturn;
+    }
+
+    public function fillSquadByForm(SquadEntity $squad, Form $form)
+    {
+        $arrayUnit = new ArrayCollection();
+        $squadUnit = $this->getEntityManager()->persist($squad);
+        $i = 0;
+        if (!empty($form->get('guild')->getData())) {
+            $squad->addGuild($form->get('guild')->getData());
+        }
+        if (!empty($form->get('units')->getData())) {
+            foreach ($form->get('units')->getData() as $unitBaseId) {
+                $unit = $this->getEntityManager()
+                    ->getRepository(Unit::class)->findOneBy(
+                        [
+                            'base_id' => $unitBaseId
+                        ]
+                    );
+
+                if (!empty($squad->getId())) {
+                    $squadUnit = $this->getEntityManager()
+                        ->getRepository(SquadUnit::class)
+                        ->findOneBy(
+                            [
+                                'unit' => $unit,
+                                'squad' => $squad
+                            ]
+                        );
+                    if (empty($squadUnit)) {
+                        $existSquadUnit = false;
+                    } else {
+                        $existSquadUnit = true;
+                    }
+                
+                } else {
+                    $existSquadUnit = false;
+                }
+
+                if (!$existSquadUnit) {
+                    $squadUnit = new SquadUnit();
+                    $this->getEntityManager()->persist($squadUnit);
+                    $squadUnit->setUnit($unit);
+                    $squadUnit->setSquad($squad);
+                    $squad->addUnit($squadUnit);
+                }
+                $squadUnit->setShowOrder($i);
+                $arrayUnit->add($squadUnit);
+                $i++;
+            }
+
+            if (!empty($arrayUnit)) {
+                foreach ($squad->getUnits() as $squadUnit) {
+                    if (!$arrayUnit->contains($squadUnit)) {
+                        $squad->getUnits()->remove($squadUnit);
+                    }
+                }
+            }
+            $this->getEntityManager()->flush();
+        }
+        return array('result' => [
+            'message' => 'L\'escouade a bien été ajoutée dans la base de données'
             ]
         );
     }

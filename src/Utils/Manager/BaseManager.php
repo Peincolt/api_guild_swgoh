@@ -16,7 +16,7 @@ class BaseManager
 
     public function getEntityManager()
     {
-        return $this->entityManagerInterface;
+        return $this->entityManager;
     }
 
     public function setRepositoryByClass($class)

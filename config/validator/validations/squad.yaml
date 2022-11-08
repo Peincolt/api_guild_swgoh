@@ -1,0 +1,3 @@
+#App\Entity\Squad:
+#constraints:
+#    - App\Validator\Constraints\Entity\Squad: ~
