@@ -8,8 +8,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: SquadRepository::class)]
+#[UniqueEntity('unique_identifier')]
+#[ORM\HasLifecycleCallbacks]
 class Squad
 {
     #[ORM\Id]
@@ -30,6 +33,9 @@ class Squad
     #[Assert\Choice(choices: ['hero', 'ship'], message: 'Seul les valeurs "hero" ou "ship" sont acceptées.')]
     #[Assert\NotBlank(message: 'Vous devez renseigner cette valeur')]
     private ?string $type = null;
+
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $unique_identifier = null;
 
     #[ORM\ManyToMany(targetEntity: Guild::class, inversedBy: 'squads')]
     private Collection $guilds;
@@ -84,6 +90,20 @@ class Squad
     public function setType(string $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    
+    #[Groups(['api_squad'])]
+    public function getUniqueIdentifier(): ?string
+    {
+        return $this->unique_identifier;
+    }
+
+    public function setUniqueIdentifier(string $unique_identifier): self
+    {
+        $this->unique_identifier = $unique_identifier;
 
         return $this;
     }
@@ -147,5 +167,13 @@ class Squad
         }
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setUniqueIdentifierValue(): void
+    {
+        $true = true;
+        $bytes = openssl_random_pseudo_bytes(20, $true);
+        $this->unique_identifier = bin2hex($bytes);
     }
 }

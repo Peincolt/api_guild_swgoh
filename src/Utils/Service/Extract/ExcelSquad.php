@@ -101,9 +101,9 @@ class ExcelSquad
             foreach ($squadGuildData as $player => $data) {
                 $sheet->setCellValue('A'.$startData, $player);
                 $startLetter = "B";
-                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 1).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getUnits())).($startData).",\"*G13*\")");
-                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 2).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getUnits())).($startData).",\"*G12*\")");
-                $sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 3).($startData),"=".count($squad->getUnits())."-".$this->incrementLetter($startLetter,count($squad->getUnits()) + 2).($startData)."-".$this->incrementLetter($startLetter,count($squad->getUnits()) + 1).($startData));
+                //$sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 1).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getUnits())).($startData).",\"*G13*\")");
+                //$sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 2).($startData),"=COUNTIF(".$startLetter.$startData.":".$this->incrementLetter($startLetter,count($squad->getUnits())).($startData).",\"*G12*\")");
+                //$sheet->setCellValue($this->incrementLetter($startLetter,count($squad->getUnits()) + 3).($startData),"=".count($squad->getUnits())."-".$this->incrementLetter($startLetter,count($squad->getUnits()) + 2).($startData)."-".$this->incrementLetter($startLetter,count($squad->getUnits()) + 1).($startData));
                 foreach ($data as $arrayValueUnit) {
                     if ($squad->getType() == "hero") {
                         $chain = $arrayValueUnit['rarity'].'* G'.$arrayValueUnit['gear_level'].' R'.$arrayValueUnit['relic_level'].' ('.$arrayValueUnit['speed'].')';

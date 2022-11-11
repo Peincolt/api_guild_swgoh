@@ -10,7 +10,7 @@ trait InformationTrait
     #[ORM\Column(length:255)]
     private ?string $name = null;
 
-    #[ORM\Column(length:255)]
+    #[ORM\Column(length:255, nullable: true)]
     private ?string $id_swgoh = null;
 
     #[Groups(['api_unit','api_player','api_player_unit','api_guild', 'api_squad', 'api_squad_unit'])]

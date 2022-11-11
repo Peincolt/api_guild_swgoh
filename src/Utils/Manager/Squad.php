@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\Common\Collections\Collection;
 
 class Squad extends BaseManager
 {
@@ -109,6 +110,7 @@ class Squad extends BaseManager
     public function fillSquadByForm(SquadEntity $squad, Form $form)
     {
         $arrayUnit = new ArrayCollection();
+        $arrayUnitToDelete = new ArrayCollection();
         $squadUnit = $this->getEntityManager()->persist($squad);
         $i = 0;
         if (!empty($form->get('guild')->getData())) {
@@ -154,17 +156,29 @@ class Squad extends BaseManager
                 $i++;
             }
 
-            if (!empty($arrayUnit)) {
-                foreach ($squad->getUnits() as $squadUnit) {
-                    if (!$arrayUnit->contains($squadUnit)) {
-                        $squad->getUnits()->remove($squadUnit);
-                    }
+            $diff = array_diff(
+                $squad->getUnits()->toArray(),
+                $arrayUnit->toArray()
+            );
+
+            if (count($diff) > 0) {
+                foreach ($diff as $unitDiff) {
+                    $squad->removeUnit($unitDiff);
                 }
             }
+
             $this->getEntityManager()->flush();
         }
+
+        if (!empty($squad->getId())) {
+            $message = 'L\'escouade a bien été modifiée';
+        } else {
+            $message = 'L\'escouade a bien été ajoutée dans la base de données';
+        }
+
         return array('result' => [
-            'message' => 'L\'escouade a bien été ajoutée dans la base de données'
+            'message' => $message,
+            'unique_identifier' => $squad->getUniqueIdentifier()
             ]
         );
     }

@@ -60,6 +60,7 @@ class SquadType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Squad::class,
+            'csrf_protection' => false
         ]);
     }
 
