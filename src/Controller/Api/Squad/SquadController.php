@@ -44,7 +44,10 @@ class SquadController extends AbstractController
         $squad = new Squad();
         $form = $this->createForm(SquadType::class, $squad);
         $form->submit($request->request->all());
+        //var_dump($request->get('units'));
+        //die('lel');
         if ($form->isSubmitted() && $form->isValid()) {
+            $units = $request->get('units');
             return $this->json(
                 $this->squadManager->fillSquadByForm($squad, $form)
             );

@@ -15,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 
 class SquadType extends AbstractType
 {
@@ -46,13 +48,47 @@ class SquadType extends AbstractType
                 'mapped' => false,
                 'invalid_message' => 'Erreur lors de la récupération des informations de la guilde'
             ])
+            /*// Voir pour mettre une modif pré/post validation car le multiselect respecte pas l'ordre qui a été reçu lors du call API
+            // Event pre-set data qui permet d'ajouter le champ en mode dynamic et dont les éléments correspondent aux units qu'on a pu trouver via les datas passées par l'API ?
             ->add('units', ChoiceType::class, [
                 'mapped' => false,
                 'multiple' => true,
                 'expanded' => true,
                 'choices' => $this->getUnitBaseId(),
                 'invalid_message' => 'Erreur lors de la récupération de l\'unité'
-            ])
+            ])*/
+            ->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+                $data = $event->getData();
+                $form = $event->getForm();
+                $unitRepository = $this->entityManager->getRepository(Unit::class);
+                $choiceUnitsOption = array();
+                if (!empty($data['units']) > 0) {
+                    foreach($data['units'] as $unitDesiredBaseId) {
+                        $unit = $unitRepository->findOneBy(
+                            [
+                                'base_id' => $unitDesiredBaseId
+                            ]
+                        );
+                        if (!empty($unit)) {
+                            $choiceUnitsOption[$unit->getBaseId()] = $unit->getBaseId();
+                        }
+                    }
+
+                    if (count($choiceUnitsOption) > 0) {
+                        $form->add(
+                            'units', ChoiceType::class, [
+                                'mapped' => false,
+                                'multiple' => true,
+                                'expanded' => true,
+                                'choices' => $choiceUnitsOption,
+                                'invalid_message' => 'Erreur lors de la récupération de l\'unité'
+                            ]
+                        );
+                    }
+                }
+                /*var_dump($choiceUnitsOption);
+                die('lel');*/
+            });
         ;
     }
 

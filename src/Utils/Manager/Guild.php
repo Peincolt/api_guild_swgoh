@@ -28,7 +28,7 @@ class Guild
 
     public function updateGuild(string $idGuild,OutputInterface $outputInterface = null)
     {
-        $arrayActualMembers = array();
+        $actualMembers = array();
         $dataGuild = $this->swgohGg->fetchGuild($idGuild);
         $count = 0;
         if (isset($dataGuild['error_message'])) {
@@ -60,13 +60,14 @@ class Guild
         }
 
         foreach ($dataGuild['data']['members'] as $guildPlayerData) {
-            array_push($arrayActualMembers, $guildPlayerData);
+            array_push($actualMembers, $guildPlayerData['player_name']);
             $result = $this->playerManager
                 ->updatePlayerWithApi($guildPlayerData['ally_code'], $guild);
             if (is_array($result)) {
                 return $result;
             }
         }
+        $this->deleteOlderMembers($actualMembers, $guild);
         $this->guildRepository->save($guild, true);
     }
 
@@ -88,5 +89,16 @@ class Guild
                 ->getPlayerDataApi($player);
         }
         return $arrayReturn;
+    }
+
+    private function deleteOlderMembers(array $actualMembers, GuildEntity $guild)
+    {
+        $allMembers = $guild->getPlayers();
+        foreach($allMembers as $member) {
+            if (!in_array($member->getName(), $actualMembers)) {
+                $this->playerRepository->remove($member);
+            }
+        }
+        $this->entityManagerInterface->flush();
     }
 }

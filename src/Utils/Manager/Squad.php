@@ -107,6 +107,8 @@ class Squad extends BaseManager
         return $arrayReturn;
     }
 
+    /* Si me mec upload rien, ça plante ?! Voir pour modifier le code */
+    /* Voir pour pas utiliser le trick du tableau $units */
     public function fillSquadByForm(SquadEntity $squad, Form $form)
     {
         $arrayUnit = new ArrayCollection();
@@ -116,7 +118,7 @@ class Squad extends BaseManager
         if (!empty($form->get('guild')->getData())) {
             $squad->addGuild($form->get('guild')->getData());
         }
-        if (!empty($form->get('units')->getData())) {
+        if ($form->has('units')) {
             foreach ($form->get('units')->getData() as $unitBaseId) {
                 $unit = $this->getEntityManager()
                     ->getRepository(Unit::class)->findOneBy(
@@ -167,19 +169,25 @@ class Squad extends BaseManager
                 }
             }
 
+            if (!empty($squad->getId())) {
+                $message = 'L\'escouade a bien été modifiée';
+            } else {
+                $message = 'L\'escouade a bien été ajoutée dans la base de données';
+            }
+
             $this->getEntityManager()->flush();
-        }
 
-        if (!empty($squad->getId())) {
-            $message = 'L\'escouade a bien été modifiée';
+            return array('result' => [
+                'message' => $message,
+                'unique_identifier' => $squad->getUniqueIdentifier()
+                ]
+            );
         } else {
-            $message = 'L\'escouade a bien été ajoutée dans la base de données';
+            return array('result' => [
+                'errors' => [
+                    'Il faut au moins un membre afin de pouvoir créer une escouade'
+                ]
+            ]);
         }
-
-        return array('result' => [
-            'message' => $message,
-            'unique_identifier' => $squad->getUniqueIdentifier()
-            ]
-        );
     }
 }

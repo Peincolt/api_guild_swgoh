@@ -166,6 +166,12 @@ class ExcelSquad
             case "d":
                 return "defense";
                 break;
+            case "an":
+                return "analyse";
+                break;
+            case "tb":
+                return "tb";
+                break;
             default:
                 return null;
                 break;

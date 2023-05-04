@@ -27,7 +27,7 @@ class ExcelCommand extends Command
     protected function configure()
     {
         $this->addArgument('id', InputArgument::REQUIRED, 'Id de la guilde a utilisé afin de générer les exports CSV')
-            ->addOption('type', 'ty', InputOption::VALUE_OPTIONAL, 'Souhaitez les teams de défenses ou les teams d\'attaque ? (d : défense ,a : attaque, t : tout)');
+            ->addOption('type', 'ty', InputOption::VALUE_OPTIONAL, 'Souhaitez les teams de défenses ou les teams d\'attaque ? (d : défense ,a : attaque, an: analyse, tb: tb, t : tout)');
         }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -73,6 +73,12 @@ class ExcelCommand extends Command
                 case "d":
                     $output->writeln('Vous avez décidé de récupérer les teams utilisées pour la défense');
                     break;
+                case "an":
+                    $output->writeln('Vous avez décidé de récupérer les teams pour analyse de roster');
+                break;
+                case "tb":
+                    $output->writeln('Vous avez décidé de récupérer les teams pour la TB');
+                break;
                 default:
                     $output->writeln('Vous avez décidé de récupérer toutes les teams (défense + attaque)');
                     $type = "t";
