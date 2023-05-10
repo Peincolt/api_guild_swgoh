@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Guild;
 use App\Entity\Squad;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
@@ -52,6 +53,23 @@ class SquadRepository extends ServiceEntityRepository
         return $query->getQuery()
             ->getResult();
 
+    }
+
+    public function getGuildSquadByFilter(Guild $guild, array $dataForm)
+    {
+        $query = $this->createQueryBuilder('s')
+            ->andWhere(':guild MEMBER OF s.guilds')
+            ->setParameter(':guild', $guild);
+        foreach($dataForm as $property => $value) {
+            if ($property === 'name') {
+                $query->andWhere('s.name LIKE :like')
+                    ->setParameter(':like','%'.$value.'%');
+            } else {
+                $query->andWhere("s.$property = :$property")
+                    ->setParameter(":$property", $value);
+            }
+        }
+        return $query->getQuery()->getResult(Query::HYDRATE_ARRAY);
     }
 //            ->setMaxResults(10)
 //            ->getQuery()

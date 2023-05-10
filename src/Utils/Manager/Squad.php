@@ -190,4 +190,9 @@ class Squad extends BaseManager
             ]);
         }
     }
+
+    public function generateExtract(Guild $guild, array $dataForm)
+    {
+        
+    }
 }
