@@ -8,11 +8,13 @@ use App\Entity\SquadUnit;
 use Symfony\Component\Form\Form;
 use App\Entity\Squad as SquadEntity;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Doctrine\Common\Collections\Collection;
 
 class Squad extends BaseManager
 {
@@ -20,10 +22,12 @@ class Squad extends BaseManager
         EntityManagerInterface $entityManagerInterface,
         private SerializerInterface $serializer,
         private UnitPlayerManager $unitPlayerManager,
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private string $extractFolder
     ) {
         parent::__construct($entityManagerInterface);
         $this->setRepositoryByClass(SquadEntity::class);
+        $this->extractFolder = $extractFolder;
     }
 
     public function getSquadDataByGuild(Guild $guild)
@@ -47,7 +51,7 @@ class Squad extends BaseManager
         foreach ($squad->getUnits() as $squadUnit) {
             $unit = $squadUnit->getUnit();
             foreach ($guild->getPlayers() as $player) {
-                $arrayReturn[$squad->getName()]['units'][$unit->getBaseId()][$player->getName()] = $this->unitPlayerManager
+                $arrayReturn['units'][$unit->getBaseId()][$player->getName()] = $this->unitPlayerManager
                         ->getPlayerUnitByPlayerAndUnit(
                             $player,
                             $unit
@@ -191,8 +195,31 @@ class Squad extends BaseManager
         }
     }
 
-    public function generateExtract(Guild $guild, array $dataForm)
+    public function generateExtract(Guild $guild, array $arraySquad)
     {
-        
+        $fileName = filter_var($guild->getName(), FILTER_SANITIZE_SPECIAL_CHARS).".xlsx";
+        $filePath = $this->extractFolder.$fileName;
+        $startLetter = 'A';
+        $startLine = 1;
+        $spreadSheet = new Spreadsheet();
+        $headerSpreadsheet = ['Identifiant unique', 'Nom', 'Utilisé en', 'Type d\'unité'];
+        $spreadSheet->removeSheetByIndex(0);
+        $sheet = $spreadSheet->createSheet();
+        $sheet->setTitle('Export');
+        foreach($headerSpreadsheet as $header) {
+            $sheet->setCellValue($startLetter.'1', $header);
+            $startLetter++;
+        }
+        $startLine++;
+        foreach($arraySquad as $squad) {
+            $sheet->setCellValue('A'.$startLine, $squad['unique_identifier']);
+            $sheet->setCellValue('B'.$startLine, $squad['name']);
+            $sheet->setCellValue('C'.$startLine, $squad['used_for']);
+            $sheet->setCellValue('D'.$startLine, $squad['type']);
+            $startLine++;
+        }
+        $writer = new Xlsx($spreadSheet);
+        $writer->save($this->extractFolder.$fileName);
+        return [$filePath, $fileName];
     }
 }
