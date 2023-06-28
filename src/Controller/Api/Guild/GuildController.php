@@ -43,17 +43,23 @@ class GuildController extends AbstractController
     }
 
     #[Route('/guild/{id_swgoh}/squad/get/{unique_identifier}', name: 'api_guild_squad', methods: ['GET'])]
+    #[Route('/guild/{id_swgoh}/squad/{unique_identifier}/export', name: 'api_guild_squad_export', methods: ['GET'])]
     #[ParamConverter('guild', options: ['mapping' => ['id_swgoh' => 'id_swgoh']])]
     #[ParamConverter('squad', options: ['mapping' => ['unique_identifier' => 'unique_identifier']])]
-    public function getGuildSquadData(Guild $guild, Squad $squad): JsonResponse
+    public function getGuildSquadData(Request $request, Guild $guild, Squad $squad): JsonResponse|BinaryFileResponse
     {
-        return $this->json(
-            $this->squadManager->getSquadDataPlayer($squad, $guild)
-        );
+        if ($request->attributes->get('_route') == 'api_guild_squad') {
+            return $this->json(
+                $this->squadManager->getSquadDataPlayer($squad, $guild)
+            );
+        } else {
+            $resultCreateFile = $this->squadManager->generateExtractSquadDataPlayer($guild, $squad);
+            return $this->generateFileResponse($resultCreateFile);
+        }
     }
 
-    #[Route('/guild/{id_swgoh}/squad/search', name: 'api_guild_search_squad', methods: ['POST'])]
-    #[Route('/guild/{id_swgoh}/squad/export', name: 'api_guild_export_squad', methods: ['GET'])]
+    #[Route('/guild/{id_swgoh}/squad/search', name: 'api_guild_search_squads', methods: ['POST'])]
+    #[Route('/guild/{id_swgoh}/squad/export', name: 'api_guild_export_squads', methods: ['GET'])]
     #[ParamConverter('guild', options:['mapping' => ['id_swgoh' => 'id_swgoh']])]
     public function searchGuildSquad(Guild $guild = null, Request $request, SquadRepository $squadRepository, Squad $squad = null)
     {
@@ -67,20 +73,25 @@ class GuildController extends AbstractController
             }
         }
         $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData);
-        if ($request->attributes->get('_route') == 'api_guild_search_squad') {
+        if ($request->attributes->get('_route') == 'api_guild_search_squads') {
             return $this->json($resultFilter);
         } else {
             if (!empty($resultFilter)) {
-                $resultCreateFile = $this->squadManager->generateExtract($guild, $resultFilter);
-                $reponse = new BinaryFileResponse($resultCreateFile[0]);
-                $reponse->headers->set('Content-Type', 'application/vnd.ms-excel');
-                $reponse->setContentDisposition(
-                    ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                    $resultCreateFile[1]
-                );
-                $reponse->deleteFileAfterSend();
-                return $reponse;
+                $resultCreateFile = $this->squadManager->generateExtractSquadData($guild, $resultFilter);
+                return $this->generateFileResponse($resultCreateFile);
             }
         }
+    }
+
+    private function generateFileResponse(array $responseElements)
+    {
+        $reponse = new BinaryFileResponse($responseElements[0]);
+        $reponse->headers->set('Content-Type', 'application/vnd.ms-excel');
+        $reponse->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $responseElements[1]
+        );
+        $reponse->deleteFileAfterSend();
+        return $reponse;
     }
 }

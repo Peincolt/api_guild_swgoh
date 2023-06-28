@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
+use App\Utils\Service\Extract\ExcelSquad as ExcelSquadService;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Squad extends BaseManager
@@ -23,6 +24,7 @@ class Squad extends BaseManager
         private SerializerInterface $serializer,
         private UnitPlayerManager $unitPlayerManager,
         private ValidatorInterface $validator,
+        private ExcelSquadService $excelSquadService,
         private string $extractFolder
     ) {
         parent::__construct($entityManagerInterface);
@@ -195,7 +197,7 @@ class Squad extends BaseManager
         }
     }
 
-    public function generateExtract(Guild $guild, array $arraySquad)
+    public function generateExtractSquadData(Guild $guild, array $arraySquad)
     {
         $fileName = filter_var($guild->getName(), FILTER_SANITIZE_SPECIAL_CHARS).".xlsx";
         $filePath = $this->extractFolder.$fileName;
@@ -218,6 +220,16 @@ class Squad extends BaseManager
             $sheet->setCellValue('D'.$startLine, $squad['type']);
             $startLine++;
         }
+        $writer = new Xlsx($spreadSheet);
+        $writer->save($this->extractFolder.$fileName);
+        return [$filePath, $fileName];
+    }
+
+    public function generateExtractSquadDataPlayer(Guild $guild, $squad)
+    {
+        $fileName = filter_var($squad->getName(), FILTER_SANITIZE_SPECIAL_CHARS).".xlsx";
+        $filePath = $this->extractFolder.$fileName;
+        $spreadSheet = $this->excelSquadService->constructSpreadShit($guild,[$squad]);
         $writer = new Xlsx($spreadSheet);
         $writer->save($this->extractFolder.$fileName);
         return [$filePath, $fileName];

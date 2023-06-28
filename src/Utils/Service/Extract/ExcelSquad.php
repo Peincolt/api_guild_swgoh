@@ -16,9 +16,12 @@ class ExcelSquad
 
     public function __construct(
         private SquadRepository $squadRepository,  
-        private UnitPlayerManager $unitPlayerManager
+        private UnitPlayerManager $unitPlayerManager,
+        private string $extractFolder
     )
-    {}
+    {
+        $this->extractFolder = $extractFolder;
+    }
 
     public function constructSpreadShitViaCommand(Guild $guild, string $option)
     {
@@ -27,7 +30,9 @@ class ExcelSquad
             $this->translateType($option)
         );
 
-        return $this->constructSpreadShit($guild, $squads);
+        $spreadSheet = $this->constructSpreadShit($guild, $squads);
+        $writer = new Xlsx($spreadSheet);
+        $writer->save($this->extractFolder.$guild->getName().".xlsx");
     }
 
     public function constructSpreadShit(Guild $guild, $squads)
@@ -129,8 +134,7 @@ class ExcelSquad
                 
             }
         }
-        $writer = new Xlsx($spreadSheet);
-        $writer->save("F:\Code\api_guild_swgoh\\".$guild->getName().".xlsx");
+        return $spreadSheet;
     }
 
     public function getStyleByGear(String $gearLevel)
