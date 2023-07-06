@@ -44,8 +44,6 @@ class SquadController extends AbstractController
         $squad = new Squad();
         $form = $this->createForm(SquadType::class, $squad);
         $form->submit($request->request->all());
-        //var_dump($request->get('units'));
-        //die('lel');
         if ($form->isSubmitted() && $form->isValid()) {
             $units = $request->get('units');
             return $this->json(
@@ -56,7 +54,7 @@ class SquadController extends AbstractController
         }
     }
 
-    #[Route('/squad/{unique_identifier}/update', name: 'api_squad_update', methods: ['PUT'])]
+    #[Route('/squad/{unique_identifier}/update', name: 'api_squad_update')]
     public function updateSquad(Squad $squad, Request $request): JsonResponse
     {
         $form = $this->createForm(SquadType::class, $squad);
@@ -66,9 +64,6 @@ class SquadController extends AbstractController
                 $this->squadManager->fillSquadByForm($squad, $form)
             );
         } else {
-            foreach($form->getErrors() as $error) {
-                var_dump($error->getMessage());
-            }
             return $this->json($this->generateErrorResponse($form));
         }
     }
