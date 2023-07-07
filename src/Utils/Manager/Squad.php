@@ -53,7 +53,8 @@ class Squad extends BaseManager
         foreach ($squad->getUnits() as $squadUnit) {
             $unit = $squadUnit->getUnit();
             foreach ($guild->getPlayers() as $player) {
-                $arrayReturn['units'][$unit->getBaseId()][$player->getName()] = $this->unitPlayerManager
+                $arrayReturn['units'][$unit->getBaseId()]['name'] = $unit->getName();
+                $arrayReturn['units'][$unit->getBaseId()]['players'][$player->getName()] = $this->unitPlayerManager
                         ->getPlayerUnitByPlayerAndUnit(
                             $player,
                             $unit
