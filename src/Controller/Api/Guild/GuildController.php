@@ -63,9 +63,14 @@ class GuildController extends AbstractController
     #[ParamConverter('guild', options:['mapping' => ['id_swgoh' => 'id_swgoh']])]
     public function searchGuildSquad(Guild $guild = null, Request $request, SquadRepository $squadRepository, Squad $squad = null)
     {
+        $routeName = $request->attributes->get('_route');
         $form = $this->createForm(SearchSquadType::class);
         $form->handleRequest($request);
-        $form->submit($request->request->all());
+        if ($routeName === 'api_guild_search_squads') {
+            $form->submit($request->request->all());
+        } else {
+            $form->submit($request->query->all());
+        }
         $formData = $form->getData();
         foreach($formData as $key => $value) {
             if (empty($value)) {
@@ -73,7 +78,7 @@ class GuildController extends AbstractController
             }
         }
         $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData);
-        if ($request->attributes->get('_route') == 'api_guild_search_squads') {
+        if ($routeName === 'api_guild_search_squads') {
             return $this->json($resultFilter);
         } else {
             if (!empty($resultFilter)) {
