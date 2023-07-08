@@ -6,16 +6,21 @@ use App\Entity\Unit;
 use App\Entity\Guild;
 use App\Entity\SquadUnit;
 use Symfony\Component\Form\Form;
+use App\Serializer\UnitNormalizer;
 use App\Entity\Squad as SquadEntity;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Serializer;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
-use App\Utils\Service\Extract\ExcelSquad as ExcelSquadService;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Utils\Service\Extract\ExcelSquad as ExcelSquadService;
 
 class Squad extends BaseManager
 {
@@ -25,7 +30,8 @@ class Squad extends BaseManager
         private UnitPlayerManager $unitPlayerManager,
         private ValidatorInterface $validator,
         private ExcelSquadService $excelSquadService,
-        private string $extractFolder
+        private string $extractFolder,
+        private TranslatorInterface $translator,
     ) {
         parent::__construct($entityManagerInterface);
         $this->setRepositoryByClass(SquadEntity::class);
@@ -53,7 +59,7 @@ class Squad extends BaseManager
         foreach ($squad->getUnits() as $squadUnit) {
             $unit = $squadUnit->getUnit();
             foreach ($guild->getPlayers() as $player) {
-                $arrayReturn['units'][$unit->getBaseId()]['name'] = $unit->getName();
+                $arrayReturn['units'][$unit->getBaseId()]['name'] = $this->translator->trans($unit->getName(),[],'unit');
                 $arrayReturn['units'][$unit->getBaseId()]['players'][$player->getName()] = $this->unitPlayerManager
                         ->getPlayerUnitByPlayerAndUnit(
                             $player,

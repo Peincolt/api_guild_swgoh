@@ -9,6 +9,7 @@ use App\Repository\SquadRepository;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ExcelSquad
 {
@@ -17,7 +18,8 @@ class ExcelSquad
     public function __construct(
         private SquadRepository $squadRepository,  
         private UnitPlayerManager $unitPlayerManager,
-        private string $extractFolder
+        private string $extractFolder,
+        private TranslatorInterface $translator
     )
     {
         $this->extractFolder = $extractFolder;
@@ -65,7 +67,7 @@ class ExcelSquad
                 $reflection = new ReflectionClass($squadUnit->getUnit());
                 $sheet->setCellValue(
                     $startLetter."2",
-                    $squadUnit->getUnit()->getName()
+                    $this->translator->trans($squadUnit->getUnit()->getName(),[],'unit')
                 );
                 if ($reflection->getShortName() == "Hero") {
                     $sheet->setCellValue(
