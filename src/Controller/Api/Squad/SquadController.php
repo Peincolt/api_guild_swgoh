@@ -2,16 +2,17 @@
 
 namespace App\Controller\Api\Squad;
 
+use App\Entity\Squad;
+use App\Form\SquadType;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormError;
+use App\Utils\Manager\Squad as SquadManager;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Entity\Squad;
-use App\Form\SquadType;
-use App\Utils\Manager\Squad as SquadManager;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
 
 class SquadController extends AbstractController
 {
@@ -54,17 +55,21 @@ class SquadController extends AbstractController
         }
     }
 
-    #[Route('/squad/{unique_identifier}/update', name: 'api_squad_update')]
+    #[Route('/squad/{unique_identifier}/update', name: 'api_squad_update', methods: ['PUT', 'OPTIONS'])]
     public function updateSquad(Squad $squad, Request $request): JsonResponse
     {
-        $form = $this->createForm(SquadType::class, $squad);
-        $form->submit($request->request->all());
-        if ($form->isSubmitted() && $form->isValid()) {
-            return $this->json(
-                $this->squadManager->fillSquadByForm($squad, $form)
-            );
+        if ($request->isMethod('PUT')) {
+            $form = $this->createForm(SquadType::class, $squad);
+            $form->submit($request->request->all());
+            if ($form->isSubmitted() && $form->isValid()) {
+                return $this->json(
+                    $this->squadManager->fillSquadByForm($squad, $form)
+                );
+            } else {
+                return $this->json($this->generateErrorResponse($form));
+            }
         } else {
-            return $this->json($this->generateErrorResponse($form));
+            return $this->json('Ok');
         }
     }
 
