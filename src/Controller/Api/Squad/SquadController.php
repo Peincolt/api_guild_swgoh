@@ -73,13 +73,17 @@ class SquadController extends AbstractController
         }
     }
 
-    #[Route('/squad/{unique_identifier}/delete', name: 'api_squad_delete', methods: ['DELETE'])]
-    public function deleteSquad(Squad $squad): JsonResponse
+    #[Route('/squad/{unique_identifier}/delete', name: 'api_squad_delete', methods: ['DELETE','OPTIONS'])]
+    public function deleteSquad(Request $request, Squad $squad): JsonResponse
     {
-        $this->squadManager->getRepository()->remove($squad, true);
-        return $this->json(
-            ['result' => ['message' => 'L\'escouade a bien été supprimée']]
-        );
+        if ($request->isMethod('DELETE')) {
+            $this->squadManager->getRepository()->remove($squad, true);
+            return $this->json(
+                ['result' => ['message' => 'L\'escouade a bien été supprimée']]
+            );
+        } else {
+            return $this->json('ok');
+        }
     }
 
     private function generateErrorResponse(Form $form)
