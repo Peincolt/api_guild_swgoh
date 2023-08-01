@@ -15,8 +15,8 @@ class Ability
         private AbilityRepository $abilityRepository,
         private HeroRepository $heroRepository,
         private EntityManagerInterface $entityManagerInterface
-    )
-    {}
+    ) {
+    }
 
     public function updateAbilities(): array|int
     {

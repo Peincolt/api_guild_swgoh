@@ -23,11 +23,13 @@ class Guild
         private PlayerManager $playerManager,
         private PlayerRepository $playerRepository,
         private SerializerInterface $serializer
-    )
-    {}
+    ) {
+    }
 
-    public function updateGuild(string $idGuild,OutputInterface $outputInterface = null)
-    {
+    public function updateGuild(
+        string $idGuild,
+        OutputInterface $outputInterface = null
+    ) {
         $actualMembers = array();
         $dataGuild = $this->swgohGg->fetchGuild($idGuild);
         $count = 0;
@@ -83,7 +85,15 @@ class Guild
     public function getGuildDataApi(GuildEntity $guild)
     {
         $arrayReturn = array();
-        $arrayReturn = $this->serializer->normalize($guild, null, ['groups' => ['api_guild']]);
+        $arrayReturn = $this->serializer->normalize(
+            $guild,
+            null,
+            [
+                'groups' => [
+                    'api_guild'
+                ]
+            ]
+        );
         foreach ($guild->getPlayers() as $player) {
             $arrayReturn['players'][] = $this->playerManager
                 ->getPlayerDataApi($player);
@@ -94,7 +104,7 @@ class Guild
     private function deleteOlderMembers(array $actualMembers, GuildEntity $guild)
     {
         $allMembers = $guild->getPlayers();
-        foreach($allMembers as $member) {
+        foreach ($allMembers as $member) {
             if (!in_array($member->getName(), $actualMembers)) {
                 $this->playerRepository->remove($member);
             }

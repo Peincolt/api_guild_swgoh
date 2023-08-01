@@ -48,7 +48,10 @@ class SwgohGg
                 $this->baseUrl . "player/" . $allyCode
             );
             if ($response->getStatusCode() == 404) {
-                throw new Exception('Le joueur que vous essayez de synchroniser n\'existe pas', 404);
+                throw new Exception(
+                    'Le joueur que vous essayez de synchroniser n\'existe pas',
+                    404
+                );
             }
             return $response->toArray();
         } catch (Exception $e) {
@@ -60,10 +63,6 @@ class SwgohGg
         
     }
 
-    /**
-     * Rest texte
-     * var $type
-     */
     public function fetchHeroOrShip($type)
     {
         try {
@@ -93,7 +92,10 @@ class SwgohGg
     public function fetchAbilities() :array
     {
         try {
-            return $this->client->request("GET", $this->baseUrl .'abilities')->toArray();
+            return $this->client->request(
+                "GET",
+                $this->baseUrl .'abilities'
+            )->toArray();
         } catch (Exception $e) {
             return array(
                 'error_code' => $e->getCode(),

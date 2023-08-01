@@ -20,8 +20,7 @@ class ExcelSquad
         private UnitPlayerManager $unitPlayerManager,
         private string $extractFolder,
         private TranslatorInterface $translator
-    )
-    {
+    ) {
         $this->extractFolder = $extractFolder;
     }
 
@@ -67,7 +66,11 @@ class ExcelSquad
                 $reflection = new ReflectionClass($squadUnit->getUnit());
                 $sheet->setCellValue(
                     $startLetter."2",
-                    $this->translator->trans($squadUnit->getUnit()->getName(),[],'unit')
+                    $this->translator->trans(
+                        $squadUnit->getUnit()->getName(),
+                        [],
+                        'unit'
+                    )
                 );
                 if ($reflection->getShortName() == "Hero") {
                     $sheet->setCellValue(
@@ -125,10 +128,16 @@ class ExcelSquad
                             }
                         }
                         $sheet->setCellValue($startLetter.$startData, $chain);
-                        $sheet->getStyle($startLetter.$startData)->applyFromArray($this->getStyleByGear($arrayValueUnit['gear_level']));
+                        $sheet->getStyle($startLetter.$startData)
+                            ->applyFromArray(
+                                $this->getStyleByGear($arrayValueUnit['gear_level'])
+                            );
                         $startLetter++;
                     } else {
-                        $sheet->setCellValue($startLetter.$startData,$arrayValueUnit['protection'].'/'.$arrayValueUnit['life'].' ('.$arrayValueUnit['speed'].')');
+                        $sheet->setCellValue(
+                            $startLetter.$startData,
+                            $arrayValueUnit['protection'].'/'.$arrayValueUnit['life'].' ('.$arrayValueUnit['speed'].')'
+                        );
                         $startLetter++;
                     }
                 }

@@ -23,7 +23,11 @@ class GuildCommand extends Command
 
     protected function configure()
     {
-        $this->addArgument('id', InputArgument::REQUIRED, 'Id de la guilde que vous souhaitez synchroniser');
+        $this->addArgument(
+            'id',
+            InputArgument::REQUIRED,
+            'Id de la guilde que vous souhaitez synchroniser'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -46,7 +50,8 @@ class GuildCommand extends Command
             );
         }*/
 
-        $result = $this->guildManager->updateGuild($input->getArgument('id'),$output);
+        $result = $this->guildManager
+            ->updateGuild($input->getArgument('id'), $output);
 
         if (is_array($result)) {
             $output->writeln(

@@ -20,8 +20,8 @@ class UnitController extends AbstractController
         private SerializerInterface $serializer,
         private HeroRepository $heroRepository,
         private ShipRepository $shipRepository
-    )
-    {}
+    ) {
+    }
     
     #[Route('/heroes', name: 'api_heroes', methods: ['GET'])]
     public function getHeroes(HeroRepository $heroRepository): JsonResponse
@@ -84,6 +84,12 @@ class UnitController extends AbstractController
 
     private function serializeUnit(Unit $unit): array
     {
-        return $this->serializer->normalize($unit,'json',['groups' => ['api_unit']]);
+        return $this->serializer->normalize(
+            $unit,
+            'json',
+            [
+                'groups' => ['api_unit']
+            ]
+        );
     }
 }

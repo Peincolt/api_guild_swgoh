@@ -44,7 +44,9 @@ class ShipPlayer extends UnitPlayer
             $this->shipPlayerRepository->save($shipPlayer);
             return true;
         }
-        return array('error_message' => 'Veuillez synchroniser les héros avant de synchroniser les données des joueurs.');
+        return array(
+            'error_message' => 'Veuillez synchroniser les héros avant de synchroniser les données des joueurs.'
+        );
     }
 
     public function fillHeroPlayerEntity(ShipPlayerEntity $shipPlayer, array $data)

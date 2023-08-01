@@ -25,7 +25,7 @@ class Unit
         $data = $this->swgohGg->fetchHeroOrShip($type);
         if (!isset($data['error_message'])) {
             $count = 0;
-            foreach($data as $key => $value) {
+            foreach ($data as $key => $value) {
                 $count++;
                 $unit = $this->entityManagerInterface
                     ->getRepository(UnitEntity::class)
@@ -66,7 +66,7 @@ class Unit
     public function getEntityByRoute(string $route)
     {
         $arrayReturn = array();
-        $array = explode('_',$route);
+        $array = explode('_', $route);
         if (count($array) > 2) {
             $arrayReturn['name'] = ucfirst($array[2]);
         } else {
@@ -106,12 +106,12 @@ class Unit
             ->getRepository("App\Entity\Ship")
             ->findAll();
 
-        foreach($heroes as $hero) {
-            array_push($arrayReturn,htmlentities($hero->getName()));
+        foreach ($heroes as $hero) {
+            array_push($arrayReturn, htmlentities($hero->getName()));
         }
 
-        foreach($ships as $ship) {
-            array_push($arrayReturn,htmlentities($ship->getName()));
+        foreach ($ships as $ship) {
+            array_push($arrayReturn, htmlentities($ship->getName()));
         }
 
         return $arrayReturn;

@@ -21,9 +21,7 @@ class GuildController extends AbstractController
     public function __construct(
         private GuildManager $guildManager,
         private SquadManager $squadManager
-    )
-    {
-        
+    ) {
     }
 
     #[Route('/guild/{id_swgoh}', name: 'api_guild', methods: ['GET'])]
@@ -46,14 +44,18 @@ class GuildController extends AbstractController
     #[Route('/guild/{id_swgoh}/squad/{unique_identifier}/export', name: 'api_guild_squad_export', methods: ['GET'])]
     #[ParamConverter('guild', options: ['mapping' => ['id_swgoh' => 'id_swgoh']])]
     #[ParamConverter('squad', options: ['mapping' => ['unique_identifier' => 'unique_identifier']])]
-    public function getGuildSquadData(Request $request, Guild $guild, Squad $squad): JsonResponse|BinaryFileResponse
-    {
+    public function getGuildSquadData(
+        Request $request,
+        Guild $guild,
+        Squad $squad
+    ): JsonResponse|BinaryFileResponse {
         if ($request->attributes->get('_route') == 'api_guild_squad') {
             return $this->json(
                 $this->squadManager->getSquadDataPlayer($squad, $guild)
             );
         } else {
-            $resultCreateFile = $this->squadManager->generateExtractSquadDataPlayer($guild, $squad);
+            $resultCreateFile = $this->squadManager
+                ->generateExtractSquadDataPlayer($guild, $squad);
             return $this->generateFileResponse($resultCreateFile);
         }
     }
@@ -61,8 +63,11 @@ class GuildController extends AbstractController
     #[Route('/guild/{id_swgoh}/squad/search', name: 'api_guild_search_squads', methods: ['POST'])]
     #[Route('/guild/{id_swgoh}/squad/export', name: 'api_guild_export_squads', methods: ['GET'])]
     #[ParamConverter('guild', options:['mapping' => ['id_swgoh' => 'id_swgoh']])]
-    public function searchGuildSquad(Guild $guild = null, Request $request, SquadRepository $squadRepository, Squad $squad = null)
-    {
+    public function searchGuildSquad(
+        Guild $guild = null,
+        Request $request,
+        SquadRepository $squadRepository
+    ) {
         $routeName = $request->attributes->get('_route');
         $form = $this->createForm(SearchSquadType::class);
         $form->handleRequest($request);
@@ -72,7 +77,7 @@ class GuildController extends AbstractController
             $form->submit($request->query->all());
         }
         $formData = $form->getData();
-        foreach($formData as $key => $value) {
+        foreach ($formData as $key => $value) {
             if (empty($value)) {
                 unset($formData[$key]);
             }
@@ -82,7 +87,8 @@ class GuildController extends AbstractController
             return $this->json($resultFilter);
         } else {
             if (!empty($resultFilter)) {
-                $resultCreateFile = $this->squadManager->generateExtractSquadData($guild, $resultFilter);
+                $resultCreateFile = $this->squadManager
+                    ->generateExtractSquadData($guild, $resultFilter);
                 return $this->generateFileResponse($resultCreateFile);
             }
         }

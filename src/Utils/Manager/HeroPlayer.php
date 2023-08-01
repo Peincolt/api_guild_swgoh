@@ -95,7 +95,9 @@ class HeroPlayer extends UnitPlayer
                         foreach ($data['ability_data'] as $abilityData) {
                             if ($abilityData['id'] == $omicronAbilityName) {
                                 $databaseHeroPlayerOmicronAbility
-                                    ->setIsZetaLearned(($abilityData['is_zeta'] == 'true' ? true : false));
+                                    ->setIsZetaLearned(
+                                        ($abilityData['is_zeta'] == 'true' ? true : false)
+                                    );
                             }
                         }
                     }

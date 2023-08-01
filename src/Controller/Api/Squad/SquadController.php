@@ -89,9 +89,9 @@ class SquadController extends AbstractController
     private function generateErrorResponse(Form $form)
     {
         $arrayReturn = array();
-        foreach($form->all() as $child) {
+        foreach ($form->all() as $child) {
             if (!$child->isValid()) {
-                foreach($child->getErrors(true, true) as $error) {
+                foreach ($child->getErrors(true, true) as $error) {
                     $arrayReturn['errors'][$child->getName()][] = $error->getMessage();
                 }
             }

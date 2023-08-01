@@ -36,8 +36,6 @@ class UnitPlayer extends BaseManager
         private TranslatorInterface $translator 
     ) {
         parent::__construct($entityManagerInterface);
-        /*$this->normalizers = [new ObjectNormalizer()];
-        $this->serializer = new SerializerInterface($this->normalizers, []);*/
     }
 
     public function getGuildPlayerUnitBySquad(Guild $guild, Squad $squad)
@@ -46,7 +44,10 @@ class UnitPlayer extends BaseManager
         foreach ($squad->getUnits() as $squadUnit) {
             $unit = $squadUnit->getUnit();
             foreach ($guild->getPlayers() as $player) {
-                $arrayData[$player->getName()][$unit->getName()] = $this->getPlayerUnitByPlayerAndUnit($player, $unit);
+                $arrayData[$player->getName()][$unit->getName()] = $this->getPlayerUnitByPlayerAndUnit(
+                    $player,
+                    $unit
+                );
             }
         }
         return $arrayData;
@@ -110,8 +111,10 @@ class UnitPlayer extends BaseManager
             ->getTwOmicron($heroPlayer);
     }
 
-    public function fillUnitPlayer(UnitPlayerEntity $unitPlayer, array $data) :UnitPlayerEntity
-    {
+    public function fillUnitPlayer(
+        UnitPlayerEntity $unitPlayer,
+        array $data
+    ) :UnitPlayerEntity {
         $unitPlayer->setNumberStars($data['rarity']);
         $unitPlayer->setLevel($data['level']);
         $unitPlayer->setGalacticalPower($data['power']);

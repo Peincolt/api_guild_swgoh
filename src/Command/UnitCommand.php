@@ -25,9 +25,25 @@ class UnitCommand extends Command
 
     protected function configure()
     {
-        $this->addOption('heros', 'r', InputOption::VALUE_NONE, 'Récupération des héros')
-            ->addOption('ships', 's', InputOption::VALUE_NONE, 'Récupération des vaisseaux')
-            ->addOption('all', 'a', InputOption::VALUE_NONE, 'Récupération des héros et des vaisseaux');
+        $this
+            ->addOption(
+                'heros',
+                'r',
+                InputOption::VALUE_NONE,
+                'Récupération des héros'
+            )
+            ->addOption(
+                'ships',
+                's',
+                InputOption::VALUE_NONE,
+                'Récupération des vaisseaux'
+            )
+            ->addOption(
+                'all',
+                'a',
+                InputOption::VALUE_NONE,
+                'Récupération des héros et des vaisseaux'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) :int
@@ -40,10 +56,9 @@ class UnitCommand extends Command
             ]
         );
 
-        if (
-            empty($userOptions['ships']) && 
-            empty($userOptions['heros']) &&
-            empty($userOptions['all'])
+        if (empty($userOptions['ships'])
+            && empty($userOptions['heros'])
+            && empty($userOptions['all'])
         ) {
             $userOptions['all'] = true;
         }
@@ -58,7 +73,8 @@ class UnitCommand extends Command
         if ($userOptions['all'] || $userOptions['hero']) {
             $output->writeln(
                 [
-                    'Vous avez choisi de synchroniser les héros'.(!empty($userOptions['all']) ? 'et les vaisseaux':''),
+                    'Vous avez choisi de synchroniser les héros'.
+                    (!empty($userOptions['all']) ? 'et les vaisseaux':''),
                     '===========================',
                     'Début de la synchronisation des héros ...</>',
                 ]
