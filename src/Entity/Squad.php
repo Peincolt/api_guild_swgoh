@@ -44,6 +44,9 @@ class Squad
     #[ORM\OrderBy(['show_order' => 'ASC'])]
     private Collection $units;
 
+    #[ORM\ManyToOne(inversedBy: 'squads')]
+    private ?User $createdBy = null;
+
     public function __construct()
     {
         $this->guilds = new ArrayCollection();
@@ -175,5 +178,17 @@ class Squad
         $true = true;
         $bytes = openssl_random_pseudo_bytes(20, $true);
         $this->unique_identifier = bin2hex($bytes);
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
     }
 }
