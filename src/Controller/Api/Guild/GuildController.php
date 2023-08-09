@@ -5,6 +5,7 @@ namespace App\Controller\Api\Guild;
 use App\Entity\Guild;
 use App\Entity\Squad;
 use App\Repository\SquadRepository;
+use App\Utils\Service\Extract\ExcelSquad;
 use App\Utils\Manager\Guild as GuildManager;
 use App\Utils\Manager\Squad as SquadManager;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,7 +67,8 @@ class GuildController extends AbstractController
     public function searchGuildSquad(
         Guild $guild = null,
         Request $request,
-        SquadRepository $squadRepository
+        SquadRepository $squadRepository,
+        ExcelSquad $excelSquad
     ) {
         $routeName = $request->attributes->get('_route');
         $form = $this->createForm(SearchSquadType::class);
@@ -82,13 +84,13 @@ class GuildController extends AbstractController
                 unset($formData[$key]);
             }
         }
-        $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData);
         if ($routeName === 'api_guild_search_squads') {
+            $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData);
             return $this->json($resultFilter);
         } else {
+            $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData, false);
             if (!empty($resultFilter)) {
-                $resultCreateFile = $this->squadManager
-                    ->generateExtractSquadData($guild, $resultFilter);
+                $resultCreateFile = $excelSquad->constructSpreadShitViaSquads($guild, $resultFilter);
                 return $this->generateFileResponse($resultCreateFile);
             }
         }

@@ -241,17 +241,10 @@ class Squad extends BaseManager
 
     public function generateExtractSquadDataPlayer(Guild $guild, $squad)
     {
-        $fileName = filter_var(
-            $squad->getName(),
-            FILTER_SANITIZE_SPECIAL_CHARS
-        ).".xlsx";
-        $filePath = $this->extractFolder.$fileName;
-        $spreadSheet = $this->excelSquadService->constructSpreadShit(
+        return $this->excelSquadService->constructSpreadShitViaSquads(
             $guild,
-            [$squad]
+            [$squad],
+            filter_var($squad->getName(), FILTER_SANITIZE_SPECIAL_CHARS)
         );
-        $writer = new Xlsx($spreadSheet);
-        $writer->save($this->extractFolder.$fileName);
-        return [$filePath, $fileName];
     }
 }

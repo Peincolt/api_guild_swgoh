@@ -55,7 +55,7 @@ class SquadRepository extends ServiceEntityRepository
 
     }
 
-    public function getGuildSquadByFilter(Guild $guild, array $dataForm)
+    public function getGuildSquadByFilter(Guild $guild, array $dataForm, $hydratation = true)
     {
         $query = $this->createQueryBuilder('s')
             ->andWhere(':guild MEMBER OF s.guilds')
@@ -69,6 +69,13 @@ class SquadRepository extends ServiceEntityRepository
                     ->setParameter(":$property", $value);
             }
         }
-        return $query->getQuery()->getResult(Query::HYDRATE_ARRAY);
+
+        $query = $query->getQuery();
+        
+        if (!empty($hydratation)) {
+            return $query->getResult(Query::HYDRATE_ARRAY);
+        } else {
+            return $query->getResult();
+        }
     }
 }
