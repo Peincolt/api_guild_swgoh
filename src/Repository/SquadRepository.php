@@ -18,9 +18,12 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 class SquadRepository extends ServiceEntityRepository
 {
+    public $manager;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Squad::class);
+        $this->manager = $this->getEntityManager();
     }
 
     public function save(Squad $entity, bool $flush = false): void
