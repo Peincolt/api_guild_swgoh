@@ -18,12 +18,15 @@ class UnitNormalizer implements NormalizerInterface
     public function normalize($unit, string $format = null, array $context = [])
     {
         $data = $this->normalizer->normalize($unit, $format, $context);
-        $data['name'] = $this->translator->trans($data['name'],[],'unit');
+        $data['name'] = $this->translator->trans($data['name'], [], 'unit');
         return $data;
     }
 
-    public function supportsNormalization($data, string $format = null, array $context = [])
-    {
+    public function supportsNormalization(
+        $data,
+        string $format = null,
+        array $context = []
+    ) {
         return $data instanceof Unit;
     }
 }

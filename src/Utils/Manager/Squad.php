@@ -59,7 +59,11 @@ class Squad extends BaseManager
         foreach ($squad->getUnits() as $squadUnit) {
             $unit = $squadUnit->getUnit();
             foreach ($guild->getPlayers() as $player) {
-                $arrayReturn['units'][$unit->getBaseId()]['name'] = $this->translator->trans($unit->getName(),[],'unit');
+                $arrayReturn['units'][$unit->getBaseId()]['name'] = $this->translator->trans(
+                    $unit->getName(),
+                    [],
+                    'unit'
+                );
                 $arrayReturn['units'][$unit->getBaseId()]['players'][$player->getName()] = $this->unitPlayerManager
                         ->getPlayerUnitByPlayerAndUnit(
                             $player,
@@ -113,7 +117,7 @@ class Squad extends BaseManager
             $this->getEntityManager()->flush($squad);
             $arrayReturn['result']['message'] = 'L\'escouade a bien été créé';
         } else {
-            foreach($errors as $error) {
+            foreach ($errors as $error) {
                 $arrayReturn['result']['errors'][] = $error->getMessage();
             }
         }
@@ -206,7 +210,10 @@ class Squad extends BaseManager
 
     public function generateExtractSquadData(Guild $guild, array $arraySquad)
     {
-        $fileName = filter_var($guild->getName(), FILTER_SANITIZE_SPECIAL_CHARS).".xlsx";
+        $fileName = filter_var(
+            $guild->getName(),
+            FILTER_SANITIZE_SPECIAL_CHARS
+        ).".xlsx";
         $filePath = $this->extractFolder.$fileName;
         $startLetter = 'A';
         $startLine = 1;
@@ -215,12 +222,12 @@ class Squad extends BaseManager
         $spreadSheet->removeSheetByIndex(0);
         $sheet = $spreadSheet->createSheet();
         $sheet->setTitle('Export');
-        foreach($headerSpreadsheet as $header) {
+        foreach ($headerSpreadsheet as $header) {
             $sheet->setCellValue($startLetter.'1', $header);
             $startLetter++;
         }
         $startLine++;
-        foreach($arraySquad as $squad) {
+        foreach ($arraySquad as $squad) {
             $sheet->setCellValue('A'.$startLine, $squad['unique_identifier']);
             $sheet->setCellValue('B'.$startLine, $squad['name']);
             $sheet->setCellValue('C'.$startLine, $squad['used_for']);
@@ -234,11 +241,10 @@ class Squad extends BaseManager
 
     public function generateExtractSquadDataPlayer(Guild $guild, $squad)
     {
-        $fileName = filter_var($squad->getName(), FILTER_SANITIZE_SPECIAL_CHARS).".xlsx";
-        $filePath = $this->extractFolder.$fileName;
-        $spreadSheet = $this->excelSquadService->constructSpreadShit($guild,[$squad]);
-        $writer = new Xlsx($spreadSheet);
-        $writer->save($this->extractFolder.$fileName);
-        return [$filePath, $fileName];
+        return $this->excelSquadService->constructSpreadShitViaSquads(
+            $guild,
+            [$squad],
+            filter_var($squad->getName(), FILTER_SANITIZE_SPECIAL_CHARS)
+        );
     }
 }

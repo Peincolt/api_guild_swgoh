@@ -58,49 +58,27 @@ class SquadRepository extends ServiceEntityRepository
 
     }
 
-    public function getGuildSquadByFilter(Guild $guild, array $dataForm)
+    public function getGuildSquadByFilter(Guild $guild, array $dataForm, $hydratation = true)
     {
         $query = $this->createQueryBuilder('s')
             ->andWhere(':guild MEMBER OF s.guilds')
             ->setParameter(':guild', $guild);
-        foreach($dataForm as $property => $value) {
+        foreach ($dataForm as $property => $value) {
             if ($property === 'name') {
                 $query->andWhere('s.name LIKE :like')
-                    ->setParameter(':like','%'.$value.'%');
+                    ->setParameter(':like', '%'.$value.'%');
             } else {
                 $query->andWhere("s.$property = :$property")
                     ->setParameter(":$property", $value);
             }
         }
-        return $query->getQuery()->getResult(Query::HYDRATE_ARRAY);
+
+        $query = $query->getQuery();
+        
+        if (!empty($hydratation)) {
+            return $query->getResult(Query::HYDRATE_ARRAY);
+        } else {
+            return $query->getResult();
+        }
     }
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-
-//    /**
-//     * @return Squad[] Returns an array of Squad objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Squad
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

@@ -66,8 +66,11 @@ class Player extends BaseManager
         return true;
     }
 
-    public function fillPlayer(PlayerEntity $player, array $data, Guild $guild) :PlayerEntity
-    {
+    public function fillPlayer(
+        PlayerEntity $player,
+        array $data,
+        Guild $guild
+    ) :PlayerEntity {
         if (preg_match("#^[0-9]+$#", $data['data']['last_updated'])) {
             $date = new \DateTime();
             $date->setTimestamp($data['data']['last_updated']);
@@ -99,8 +102,12 @@ class Player extends BaseManager
         return $player;
     }
 
-    public function updatePlayerGuild(Guild $guild, array $arrayDataPlayer, bool $characters = false, bool $ships = false)
-    {
+    public function updatePlayerGuild(
+        Guild $guild,
+        array $arrayDataPlayer,
+        bool $characters = false,
+        bool $ships = false
+    ) {
         $player = $this->updatePlayer($arrayDataPlayer, $characters, $ships);
         $player->setGuild($guild);
         $this->_entityManager->persist($player);
@@ -110,7 +117,15 @@ class Player extends BaseManager
     public function getPlayerDataApi(PlayerEntity $player)
     {
         $arrayReturn = array();
-        $arrayReturn = $this->serializer->normalize($player, null, ['groups' => ['api_player']]);
+        $arrayReturn = $this->serializer->normalize(
+            $player,
+            null,
+            [
+                'groups' => [
+                    'api_player'
+                ]
+            ]
+        );
         return array_merge($arrayReturn, $this->getPlayerUnits($player));
     }
 
@@ -138,13 +153,17 @@ class Player extends BaseManager
 
             if (empty($type) || $type == $unitTypeName) {
                 $unitInformation = array_merge(
-                    $this->serializer->normalize($unit, null,
+                    $this->serializer->normalize(
+                        $unit,
+                        null,
                         [
                             'groups' => [
                                 'api_player_unit'
                             ]
                         ]
-                    ), $this->serializer->normalize($unit->getUnit(), null,
+                    ), $this->serializer->normalize(
+                        $unit->getUnit(),
+                        null,
                         [
                             'groups' => [
                                 'api_player_unit'

@@ -10,10 +10,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(name: 'synchro-abilities', description: 'Cette commande permet de récupérer les compétences des héros du jeu')]
-class AbilitiesCommand extends Command 
+class AbilitiesCommand extends Command
 {
-
-    public function __construct (private AbilityManager $abilityManager)
+    public function __construct(private AbilityManager $abilityManager)
     {
         parent::__construct();
     }

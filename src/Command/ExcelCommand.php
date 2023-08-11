@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'generate-excel', description: 'Cette commande permet de générer un fichier Excel avec les escouades des guildes')]
-class ExcelCommand extends Command 
+class ExcelCommand extends Command
 {
     public function __construct(
         private ExcelSquad $excelSquad,
@@ -28,7 +28,7 @@ class ExcelCommand extends Command
     {
         $this->addArgument('id', InputArgument::REQUIRED, 'Id de la guilde a utilisé afin de générer les exports CSV')
             ->addOption('type', 'ty', InputOption::VALUE_OPTIONAL, 'Souhaitez les teams de défenses ou les teams d\'attaque ? (d : défense ,a : attaque, an: analyse, tb: tb, t : tout)');
-        }
+    }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -59,7 +59,8 @@ class ExcelCommand extends Command
 
         $output->writeln(
             [
-                'Vous souhaitez générer un fichier Excel à partir des informations de la guilde '.$guild->getName(),
+                'Vous souhaitez générer un fichier Excel à partir des informations de la guilde '.
+                $guild->getName(),
                 '===========================',
             ]
         );
@@ -75,10 +76,10 @@ class ExcelCommand extends Command
                     break;
                 case "an":
                     $output->writeln('Vous avez décidé de récupérer les teams pour analyse de roster');
-                break;
+                    break;
                 case "tb":
                     $output->writeln('Vous avez décidé de récupérer les teams pour la TB');
-                break;
+                    break;
                 default:
                     $output->writeln('Vous avez décidé de récupérer toutes les teams (défense + attaque)');
                     $type = "t";

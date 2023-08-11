@@ -28,37 +28,54 @@ class SquadType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', TextType::class, [
-                'required' => false
-            ])
-            ->add('used_for', ChoiceType::class, [
-                'choices' => [
-                    'attack' => 'attack',
-                    'defense' => 'defense'
-                ],
-                'invalid_message' => 'Seul les valeurs "attack" ou "defense" sont acceptées.',
-                'required' => false
-            ])
-            ->add('type', ChoiceType::class, [
-                'choices' => [
-                    'hero' => 'hero',
-                    'ship' => 'ship'
-                ],
-                'invalid_message' => 'Seul les valeurs "hero" ou "ship" sont acceptées.',
-                'required' => false
-            ])
-            ->add('guild', EntityType::class, [
-                'class' => Guild::class,
-                'mapped' => false,
-                'invalid_message' => 'Erreur lors de la récupération des informations de la guilde'
-            ]);
+            ->add(
+                'name',
+                TextType::class, [
+                    'required' => false
+                ]
+            )
+            ->add(
+                'used_for',
+                ChoiceType::class,
+                [
+                    'choices' => [
+                        'attack' => 'attack',
+                        'defense' => 'defense'
+                    ],
+                    'invalid_message' => 'Seul les valeurs "attack" ou "defense" sont acceptées.',
+                    'required' => false
+                ]
+            )
+            ->add(
+                'type',
+                ChoiceType::class,
+                [
+                    'choices' => [
+                        'hero' => 'hero',
+                        'ship' => 'ship'
+                    ],
+                    'invalid_message' => 'Seul les valeurs "hero" ou "ship" sont acceptées.',
+                    'required' => false
+                ]
+            )
+            ->add(
+                'guild',
+                EntityType::class,
+                [
+                    'class' => Guild::class,
+                    'mapped' => false,
+                    'invalid_message' => 'Erreur lors de la récupération des informations de la guilde'
+                ]
+            );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'csrf_protection' => false
-        ]);
+        $resolver->setDefaults(
+            [
+                'csrf_protection' => false
+            ]
+        );
     }
 
     private function getUnitBaseId()
@@ -66,7 +83,7 @@ class SquadType extends AbstractType
         $arrayReturn = array();
         $units = $this->entityManager->getRepository(Unit::class)
             ->findAll();
-        foreach($units as $unit) {
+        foreach ($units as $unit) {
             $arrayReturn[$unit->getBaseId()] = $unit->getBaseId();
         }
         return $arrayReturn;

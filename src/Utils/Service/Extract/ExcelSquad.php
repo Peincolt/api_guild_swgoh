@@ -20,8 +20,7 @@ class ExcelSquad
         private UnitPlayerManager $unitPlayerManager,
         private string $extractFolder,
         private TranslatorInterface $translator
-    )
-    {
+    ) {
         $this->extractFolder = $extractFolder;
     }
 
@@ -32,9 +31,32 @@ class ExcelSquad
             $this->translateType($option)
         );
 
-        $spreadSheet = $this->constructSpreadShit($guild, $squads);
-        $writer = new Xlsx($spreadSheet);
-        $writer->save($this->extractFolder.$guild->getName().".xlsx");
+        return $this->writeSpreadShit($guild, $squads);
+    }
+
+    public function constructSpreadShitViaSquads(Guild $guild, $squads, string $filename = null)
+    {
+        return $this->writeSpreadShit($guild, $squads, $filename);
+    }
+
+    private function writeSpreadShit(Guild $guild, $squads, $filename)
+    {
+        try {
+            $filename = filter_var(
+                (empty($filename) ? $guild->getName() : $filename),
+                FILTER_SANITIZE_SPECIAL_CHARS
+            ).".xlsx";
+            $filePath = $this->extractFolder.$filename;
+            $spreadSheet = $this->constructSpreadShit($guild, $squads);
+            $writer = new Xlsx($spreadSheet);
+            $writer->save($filePath);
+            return [$filePath, $filename];
+        } catch (Exception $e) {
+            return array(
+                'error_message_front' => 'Une erreur est survenue lors de la génération de la matrice Excel',
+                'error_message_back' => $e->getMessage()
+            );
+        }
     }
 
     public function constructSpreadShit(Guild $guild, $squads)
@@ -67,7 +89,11 @@ class ExcelSquad
                 $reflection = new ReflectionClass($squadUnit->getUnit());
                 $sheet->setCellValue(
                     $startLetter."2",
-                    $this->translator->trans($squadUnit->getUnit()->getName(),[],'unit')
+                    $this->translator->trans(
+                        $squadUnit->getUnit()->getName(),
+                        [],
+                        'unit'
+                    )
                 );
                 if ($reflection->getShortName() == "Hero") {
                     $sheet->setCellValue(
@@ -125,10 +151,16 @@ class ExcelSquad
                             }
                         }
                         $sheet->setCellValue($startLetter.$startData, $chain);
-                        $sheet->getStyle($startLetter.$startData)->applyFromArray($this->getStyleByGear($arrayValueUnit['gear_level']));
+                        $sheet->getStyle($startLetter.$startData)
+                            ->applyFromArray(
+                                $this->getStyleByGear($arrayValueUnit['gear_level'])
+                            );
                         $startLetter++;
                     } else {
-                        $sheet->setCellValue($startLetter.$startData,$arrayValueUnit['protection'].'/'.$arrayValueUnit['life'].' ('.$arrayValueUnit['speed'].')');
+                        $sheet->setCellValue(
+                            $startLetter.$startData,
+                            $arrayValueUnit['protection'].'/'.$arrayValueUnit['life'].' ('.$arrayValueUnit['speed'].')'
+                        );
                         $startLetter++;
                     }
                 }
