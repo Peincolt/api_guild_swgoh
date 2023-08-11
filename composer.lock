@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3cb17c98eb780fd4ee751da1e4a6acdb",
+    "content-hash": "1b32d4cf7c99302d8f356796825364e7",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1826,6 +1826,68 @@
                 }
             ],
             "time": "2022-08-04T09:53:51+00:00"
+        },
+        {
+            "name": "nelmio/cors-bundle",
+            "version": "2.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nelmio/NelmioCorsBundle.git",
+                "reference": "185d2c0ae50a3f0b628790170164d5f1c5b7c281"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nelmio/NelmioCorsBundle/zipball/185d2c0ae50a3f0b628790170164d5f1c5b7c281",
+                "reference": "185d2c0ae50a3f0b628790170164d5f1c5b7c281",
+                "shasum": ""
+            },
+            "require": {
+                "psr/log": "^1.0 || ^2.0 || ^3.0",
+                "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.2",
+                "symfony/phpunit-bridge": "^4.4 || ^5.4 || ^6.0"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nelmio\\CorsBundle\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nelmio",
+                    "homepage": "http://nelm.io"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://github.com/nelmio/NelmioCorsBundle/contributors"
+                }
+            ],
+            "description": "Adds CORS (Cross-Origin Resource Sharing) headers support in your Symfony application",
+            "keywords": [
+                "api",
+                "cors",
+                "crossdomain"
+            ],
+            "support": {
+                "issues": "https://github.com/nelmio/NelmioCorsBundle/issues",
+                "source": "https://github.com/nelmio/NelmioCorsBundle/tree/2.3.1"
+            },
+            "time": "2023-02-16T08:49:29+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",
@@ -4033,16 +4095,16 @@
         },
         {
             "name": "symfony/http-kernel",
-            "version": "v6.1.5",
+            "version": "v6.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-kernel.git",
-                "reference": "bf433ef30c2dfbf1f47449d5dce8be243e8a0012"
+                "reference": "7a4a69dee1b0db04bdc12e86d4cd0dbf6daa390c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/bf433ef30c2dfbf1f47449d5dce8be243e8a0012",
-                "reference": "bf433ef30c2dfbf1f47449d5dce8be243e8a0012",
+                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/7a4a69dee1b0db04bdc12e86d4cd0dbf6daa390c",
+                "reference": "7a4a69dee1b0db04bdc12e86d4cd0dbf6daa390c",
                 "shasum": ""
             },
             "require": {
@@ -4123,7 +4185,7 @@
             "description": "Provides a structured process for converting a Request into a Response",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-kernel/tree/v6.1.5"
+                "source": "https://github.com/symfony/http-kernel/tree/v6.1.12"
             },
             "funding": [
                 {
@@ -4139,7 +4201,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-09-30T08:10:57+00:00"
+            "time": "2023-02-01T08:26:56+00:00"
         },
         {
             "name": "symfony/options-resolver",
