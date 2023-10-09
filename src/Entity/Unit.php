@@ -36,6 +36,9 @@ class Unit
     #[ORM\OneToMany(mappedBy: 'unit', targetEntity: UnitPlayer::class, orphanRemoval: true)]
     private Collection $playerUnits;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->squadunits = new ArrayCollection();
@@ -129,6 +132,19 @@ class Unit
                 $playerUnit->setUnit(null);
             }
         }
+
+        return $this;
+    }
+
+    #[Groups(['api_unit'])]
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }

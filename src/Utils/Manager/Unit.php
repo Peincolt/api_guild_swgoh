@@ -56,6 +56,7 @@ class Unit
         $className = $reflection->getShortName();
         $unit->setBaseId($data['base_id']);
         $unit->setName($data['name']);
+        $unit->setImage($data['image']);
         $unit->setCategories($data['categories']);
         if ($className == 'Hero') {
             $unit->setIdSwgoh($data['pk']);
