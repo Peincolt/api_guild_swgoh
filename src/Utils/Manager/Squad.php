@@ -64,6 +64,7 @@ class Squad extends BaseManager
                     [],
                     'unit'
                 );
+                $arrayReturn['units'][$unit->getBaseId()]['image'] = $unit->getImage();
                 $arrayReturn['units'][$unit->getBaseId()]['players'][$player->getName()] = $this->unitPlayerManager
                         ->getPlayerUnitByPlayerAndUnit(
                             $player,
