@@ -58,9 +58,9 @@ class Unit
         $unit->setName($data['name']);
         $unit->setImage($data['image']);
         $unit->setCategories($data['categories']);
-        if ($className == 'Hero') {
+        /*if ($className == 'Hero') {
             $unit->setIdSwgoh($data['pk']);
-        }
+        }*/
         return $unit;
     }
 
