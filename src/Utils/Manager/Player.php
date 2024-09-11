@@ -92,7 +92,7 @@ class Player extends BaseManager
         }*/
         $dateString = $data['data']['last_updated'];
         $date = new \DateTime($dateString);
-        $formattedDate = $date->format('Y-m-d H:i:s');
+        //$formattedDate = $date->format('Y-m-d H:i:s');
         $player->setGuild($guild);
         $player->setLastUpdate($formattedDate);
         $player->setIdSwgoh($data['data']['ally_code']);
