@@ -120,7 +120,7 @@ class UnitPlayer extends BaseManager
         $unitPlayer->setGalacticalPower($data['power']);
         $unitPlayer->setSpeed($data['stats']['5']);
         $unitPlayer->setLife($data['stats']['1']);
-        $unitPlayer->setProtection($data['stats']['28']);
+        $unitPlayer->setProtection(intval($data['stats']['28']));
         return $unitPlayer;
     }
 }
