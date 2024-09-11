@@ -71,7 +71,7 @@ class Player extends BaseManager
         array $data,
         Guild $guild
     ) :PlayerEntity {
-        if (preg_match("#^[0-9]+$#", $data['data']['last_updated'])) {
+        /*if (preg_match("#^[0-9]+$#", $data['data']['last_updated'])) {
             $date = new \DateTime();
             $date->setTimestamp($data['data']['last_updated']);
         } else {
@@ -89,9 +89,12 @@ class Player extends BaseManager
                     )
                 )->format('Y-m-d H:i')
             );
-        }
+        }*/
+        $dateString = $data['data']['last_updated'];
+        $date = new DateTime($dateString);
+        $formattedDate = $date->format('Y-m-d H:i:s');
         $player->setGuild($guild);
-        $player->setLastUpdate($date);
+        $player->setLastUpdate($formattedDate);
         $player->setIdSwgoh($data['data']['ally_code']);
         $player->setName($data['data']['name']);
         $player->setLevel($data['data']['level']);
