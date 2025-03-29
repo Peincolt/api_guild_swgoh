@@ -23,38 +23,21 @@ class UnitCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addOption(
-                'heros',
-                'r',
-                InputOption::VALUE_NONE,
-                'Récupération des héros'
-            )
-            ->addOption(
-                'ships',
-                's',
-                InputOption::VALUE_NONE,
-                'Récupération des vaisseaux'
-            )
-            ->addOption(
-                'all',
-                'a',
-                InputOption::VALUE_NONE,
-                'Récupération des héros et des vaisseaux'
+                'type',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Quel type d\'unité souhaitez vous mettre à jour ? Héros (hero), vaisseaux (ships), les deux (all)',
+                'all'
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) :int
     {
-        $userOptions = $input->getOptions(
-            [
-                'heros',
-                'ships',
-                'all'
-            ]
-        );
+        $userOptions = $input->getOptions();
 
         if (empty($userOptions['ships'])
             && empty($userOptions['heros'])
@@ -70,6 +53,18 @@ class UnitCommand extends Command
             ]
         );
 
+        if ($userOptions['hero']) {
+
+        }
+
+        if ($userOptions['vaisseau']) {
+
+        }
+
+        if ($userOptions['all']) {
+
+        }
+
         if ($userOptions['all'] || $userOptions['hero']) {
             $output->writeln(
                 [
@@ -84,7 +79,11 @@ class UnitCommand extends Command
         }
 
         if ($userOptions['all'] || $userOptions['ship']) {
-            if (!empty($result) && is_array($result)) {
+            if (
+                !empty($result) &&
+                is_array($result) &&
+                is_string($result['error_message'])
+            ) {
                 $output->writeln(
                     [
                         '<fg=red>Erreur lors de la synchronisation',
@@ -103,6 +102,10 @@ class UnitCommand extends Command
                 ]
             );
             $result = $this->unitManager->updateUnit('Ship');
+        }
+
+        if (!empty($result)) {
+
         }
 
         if (!empty($result) && !is_array(($result))) {

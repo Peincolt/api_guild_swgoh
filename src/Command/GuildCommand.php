@@ -21,7 +21,7 @@ class GuildCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument(
             'id',
@@ -30,7 +30,7 @@ class GuildCommand extends Command
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln(
             [
@@ -40,20 +40,14 @@ class GuildCommand extends Command
             ]
         );
 
-        // TESTER RETOUR CODE QUAND MET RIEN
-        /*if (emptyu($input->getArgument('id'))) {
-            $output->writeln(
-                [
-                    '<fg=red>Début de la commande',
-                    '===========================</fg>',
-                ]
-            );
-        }*/
-
         $result = $this->guildManager
-            ->updateGuild($input->getArgument('id'), $output);
+            ->updateGuild((string)$input->getArgument('id'), $output);
 
-        if (is_array($result)) {
+        if (
+            is_array($result) &&
+            isset($result['error_message']) &&
+            is_string($result['error_message'])
+        ) {
             $output->writeln(
                 [
                     '<fg=red>Erreur lors de la synchronisation',

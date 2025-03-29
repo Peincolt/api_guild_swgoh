@@ -40,14 +40,16 @@ class AbilitiesCommand extends Command
             return Command::SUCCESS;
         }
         
-        $output->writeln(
-            [
-                '<fg=red>Erreur lors de la synchronisation',
-                '===========================',
-                'Voilà le message d\'erreur :',
-                $result['error_message'].'</>'
-            ]
-        );
+        if (isset($result['error_message']) && is_string($result['error_message'])) {
+            $output->writeln(
+                [
+                    '<fg=red>Erreur lors de la synchronisation',
+                    '===========================',
+                    'Voilà le message d\'erreur :',
+                    $result['error_message'].'</>'
+                ]
+            );
+        }
         return Command::FAILURE;
     }
 }
