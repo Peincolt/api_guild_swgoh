@@ -5,12 +5,12 @@ namespace App\Utils\Manager;
 use App\Entity\Unit;
 use App\Entity\Guild;
 use App\Entity\SquadUnit;
-use Symfony\Component\Form\Form;
-use App\Serializer\UnitNormalizer;
+use App\Dto\FileResponseData;
 use App\Entity\Squad as SquadEntity;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\Form\FormInterface;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Serializer;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -127,7 +127,7 @@ class Squad extends BaseManager
 
     /* Si me mec upload rien, ça plante ?! Voir pour modifier le code */
     /* Voir pour pas utiliser le trick du tableau $units */
-    public function fillSquadByForm(SquadEntity $squad, Form $form)
+    public function fillSquadByForm(SquadEntity $squad, FormInterface $form)
     {
         $arrayUnit = new ArrayCollection();
         $arrayUnitToDelete = new ArrayCollection();
@@ -240,7 +240,7 @@ class Squad extends BaseManager
         return [$filePath, $fileName];
     }
 
-    public function generateExtractSquadDataPlayer(Guild $guild, $squad)
+    public function generateExtractSquadDataPlayer(Guild $guild, $squad): FileResponseData
     {
         return $this->excelSquadService->constructSpreadShitViaSquads(
             $guild,

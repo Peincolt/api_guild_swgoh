@@ -5,7 +5,6 @@ namespace App\Form\Search;
 use App\Entity\Unit;
 use App\Entity\Guild;
 use App\Entity\Squad;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -20,11 +19,6 @@ use Symfony\Component\Form\FormEvents;
 
 class SquadType extends AbstractType
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
-        
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -76,16 +70,5 @@ class SquadType extends AbstractType
                 'csrf_protection' => false
             ]
         );
-    }
-
-    private function getUnitBaseId()
-    {
-        $arrayReturn = array();
-        $units = $this->entityManager->getRepository(Unit::class)
-            ->findAll();
-        foreach ($units as $unit) {
-            $arrayReturn[$unit->getBaseId()] = $unit->getBaseId();
-        }
-        return $arrayReturn;
     }
 }

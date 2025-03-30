@@ -99,7 +99,7 @@ class SwgohGg
         } catch (Exception $e) {
             return array(
                 'error_code' => $e->getCode(),
-                'error_message' => $e->getMessage()
+                'error_message_api_swgoh' => $e->getMessage()
             );
         }
     }

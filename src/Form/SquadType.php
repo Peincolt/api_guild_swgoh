@@ -60,24 +60,21 @@ class SquadType extends AbstractType
                     'invalid_message' => 'Erreur lors de la récupération des informations de la guilde'
                 ]
             )
-            /*// Voir pour mettre une modif pré/post validation car le multiselect respecte pas l'ordre qui a été reçu lors du call API
-            // Event pre-set data qui permet d'ajouter le champ en mode dynamic et dont les éléments correspondent aux units qu'on a pu trouver via les datas passées par l'API ?
-            ->add('units', ChoiceType::class, [
-                'mapped' => false,
-                'multiple' => true,
-                'expanded' => true,
-                'choices' => $this->getUnitBaseId(),
-                'invalid_message' => 'Erreur lors de la récupération de l\'unité'
-            ])*/
             ->addEventListener(
                 FormEvents::PRE_SUBMIT,
                 function (FormEvent $event) {
+                    $choiceUnitsOption = array();
                     $data = $event->getData();
                     $form = $event->getForm();
                     $unitRepository = $this->entityManager
                         ->getRepository(Unit::class);
-                    $choiceUnitsOption = array();
-                    if (!empty($data['units']) > 0) {
+                    if (
+                        !empty($data) &&
+                        is_array($data) && 
+                        isset($data['units']) &&
+                        is_array($data['units']) &&
+                        count($data['units']) > 0
+                    ) {
                         foreach ($data['units'] as $unitDesiredBaseId) {
                             $unit = $unitRepository->findOneBy(
                                 [
@@ -114,16 +111,5 @@ class SquadType extends AbstractType
                 'csrf_protection' => false
             ]
         );
-    }
-
-    private function getUnitBaseId()
-    {
-        $arrayReturn = array();
-        $units = $this->entityManager->getRepository(Unit::class)
-            ->findAll();
-        foreach ($units as $unit) {
-            $arrayReturn[$unit->getBaseId()] = $unit->getBaseId();
-        }
-        return $arrayReturn;
     }
 }

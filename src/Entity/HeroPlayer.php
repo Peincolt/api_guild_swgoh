@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use App\Entity\UnitPlayer;
 use App\Repository\HeroPlayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\UnitPlayer;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: HeroPlayerRepository::class)]
 class HeroPlayer extends UnitPlayer
@@ -23,14 +24,6 @@ class HeroPlayer extends UnitPlayer
     public function __construct()
     {
         $this->abilities = new ArrayCollection();
-    }
-
-    /**
-     * @return Collection<int, HeroPlayerAbility>
-     */
-    public function getHeroPlayerAbilities(): Collection
-    {
-        return $this->heroPlayerAbilities;
     }
 
     public function addHeroPlayerAbility(HeroPlayerAbility $heroPlayerAbility): self

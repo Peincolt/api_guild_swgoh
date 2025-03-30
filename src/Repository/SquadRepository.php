@@ -10,12 +10,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Squad>
- *
- * @method Squad|null find($id, $lockMode = null, $lockVersion = null)
- * @method Squad|null findOneBy(array $criteria, array $orderBy = null)
- * @method Squad[]    findAll()
- * @method Squad[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
+*/
 class SquadRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -41,7 +36,7 @@ class SquadRepository extends ServiceEntityRepository
         }
     }
 
-    public function getGuildSquad(Guild $guild, string $type = null)
+    public function getGuildSquad(Guild $guild, string $type = null): mixed
     {
         $query = $this->createQueryBuilder('s')
             ->andWhere(':guild MEMBER OF s.guilds')
@@ -55,7 +50,10 @@ class SquadRepository extends ServiceEntityRepository
 
     }
 
-    public function getGuildSquadByFilter(Guild $guild, array $dataForm, $hydratation = true)
+    /**
+     * @param array<string> $dataForm
+     */
+    public function getGuildSquadByFilter(Guild $guild, array $dataForm, bool $hydratation = true): mixed
     {
         $query = $this->createQueryBuilder('s')
             ->andWhere(':guild MEMBER OF s.guilds')

@@ -14,13 +14,13 @@ class Hero extends Unit
     #[ORM\OneToMany(mappedBy: 'hero', targetEntity: Ability::class, orphanRemoval: true)]
     private Collection $abilities;
 
-    #[ORM\OneToMany(mappedBy: 'hero', targetEntity: HeroPlayer::class, orphanRemoval: true)]
-    private Collection $heroPlayers;
+    /*#[ORM\OneToMany(mappedBy: 'hero', targetEntity: HeroPlayer::class, orphanRemoval: true)]
+    private Collection $heroPlayers;*/
 
     public function __construct()
     {
         $this->abilities = new ArrayCollection();
-        $this->heroPlayers = new ArrayCollection();
+        //$this->heroPlayers = new ArrayCollection();
     }
 
     /**
@@ -56,7 +56,7 @@ class Hero extends Unit
     /**
      * @return Collection<int, HeroPlayer>
      */
-    public function getHeroPlayers(): Collection
+    /*public function getHeroPlayers(): Collection
     {
         return $this->heroPlayers;
     }
@@ -65,7 +65,7 @@ class Hero extends Unit
     {
         if (!$this->heroPlayers->contains($heroPlayer)) {
             $this->heroPlayers->add($heroPlayer);
-            $heroPlayer->setHero($this);
+            //$heroPlayer->setHero($this);
         }
 
         return $this;
@@ -76,10 +76,10 @@ class Hero extends Unit
         if ($this->heroPlayers->removeElement($heroPlayer)) {
             // set the owning side to null (unless already changed)
             if ($heroPlayer->getHero() === $this) {
-                $heroPlayer->setHero(null);
+                //$heroPlayer->setHero(null);
             }
         }
 
         return $this;
-    }
+    }*/
 }

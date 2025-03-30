@@ -2,11 +2,11 @@
 
 namespace App\Listener;
 
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class PreflightIgnoreOnNewRelicListener
 {
-    public function onKernelResponse(FilterResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event): void
     {
         if (!extension_loaded('newrelic')) {
             return;

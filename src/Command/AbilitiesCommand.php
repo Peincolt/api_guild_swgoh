@@ -40,13 +40,34 @@ class AbilitiesCommand extends Command
             return Command::SUCCESS;
         }
         
-        if (isset($result['error_message']) && is_string($result['error_message'])) {
+        // Si on a error_message_api_swgoh, c'est que l'on a eu une erreur lors de la récupération des infos directement via l'API
+        if (isset($result['error_message_api_swgoh']) && is_string($result['error_message'])) {
+            // On print le message
             $output->writeln(
                 [
                     '<fg=red>Erreur lors de la synchronisation',
                     '===========================',
                     'Voilà le message d\'erreur :',
                     $result['error_message'].'</>'
+                ]
+            );
+        }
+        
+        if (isset($result['error_messages']) && is_array($result['error_messages'])) {
+            $output->writeln(
+                [
+                    '<fg=red>Erreur lors de la synchronisation',
+                    '===========================',
+                    'Voilà les messages d\'erreur :</>'
+                ]
+            );
+            foreach($result['error_messages'] as $errorMessage) {
+                $output->writeln($errorMessage.'</>');
+            }
+            $output->writeln(
+                [
+                    '===========================',
+                    'Fin de la synchronisation'
                 ]
             );
         }

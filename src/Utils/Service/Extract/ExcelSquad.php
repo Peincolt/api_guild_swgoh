@@ -5,6 +5,7 @@ namespace App\Utils\Service\Extract;
 use ReflectionClass;
 use App\Entity\Guild;
 use App\Entity\Squad;
+use App\Dto\FileResponseData;
 use App\Repository\SquadRepository;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -34,12 +35,12 @@ class ExcelSquad
         return $this->writeSpreadShit($guild, $squads);
     }
 
-    public function constructSpreadShitViaSquads(Guild $guild, $squads, string $filename = null)
+    public function constructSpreadShitViaSquads(Guild $guild, $squads, string $filename = null): FileResponseData
     {
         return $this->writeSpreadShit($guild, $squads, $filename);
     }
 
-    private function writeSpreadShit(Guild $guild, $squads, $filename)
+    private function writeSpreadShit(Guild $guild, $squads, $filename): FileResponseData
     {
         try {
             $filename = filter_var(
@@ -50,7 +51,7 @@ class ExcelSquad
             $spreadSheet = $this->constructSpreadShit($guild, $squads);
             $writer = new Xlsx($spreadSheet);
             $writer->save($filePath);
-            return [$filePath, $filename];
+            return new FileReponseData($filePath, $filename);
         } catch (Exception $e) {
             return array(
                 'error_message_front' => 'Une erreur est survenue lors de la génération de la matrice Excel',

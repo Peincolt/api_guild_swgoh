@@ -7,15 +7,18 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class UnitNormalizer implements NormalizerInterface
+class UnitNormalizer //implements NormalizerInterface
 {
-    public function __construct(
+    /*public function __construct(
         private ObjectNormalizer $normalizer,
         private TranslatorInterface $translator
     ) {
     }
 
-    public function normalize($unit, string $format = null, array $context = [])
+    /**
+     * @return array<
+     
+    public function normalize($unit, string $format = null, array $context = []): array
     {
         $data = $this->normalizer->normalize($unit, $format, $context);
         $data['name'] = $this->translator->trans($data['name'], [], 'unit');
@@ -28,5 +31,5 @@ class UnitNormalizer implements NormalizerInterface
         array $context = []
     ) {
         return $data instanceof Unit;
-    }
+    }*/
 }
