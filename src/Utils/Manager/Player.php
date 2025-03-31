@@ -179,4 +179,37 @@ class Player extends BaseManager
         }
         return $arrayReturn;
     }
+
+    public function updateGuildPlayers(Guild $guild, array $dataGuild)
+    {
+        foreach ($dataGuild['data']['members'] as $key => $guildPlayerData) {
+            $playerNotSync = ['error_messages' => []];
+            if (
+                is_array($guildPlayerData) &&
+                isset($guildPlayerData['player_name']) && 
+                isset($guildPlayerData['ally_code']) &&
+                is_string($guildPlayerData['player_name']) &&
+                is_string($guildPlayerData['ally_code'])
+            ) {
+                array_push($actualMembers, $guildPlayerData['player_name']);
+                $result = $this->updatePlayerWithApi($guildPlayerData['ally_code'], $guild);
+                if (
+                    is_array($result) &&
+                    isset($result['error_message']) &&
+                    is_string($result['error_message'])
+                ) {
+                    array_push($playerNotSync['error_messages'], $result['error_message']);
+                }
+            } else {
+                array_push(
+                    $playerNotSync['error_messages'],
+                    'Une erreur est survenue lors de la synchronisation du joueur numéro '.$key
+                );
+            }
+        }
+        if (count($playerNotSync['error_messages']) > 0) {
+            return $playerNotSync;
+        }
+        return true;
+    }
 }

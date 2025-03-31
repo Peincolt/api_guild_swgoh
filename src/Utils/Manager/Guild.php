@@ -42,7 +42,7 @@ class Guild
         $count = 0;
 
         if (is_array($dataGuild)) {
-            if (!isset($dataGuild['error_message'])) {
+            if (!isset($dataGuild['error_message_api_swgoh'])) {
                 if (
                     isset($dataGuild['data']) &&
                     is_array($dataGuild['data']) &&
@@ -80,30 +80,12 @@ class Guild
                             isset($dataGuild['data']['members']) &&
                             is_array($dataGuild['data']['members'])
                         ) {
-                            foreach ($dataGuild['data']['members'] as $key => $guildPlayerData) {
-                                $playerNotSync = ['error_messages' => []];
-                                if (
-                                    is_array($guildPlayerData) &&
-                                    isset($guildPlayerData['player_name']) && 
-                                    isset($guildPlayerData['ally_code']) &&
-                                    is_string($guildPlayerData['player_name']) &&
-                                    is_string($guildPlayerData['ally_code'])
-                                ) {
-                                    array_push($actualMembers, $guildPlayerData['player_name']);
-                                    $result = $this->playerManager
-                                        ->updatePlayerWithApi($guildPlayerData['ally_code'], $guild);
-                                    if (is_array($result)) {
-                                        return $result;
-                                    }
-                                } else {
-                                    array_push(
-                                        $playerNotSync['error_messages'],
-                                        'Une erreur est survenue lors de la synchronisation du joueur numéro '.$key
-                                    );
-                                }
-                            }
+                            $isPlayerNotSync = $this->playerManager->updateGuildPlayers($guild, $dataGuild['data']['members']);
                             $this->deleteOlderMembers($actualMembers, $guild);
                             $this->guildRepository->save($guild, true);
+                            if (is_array($isPlayerNotSync)) {
+                                return $isPlayerNotSync;
+                            }
                             return true;
                         }
                         return ['error_message' => 'Une erreur est survenue lors de la récupération des informations des joueurs de la guilde'];
@@ -111,7 +93,7 @@ class Guild
                     return ['error_message' => 'Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite'];
                 }
             }
-            return ['error_message' => $dataGuild['error_message']];
+            return $dataGuild;
         }
         return ['error_message' => 'Une erreur est survenue lors de la récupération des informations de la guilde via l\'API'];
     }
