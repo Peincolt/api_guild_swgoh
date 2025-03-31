@@ -55,6 +55,8 @@ class Ability
                                 $count = 0;
                             }
                             $count++;
+                        } else {
+                            $errorsMessages['error_messages'][] = 'Erreur lors de la synchronisation de l\'abilité '.$key.'. Le héro '.$abilityDto->character_base_id.' n\'existe pas dans la base de données';
                         }
                     } else  {
                         $errorsMessages['error_messages'][] = 'Erreur lors de la synchronisation de l\'abilité '.$key;

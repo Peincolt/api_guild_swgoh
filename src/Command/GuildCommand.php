@@ -43,20 +43,37 @@ class GuildCommand extends Command
         $result = $this->guildManager
             ->updateGuild((string)$input->getArgument('id'), $output);
 
-        if (
-            is_array($result) &&
-            isset($result['error_message']) &&
-            is_string($result['error_message'])
-        ) {
-            $output->writeln(
-                [
-                    '<fg=red>Erreur lors de la synchronisation',
-                    '===========================',
-                    'Voilà le message d\'erreur :',
-                    $result['error_message'].'</>'
-                ]
-            );
-            return Command::FAILURE;
+        if (is_array($result)) {
+            if (
+                isset($result['error_message']) &&
+                is_string($result['error_message'])
+            ) {
+                $output->writeln(
+                    [
+                        '<fg=red>Erreur lors de la synchronisation',
+                        '===========================',
+                        'Voilà le message d\'erreur :',
+                        $result['error_message'].'</>'
+                    ]
+                );
+                return Command::FAILURE;
+            }
+
+            if (
+                isset($result['error_messages']) &&
+                is_array($result['error_messages'])
+            ) {
+                $output->writeln(
+                    [
+                        '<fg=red>Une erreur est survenue lors de la synchronisation des joueurs suivants :</>',
+                        '===========================',
+                    ]
+                );
+                foreach($result['error_messages'] as $key) {
+                    $output->writeln($key.'</>');
+                }
+                return Command::SUCCESS;
+            }
         }
 
         $output->writeln(

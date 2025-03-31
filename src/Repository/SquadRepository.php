@@ -51,7 +51,7 @@ class SquadRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param array<string> $dataForm
+     * @param array<mixed> $dataForm
      */
     public function getGuildSquadByFilter(Guild $guild, array $dataForm, bool $hydratation = true): mixed
     {

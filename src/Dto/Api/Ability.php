@@ -34,22 +34,29 @@ class Ability
     #[Assert\GreaterThanOrEqual(0)]
     public readonly ?int $omicron_mode;
 
-    // Propriétés présente dans le retour API mais non utilisée pour le moment
-    public readonly ?int $combat_type;
+    #[Assert\Length(max: 255)]
+    public readonly ?string $character_base_id;
+
+    // Propriétés présentent dans le retour API mais non utilisées pour le moment
+    /*public readonly ?int $combat_type;
     public readonly ?bool $is_ultimate;
     /**
      * @var array<string>|null
      */
-    public readonly ?array $omicron_battle_types;
+    /*public readonly ?array $omicron_battle_types;
     public readonly ?string $ship_base_id;
     public readonly ?string $ability_id;
     public readonly ?string $image;
     public readonly ?string $url;
     public readonly ?int $tier_max;
-    public readonly ?string $character_base_id;
+    public readonly ?string $character_base_id;*/
 
     // On crée un tableau qui contient au minimum toutes les clés nécessaires à la bonne instanciation d'un objet "Abilité"
-    private $defaults = [
+
+    /**
+     * @var array<string, null>
+     */
+    private array $defaults = [
         'name' => null,
         'base_id' => null,
         'is_zeta' => null,
@@ -61,7 +68,7 @@ class Ability
     ];
 
     /**
-     * @param array<mixed>
+     * @param array<mixed> $apiAbilityData
      */
     public function __construct(array $apiAbilityData) {
         $apiAbilityData = array_merge($this->defaults, $apiAbilityData);

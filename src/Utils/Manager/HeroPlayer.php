@@ -25,7 +25,10 @@ class HeroPlayer extends UnitPlayer
         $this->setRepositoryByClass(HeroPlayerEntity::class);
     }
 
-    public function createHeroPlayer(Player $player, array $data)
+    /**
+     * @return string[]|bool
+     */
+    public function createHeroPlayer(Player $player, array $data): array|bool
     {
         $hero = $this->heroRepository->findOneBy(
             [
@@ -49,10 +52,10 @@ class HeroPlayer extends UnitPlayer
             $this->heroPlayerRepository->save($heroPlayer);
             return true;
         }
-        return array('error_message' => 'Veuillez synchroniser les héros avant de synchroniser les données des joueurs.');
+        return ['error_message' => 'Veuillez synchroniser les héros avant de synchroniser les données des joueurs.'];
     }
 
-    public function fillHeroPlayerEntity(HeroPlayerEntity $heroPlayer, array $data)
+    public function fillHeroPlayerEntity(HeroPlayerEntity $heroPlayer, array $data): HeroPlayerEntity
     {
         $heroPlayer = $this->fillUnitPlayer($heroPlayer, $data);
         $heroPlayer->setGearLevel($data['gear_level']);
