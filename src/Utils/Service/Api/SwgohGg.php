@@ -40,7 +40,10 @@ class SwgohGg
         }
     }
 
-    public function fetchPlayer(string $allyCode)
+    /**
+     * @return array<string, mixed>
+     */
+    public function fetchPlayer(string $allyCode): array
     {
         try {
             $response = $this->client->request(
@@ -57,7 +60,7 @@ class SwgohGg
         } catch (Exception $e) {
             return array(
                 'error_code' => $e->getCode(),
-                'error_message' => $e->getMessage()
+                'error_message_api_swgoh' => $e->getMessage()
             );
         }
         

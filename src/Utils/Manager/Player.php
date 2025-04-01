@@ -2,35 +2,46 @@
 
 namespace App\Utils\Manager;
 
+use ReflectionClass;
+
+use App\Dto\Api\Player as PlayerDto;
 use App\Entity\Guild;
-use App\Entity\Player as PlayerEntity;
-use App\Repository\PlayerRepository;
+use App\Mapper\Player as PlayerMapper;
 use App\Utils\Service\Api\SwgohGg;
+use App\Repository\PlayerRepository;
+use App\Entity\Player as PlayerEntity;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use App\Utils\Manager\HeroPlayer as HeroPlayerManager;
 use App\Utils\Manager\ShipPlayer as ShipPlayerManager;
-use Doctrine\ORM\EntityManagerInterface;
-use ReflectionClass;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Player extends BaseManager
 {
     public function __construct(
         EntityManagerInterface $entityManagerInterface,
-        private SwgohGg $swgohGg, 
+        private SwgohGg $swgohGg,
         private HeroPlayerManager $heroPlayerManager, 
         private ShipPlayerManager $shipPlayerManager,
         private PlayerRepository $playerRepository,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private ValidatorInterface $validatorInterface
     ) 
     {
         parent::__construct($entityManagerInterface);
     }
 
-    public function updatePlayerWithApi(string $allyCode, Guild $guild) :bool|array
+    /**
+     * @return bool|array<string, string>
+     */
+    public function updatePlayerWithApi(string $allyCode, Guild $guild) :array
     {
         $count = 0;
         $playerData = $this->swgohGg->fetchPlayer($allyCode);
-        if (isset($playerData['error_message'])) {
+        if (
+            isset($playerData['error_message_api_swgoh']) &&
+            is_string($playerData['error_message_api_swgoh'])
+        ) {
             return $playerData;
         }
 
@@ -40,83 +51,47 @@ class Player extends BaseManager
             $this->playerRepository->save($player);
         }
 
-        $player = $this->fillPlayer($player, $playerData, $guild);
-        foreach ($playerData['units'] as $unit) {
-            $count++;
-            switch ($unit['data']['combat_type']) {
-                case 1:
-                    $result = $this->heroPlayerManager->createHeroPlayer(
-                        $player,
-                        $unit['data'],
-                    );
-                break;
-                case 2:
-                    $result = $this->shipPlayerManager->createShiplayer(
-                        $player,
-                        $unit['data']
-                    );
-                break;
-            }
-
-            if (is_array($result)) {
-                return $result;
+        $playerDto = new PlayerDto($playerData);
+        $errors = $this->validatorInterface->validate($playerDto);
+        if (count($errors) === 0) {
+            $player = PlayerMapper::FromDTO($player, $playerDto, $guild);
+            if (is_array($playerData['units'])) {
+                foreach ($playerData['units'] as $unit) {
+                    if (is_array($unit)) {
+                        $result = null;
+                        if (is_array($unit['data'])) {
+                            $count++;
+                            switch ($unit['data']['combat_type']) {
+                                case 1:
+                                    $result = $this->heroPlayerManager->createHeroPlayer(
+                                        $player,
+                                        $unit['data'],
+                                    );
+                                break;
+                                case 2:
+                                    $result = $this->shipPlayerManager->createShiplayer(
+                                        $player,
+                                        $unit['data']
+                                    );
+                                break;
+                            }
+            
+                            if (is_array($result)) {
+                                return $result;
+                            }
+                        }
+                    }
+                }
+                $this->playerRepository->save($player, true);
+                return true;
             }
         }
-        $this->playerRepository->save($player, true);
-        return true;
+        return ['error_message' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite '];
     }
 
-    public function fillPlayer(
-        PlayerEntity $player,
-        array $data,
-        Guild $guild
-    ) :PlayerEntity {
-        /*if (preg_match("#^[0-9]+$#", $data['data']['last_updated'])) {
-            $date = new \DateTime();
-            $date->setTimestamp($data['data']['last_updated']);
-        } else {
-            $dateCreation = \DateTime::createFromFormat(
-                'Y-m-d H:i:s',
-                preg_replace("#[a-zA-Z]+#", ' ', $data['data']['last_updated'])
-            );
-            $date = new \DateTime(
-                (
-                    \DateTime::createFromFormat(
-                        'Y-m-d H:i:s',
-                        preg_replace(
-                            "#[a-zA-Z]+#", ' ', $data['data']['last_updated']
-                        )
-                    )
-                )->format('Y-m-d H:i')
-            );
-        }*/
-        $dateString = $data['data']['last_updated'];
-        $date = new \DateTime($dateString);
-        //$formattedDate = $date->format('Y-m-d H:i:s');
-        $player->setGuild($guild);
-        $player->setLastUpdate($date);
-        $player->setIdSwgoh($data['data']['ally_code']);
-        $player->setName($data['data']['name']);
-        $player->setLevel($data['data']['level']);
-        $player->setGalacticalPower($data['data']['galactic_power']);
-        $player->setHeroesGelacticPower($data['data']['character_galactic_power']);
-        $player->setShipsGalacticPower($data['data']['ship_galactic_power']);
-        $player->setGearGiven($data['data']['guild_exchange_donations']);
-        return $player;
-    }
-
-    public function updatePlayerGuild(
-        Guild $guild,
-        array $arrayDataPlayer,
-        bool $characters = false,
-        bool $ships = false
-    ) {
-        $player = $this->updatePlayer($arrayDataPlayer, $characters, $ships);
-        $player->setGuild($guild);
-        $this->_entityManager->persist($player);
-        $this->_entityManager->flush();
-    }
-
+    /**
+     * @return string[]|array<string,array<string,mixed>>
+     */
     public function getPlayerDataApi(PlayerEntity $player): array
     {
         $arrayReturn = [];
@@ -132,19 +107,22 @@ class Player extends BaseManager
         return array_merge($arrayReturn, $this->getPlayerUnits($player));
     }
 
-    public function getPlayerHeroesApi(PlayerEntity $player)
+    public function getPlayerHeroesApi(PlayerEntity $player): array
     {
         return $this->getPlayerUnits($player, 'heroes')['heroes'];
     }
 
-    public function getPlayerShipsApi(PlayerEntity $player)
+    public function getPlayerShipsApi(PlayerEntity $player): array
     {
         return $this->getPlayerUnits($player, 'ships')['ships'];
     }
 
-    public function getPlayerUnits(PlayerEntity $player, string $type = null)
+    /**
+     * @return string[]|array<string,array<string,mixed>>
+     */
+    public function getPlayerUnits(PlayerEntity $player, string $type = null): array
     {
-        $arrayReturn = array();
+        $arrayReturn = [];
         $units = $player->getUnitPlayers();
         foreach ($units as $unit) {
             $classInformation = new ReflectionClass($unit);
@@ -180,10 +158,15 @@ class Player extends BaseManager
         return $arrayReturn;
     }
 
-    public function updateGuildPlayers(Guild $guild, array $dataGuild)
+    /**
+     * @param array<string,array<string, mixed>> $dataGuild
+     * @return string[]|array<string, string>|bool
+     */
+    public function updateGuildPlayers(Guild $guild, array $dataGuild): array|bool
     {
+        $actualMembers = [];
+        $playerNotSync = ['error_messages' => []];
         foreach ($dataGuild['data']['members'] as $key => $guildPlayerData) {
-            $playerNotSync = ['error_messages' => []];
             if (
                 is_array($guildPlayerData) &&
                 isset($guildPlayerData['player_name']) && 
@@ -207,9 +190,10 @@ class Player extends BaseManager
                 );
             }
         }
-        if (count($playerNotSync['error_messages']) > 0) {
+
+        if (!empty($playerNotSync['error_messages'])) {
             return $playerNotSync;
         }
-        return true;
+        return $actualMembers;
     }
 }

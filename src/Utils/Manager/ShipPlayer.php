@@ -20,7 +20,10 @@ class ShipPlayer extends UnitPlayer
         $this->setRepositoryByClass(ShipPlayerEntity::class);
     }
 
-    public function createShiplayer(Player $player, array $data)
+    /**
+     * @return bool|array<string, string>
+     */
+    public function createShiplayer(Player $player, array $data): array|bool
     {
         $ship = $this->shipRepository->findOneBy(
             [

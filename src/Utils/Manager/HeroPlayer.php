@@ -26,7 +26,7 @@ class HeroPlayer extends UnitPlayer
     }
 
     /**
-     * @return string[]|bool
+     * @return array<string, string>|bool
      */
     public function createHeroPlayer(Player $player, array $data): array|bool
     {
@@ -62,11 +62,16 @@ class HeroPlayer extends UnitPlayer
         if ($data['gear_level'] == 13 && $data['relic_tier'] == 2) {
             $heroPlayer->setRelicLevel($data['relic_tier']);
         } elseif ($data['gear_level'] == 13 && $data['relic_tier'] >= 3) {
-            $heroPlayer->setRelicLevel($data['relic_tier'] - 2);
+            if (is_int($data['relic_tier'])) {
+                $heroPlayer->setRelicLevel($data['relic_tier'] - 2);
+            }
         } else {
             $heroPlayer->setRelicLevel(0);
         }
-        if (count($data['omicron_abilities']) > 0) {
+        if (
+            is_array($data['omicron_abilities']) &&
+            count($data['omicron_abilities']) > 0
+        ) {
             foreach ($data['omicron_abilities'] as $omicronAbilityName) {
                 $omicronAbility = $this->abilityRepository->findOneBy(
                     [
@@ -95,12 +100,16 @@ class HeroPlayer extends UnitPlayer
                             ->setHeroPlayer($heroPlayer);
                         $databaseHeroPlayerOmicronAbility
                             ->setIsOmicronLearned(true);
-                        foreach ($data['ability_data'] as $abilityData) {
-                            if ($abilityData['id'] == $omicronAbilityName) {
-                                $databaseHeroPlayerOmicronAbility
-                                    ->setIsZetaLearned(
-                                        ($abilityData['is_zeta'] == 'true' ? true : false)
-                                    );
+                        if (is_array($data['ability_data'])) {
+                            foreach ($data['ability_data'] as $abilityData) {
+                                if (is_array($abilityData)) {
+                                    if ($abilityData['id'] == $omicronAbilityName) {
+                                        $databaseHeroPlayerOmicronAbility
+                                            ->setIsZetaLearned(
+                                                ($abilityData['is_zeta'] == 'true' ? true : false)
+                                            );
+                                    }
+                                }
                             }
                         }
                     }

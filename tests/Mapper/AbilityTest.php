@@ -13,9 +13,6 @@ class AbilityTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $container = static::getContainer();
-        //$abilityMapper = $container->get(AbilityMapper::class);
-
         $ability = new AbilityEntity();
         $abilityDto = new AbilityDto(
             [

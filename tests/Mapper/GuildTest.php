@@ -2,18 +2,16 @@
 
 namespace App\Tests\Mapper;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Entity\Guild as GuildEntity;
 use App\Dto\Api\Guild as GuildDto;
 use App\Mapper\Guild as GuildMapper;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class GuildTest extends KernelTestCase
 {
     public function testGuildMapper(): void
     {
         self::bootKernel();
-
-        $container = static::getContainer();
 
         $guild = new GuildEntity();
         $guildDto = new GuildDto(
