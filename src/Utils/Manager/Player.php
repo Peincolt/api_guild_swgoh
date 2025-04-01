@@ -117,9 +117,9 @@ class Player extends BaseManager
         $this->_entityManager->flush();
     }
 
-    public function getPlayerDataApi(PlayerEntity $player)
+    public function getPlayerDataApi(PlayerEntity $player): array
     {
-        $arrayReturn = array();
+        $arrayReturn = [];
         $arrayReturn = $this->serializer->normalize(
             $player,
             null,

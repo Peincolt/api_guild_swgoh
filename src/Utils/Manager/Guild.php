@@ -30,13 +30,10 @@ class Guild
     ) {
     }
 
-    /**
-     *@return array<string, mixed>|bool
-     */
     public function updateGuild(
         string $idGuild,
         OutputInterface $outputInterface = null
-    ) :array|bool {
+    ) :mixed {
         $actualMembers = array();
         $dataGuild = $this->swgohGg->fetchGuild($idGuild);
         $count = 0;
@@ -90,8 +87,8 @@ class Guild
                         }
                         return ['error_message' => 'Une erreur est survenue lors de la récupération des informations des joueurs de la guilde'];
                     }
-                    return ['error_message' => 'Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite'];
                 }
+                return ['error_message' => 'Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite'];
             }
             return $dataGuild;
         }
