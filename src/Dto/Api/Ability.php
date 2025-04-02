@@ -51,27 +51,21 @@ class Ability
     public readonly ?int $tier_max;
     public readonly ?string $character_base_id;*/
 
-    // On crée un tableau qui contient au minimum toutes les clés nécessaires à la bonne instanciation d'un objet "Abilité"
-
-    /**
-     * @var array<string, null>
-     */
-    private array $defaults = [
-        'name' => null,
-        'base_id' => null,
-        'is_zeta' => null,
-        'is_omega' => null,
-        'is_omicron' => null,
-        'description' => null,
-        'omicron_mode' => null,
-        'character_base_id' => null
-    ];
-
     /**
      * @param array<mixed> $apiAbilityData
      */
     public function __construct(array $apiAbilityData) {
-        $apiAbilityData = array_merge($this->defaults, $apiAbilityData);
+        $defaults = [
+            'name' => null,
+            'base_id' => null,
+            'is_zeta' => null,
+            'is_omega' => null,
+            'is_omicron' => null,
+            'description' => null,
+            'omicron_mode' => null,
+            'character_base_id' => null
+        ];
+        $apiAbilityData = array_merge($defaults, $apiAbilityData);
         $this->name = $apiAbilityData['name'];
         $this->base_id = $apiAbilityData['base_id'];
         $this->is_zeta = $apiAbilityData['is_zeta'];

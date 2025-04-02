@@ -34,20 +34,16 @@ class Guild
     public readonly ?int $level_requirement;*/
 
     /**
-     * @var array<string, null>
-     */
-    private array $defaults = [
-        'name' => null,
-        'id_swgoh' => null,
-        'galactic_power' => null,
-        'number_players' => null
-    ];
-
-    /**
      * @param array<mixed> $apiGuildData
      */
     public function __construct(array $apiGuildData) {
-        $apiGuildData = array_merge($this->defaults, $apiGuildData['data']);
+        $defaults = [
+            'name' => null,
+            'id_swgoh' => null,
+            'galactic_power' => null,
+            'number_players' => null
+        ];
+        $apiGuildData = array_merge($defaults, $apiGuildData['data']);
         $this->name = $apiGuildData['name'];
         $this->id_swgoh = $apiGuildData['guild_id'];
         $this->galactic_power = $apiGuildData['galactic_power'];

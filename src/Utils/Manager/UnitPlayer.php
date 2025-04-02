@@ -123,4 +123,34 @@ class UnitPlayer extends BaseManager
         $unitPlayer->setProtection(intval($data['stats']['28']));
         return $unitPlayer;
     }
+
+    public function updateUnitsPlayer(Player $player, array $dataPlayerUnits): array|bool
+    {
+        foreach ($playerData['units'] as $unit) {
+            if (is_array($unit)) {
+                $result = null;
+                if (is_array($unit['data'])) {
+                    switch ($unit['data']['combat_type']) {
+                        case 1:
+                            $result = $this->heroPlayerManager->createHeroPlayer(
+                                $player,
+                                $unit['data'],
+                            );
+                        break;
+                        case 2:
+                            $result = $this->shipPlayerManager->createShiplayer(
+                                $player,
+                                $unit['data']
+                            );
+                        break;
+                    }
+    
+                    if (is_array($result)) {
+                        return $result;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

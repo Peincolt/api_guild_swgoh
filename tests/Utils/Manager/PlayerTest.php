@@ -10,8 +10,7 @@ use App\Repository\PlayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Utils\Manager\Player as PlayerManager;
 use App\Utils\Service\Api\SwgohGg as SwgohGgApi;
-use App\Utils\Manager\HeroPlayer as HeroPlayerManager;
-use App\Utils\Manager\ShipPlayer as ShipPlayerManager;
+use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -21,8 +20,7 @@ class PlayerTest extends KernelTestCase
     private Guild $mockGuild;
     private PlayerManager $playerManager;
     private SwgohGgApi $mockSwgogGgApi;
-    private HeroPlayerManager $mockHeroPlayerManager;
-    private ShipPlayerManager $mockShipPlayerManager;
+    private UnitPlayerManager $mockUnitPlayerManager;
     private PlayerRepository $mockPlayerRepository;
     private SerializerInterface $serializer;
     private ValidatorInterface $validatorInterface;
@@ -34,8 +32,8 @@ class PlayerTest extends KernelTestCase
         $container = static::getContainer();
         $this->allyCode = "xxxx";
         $this->baseSwgohggData =
-            [
-                "data"=> [
+        [
+            "data"=> [
                 "ally_code"=> 246639295,
                 "arena_leader_base_id"=> "GLLEIA",
                 "arena_rank"=> 118,
@@ -99,21 +97,20 @@ class PlayerTest extends KernelTestCase
                 "guild_name"=> "HGamers II",
                 "guild_url"=> "/g/uuwcpRBoStWfogZersAvJA/",
                 "mods"=> []
-            ]
+            ],
+            'units' => []
         ];
 
         $this->validatorInterface = $container->get(ValidatorInterface::class);
         $this->serializer = $container->get(SerializerInterface::class);
         $this->mockSwgogGgApi = $this->createMock(SwgohGgApi::class);
-        $this->mockHeroPlayerManager = $this->createMock(HeroPlayerManager::class);
-        $this->mockShipPlayerManager = $this->createMock(ShipPlayerManager::class);
+        $this->mockUnitPlayerManager = $this->createMock(UnitPlayerManager::class);
         $this->mockPlayerRepository = $this->createMock(PlayerRepository::class);
         $this->mockGuild = $this->createMock(Guild::class);
         $this->playerManager = new PlayerManager(
             $this->createMock(EntityManagerInterface::class),
             $this->mockSwgogGgApi,
-            $this->mockHeroPlayerManager,
-            $this->mockShipPlayerManager,
+            $this->mockUnitPlayerManager,
             $this->mockPlayerRepository,
             $this->serializer,
             $this->validatorInterface
@@ -132,5 +129,34 @@ class PlayerTest extends KernelTestCase
         $caseSwgohggApiError = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
 
         $this->assertEquals('Sup diff', $caseSwgohggApiError['error_message_api_swgoh']);
+    }
+
+    public function testSchemUpdataSwgohggApi(): void
+    {
+        $errorUpdateSchemaApi = [
+            'error_message' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite'
+        ];
+        $upateBaseSwgohggData = $this->baseSwgohggData;
+        $upateBaseSwgohggData['data']['allyCode'] = $upateBaseSwgohggData['data']['ally_code'];
+        unset($upateBaseSwgohggData['data']['ally_code']);
+        $this->mockSwgogGgApi->method('fetchPlayer')
+            ->willReturn($upateBaseSwgohggData);
+        $this->mockPlayerRepository->method('findOneBy')
+            ->willReturn(null);
+        $caseUpdateSchemaSwgohgg = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
+        $this->assertSame($errorUpdateSchemaApi, $caseUpdateSchemaSwgohgg);
+    }
+
+    public function testEverythingIsFine(): void
+    {
+        $result = true;
+        $this->mockSwgogGgApi->method('fetchPlayer')
+            ->willReturn($this->baseSwgohggData);
+        $this->mockPlayerRepository->method('findOneBy')
+            ->willReturn(null);
+        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
+            ->willReturn(true);
+        $caseEverythingIsFine = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
+        $this->assertSame($result, $caseEverythingIsFine);
     }
 }

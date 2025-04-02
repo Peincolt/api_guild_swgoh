@@ -8,12 +8,11 @@ use App\Dto\Api\Player as PlayerDto;
 use App\Entity\Guild;
 use App\Mapper\Player as PlayerMapper;
 use App\Utils\Service\Api\SwgohGg;
+use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 use App\Repository\PlayerRepository;
 use App\Entity\Player as PlayerEntity;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use App\Utils\Manager\HeroPlayer as HeroPlayerManager;
-use App\Utils\Manager\ShipPlayer as ShipPlayerManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Player extends BaseManager
@@ -21,8 +20,7 @@ class Player extends BaseManager
     public function __construct(
         EntityManagerInterface $entityManagerInterface,
         private SwgohGg $swgohGg,
-        private HeroPlayerManager $heroPlayerManager, 
-        private ShipPlayerManager $shipPlayerManager,
+        private UnitPlayerManager $unitPlayerManager,
         private PlayerRepository $playerRepository,
         private SerializerInterface $serializer,
         private ValidatorInterface $validatorInterface
@@ -34,7 +32,7 @@ class Player extends BaseManager
     /**
      * @return bool|array<string, string>
      */
-    public function updatePlayerWithApi(string $allyCode, Guild $guild) :array
+    public function updatePlayerWithApi(string $allyCode, Guild $guild) :array|bool
     {
         $count = 0;
         $playerData = $this->swgohGg->fetchPlayer($allyCode);
@@ -56,37 +54,12 @@ class Player extends BaseManager
         if (count($errors) === 0) {
             $player = PlayerMapper::FromDTO($player, $playerDto, $guild);
             if (is_array($playerData['units'])) {
-                foreach ($playerData['units'] as $unit) {
-                    if (is_array($unit)) {
-                        $result = null;
-                        if (is_array($unit['data'])) {
-                            $count++;
-                            switch ($unit['data']['combat_type']) {
-                                case 1:
-                                    $result = $this->heroPlayerManager->createHeroPlayer(
-                                        $player,
-                                        $unit['data'],
-                                    );
-                                break;
-                                case 2:
-                                    $result = $this->shipPlayerManager->createShiplayer(
-                                        $player,
-                                        $unit['data']
-                                    );
-                                break;
-                            }
-            
-                            if (is_array($result)) {
-                                return $result;
-                            }
-                        }
-                    }
-                }
+                $resultActionsPlayerUnits = $this->unitPlayerManager->updateUnitsPlayer($player, $playerData['units']);
                 $this->playerRepository->save($player, true);
                 return true;
             }
         }
-        return ['error_message' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite '];
+        return ['error_message' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite'];
     }
 
     /**

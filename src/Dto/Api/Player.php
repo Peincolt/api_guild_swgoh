@@ -46,22 +46,21 @@ class Player
     // public readonly ?string $portrait_image;
     // public readonly ?string $title;*/
 
-    private array $defaults = [
-        'last_updated' => null,
-        'ally_code' => null,
-        'name' => null,
-        'level' => null,
-        'galactic_power' => null,
-        'character_galactic_power' => null,
-        'ship_galactic_power' => null,
-        'guild_exchange_donations' => null
-    ];
-
     /**
      * @param array<mixed> $apiPlayerData
      */
     public function __construct(array $apiPlayerData) {
-        $apiPlayerData = array_merge($this->defaults, $apiPlayerData['data']);
+        $defaults = [
+            'last_updated' => null,
+            'ally_code' => null,
+            'name' => null,
+            'level' => null,
+            'galactic_power' => null,
+            'character_galactic_power' => null,
+            'ship_galactic_power' => null,
+            'guild_exchange_donations' => null
+        ];
+        $apiPlayerData = array_merge($defaults, $apiPlayerData['data']);
         $this->last_updated = $apiPlayerData['last_updated'];
         $this->id_swgoh = $apiPlayerData['ally_code'];
         $this->name = $apiPlayerData['name'];
