@@ -9,19 +9,19 @@ use App\Entity\Unit as UnitEntity;
 use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Repository\UnitPlayerRepository;
 use App\Repository\UnitRepository;
-use App\Utils\Factory\Unit as UnitFactory;
+use App\Utils\Factory\UnitPlayer as UnitPlayerFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class Unit extends KernelTestCase
+class UnitPlayerTest extends KernelTestCase
 {
     private UnitPlayerRepository $mockUnitPlayerRepository;
     private UnitRepository $mockUnitRepository;
     private ValidatorInterface $validatorInterface;
-    private UnitFactory $unitFactory;
+    private UnitPlayerFactory $UnitPlayerFactory;
     private PlayerEntity $mockPlayerEntity;
-    private $heroPlayerData = [
+    private array $heroPlayerData = [
         "data"=> [
             "base_id"=> "LORDVADER",
             "name"=> "Lord Vader",
@@ -190,7 +190,7 @@ class Unit extends KernelTestCase
             "is_galactic_legend"=> true
         ]
     ];
-    private $shipPlayerData = [
+    private array $shipPlayerData = [
         'data' => [
             "base_id"=> "CAPITALEXECUTOR",
             "name"=> "Executor",
@@ -309,7 +309,7 @@ class Unit extends KernelTestCase
         $this->mockUnitRepository = $this->createMock(UnitRepository::class);
         $this->mockPlayerEntity = $this->createMock(PlayerEntity::class);
         $this->mockPlayerEntity->method('getId')->willReturn(1);
-        $this->unitFactory = new UnitFactory(
+        $this->unitPlayerFactory = new UnitPlayerFactory(
             $this->validatorInterface,
             $this->mockUnitPlayerRepository,
             $this->mockUnitRepository
@@ -323,7 +323,7 @@ class Unit extends KernelTestCase
         ];
         $updateShipPlayerData = $this->shipPlayerData;
         $updateShipPlayerData['data']['combat_type'] = 3;
-        $caseMissingCombatType = $this->unitFactory->getEntityByApiResponse($updateShipPlayerData, $this->mockPlayerEntity);
+        $caseMissingCombatType = $this->unitPlayerFactory->getEntityByApiResponse($updateShipPlayerData, $this->mockPlayerEntity);
         $this->assertSame($errorMessageMissingCombatType, $caseMissingCombatType);
     }
 
@@ -334,7 +334,7 @@ class Unit extends KernelTestCase
         $errorInvalidHeroDto = [
             'error_message' => 'Une erreur est survenue lors de la mise à jour des informations de l\'unité du joueur. Cela est surement dû à un changement du format de l\'API'
         ];
-        $caseInvalidDto = $this->unitFactory->getEntityByApiResponse($wrongHeroPlayerData, $this->mockPlayerEntity);
+        $caseInvalidDto = $this->unitPlayerFactory->getEntityByApiResponse($wrongHeroPlayerData, $this->mockPlayerEntity);
         $this->assertSame($errorInvalidHeroDto, $caseInvalidDto);
     }
 
@@ -345,7 +345,7 @@ class Unit extends KernelTestCase
         $errorMissingHero = [
             'error_message' => 'L\'unité MISSING n\'a pas été retrouvée dans la base de données. Veuillez mettre à jour les unités avant de mettre à jour les informations des joueurs.'
         ];
-        $caseMissingUnit = $this->unitFactory->getEntityByApiResponse($missingHeroPlayerData, $this->mockPlayerEntity);
+        $caseMissingUnit = $this->unitPlayerFactory->getEntityByApiResponse($missingHeroPlayerData, $this->mockPlayerEntity);
         $this->assertSame($errorMissingHero, $caseMissingUnit);
     }
 
@@ -353,7 +353,7 @@ class Unit extends KernelTestCase
     {
         $this->mockUnitPlayerRepository->method('findOneBy')->willReturn((new HeroPlayerEntity()));
         $this->mockUnitRepository->method('findOneBy')->willReturn((new UnitEntity()));
-        $caseEverythingIsFineForHero = $this->unitFactory->getEntityByApiResponse($this->heroPlayerData, $this->mockPlayerEntity);;
+        $caseEverythingIsFineForHero = $this->unitPlayerFactory->getEntityByApiResponse($this->heroPlayerData, $this->mockPlayerEntity);;
         $this->assertInstanceOf('\App\Entity\HeroPlayer', $caseEverythingIsFineForHero);
         $this->assertSame(85, $caseEverythingIsFineForHero->getLevel());
         $this->assertSame(7, $caseEverythingIsFineForHero->getNumberStars());
@@ -369,7 +369,7 @@ class Unit extends KernelTestCase
     {
         $this->mockUnitPlayerRepository->method('findOneBy')->willReturn((new ShipPlayerEntity()));
         $this->mockUnitRepository->method('findOneBy')->willReturn((new UnitEntity()));
-        $caseEverythingIsFineForShip = $this->unitFactory->getEntityByApiResponse($this->shipPlayerData, $this->mockPlayerEntity);
+        $caseEverythingIsFineForShip = $this->unitPlayerFactory->getEntityByApiResponse($this->shipPlayerData, $this->mockPlayerEntity);
         $this->assertInstanceOf('\App\Entity\ShipPlayer', $caseEverythingIsFineForShip);
         $this->assertSame(85, $caseEverythingIsFineForShip->getLevel());
         $this->assertSame(7, $caseEverythingIsFineForShip->getNumberStars());

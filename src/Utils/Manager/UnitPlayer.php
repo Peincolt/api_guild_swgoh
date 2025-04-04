@@ -3,16 +3,17 @@
 namespace App\Utils\Manager;
 
 use Exception;
-use App\Entity\Unit as UnitEntity;
 use ReflectionClass;
+use App\Entity\Unit as UnitEntity;
+use App\Repository\UnitRepository;
 use App\Entity\Guild as GuildEntity;
 use App\Entity\Squad as SquadEntity;
 use App\Entity\Player as PlayerEntity;
-use App\Entity\HeroPlayer as HeroPlayerEntity;
-use App\Repository\UnitRepository;
 use App\Repository\UnitPlayerRepository;
-use App\Utils\Factory\Unit as UnitFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Utils\Factory\UnitPlayer as UnitPlayerFactory;
+use App\Utils\Manager\HeroPlayerAbility as HeroPlayerAbilityManager;
+use App\Entity\HeroPlayer as HeroPlayerEntity;
 use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -22,11 +23,11 @@ class UnitPlayer extends BaseManager
 
     public function __construct(
         EntityManagerInterface $entityManagerInterface,
-        private HeroPlayerAbilityRepository $heroPlayerAbilityRepository,
-        private UnitFactory $unitFactory,
+        private HeroPlayerAbilityManager $heroPlayerAbilityManager,
+        private UnitPlayerFactory $unitPlayerFactory,
         private UnitRepository $unitRepository,
         private UnitPlayerRepository $unitPlayerRepository,
-        private TranslatorInterface $translator 
+        private TranslatorInterface $translator,
     ) {
         parent::__construct($entityManagerInterface);
     }
@@ -126,11 +127,21 @@ class UnitPlayer extends BaseManager
             if (is_array($unit)) {
                 $result = null;
                 if (is_array($unit['data'])) {
-                    $unit = $this->unitFactory->getEntityByApiResponse($unit['data'], $player);
-                    if (!is_array($unit)) {
-                        $this->unitRepository->save($unit);
+                    $unitPlayer = $this->unitPlayerFactory->getEntityByApiResponse($unit['data'], $player);
+                    if (!is_array($unitPlayer)) {
+                        $this->unitRepository->save($unitPlayer, false);
+                        if (
+                            is_array($data['omicron_abilities']) &&
+                            count($data['omicron_abilities']) > 0
+                        ) {
+                            $resultUpdateOmicron = $this->heroPlayerAbilityManager->setHeroPlayerOmicrons($unitPlayer, $unit['data']);
+                            if (is_array($resultUpdateOmicron)) {
+                                return $resultUpdateOmicron;
+                            }
+                        }
                     } else {
-                        return $unit;
+                        $this->unitRepository->save($unitPlayer, true);
+                        return $unitPlayer;
                     }
                 }
             } else {

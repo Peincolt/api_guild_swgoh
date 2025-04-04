@@ -192,6 +192,21 @@ class PlayerTest extends KernelTestCase
         $this->assertSame($errorMissingUnit, $caseErrorMissingUnit);
     }
 
+    public function testOmicronCapacitiesUpdateScheme(): void
+    {
+        $errorOmicronSchema = [
+            'error_message' => 'Une erreur est survenue lors de la mise à jours des capacités de l\'unité. Une modification de l\'API a du être faite'
+        ];
+        $this->mockSwgogGgApi->method('fetchPlayer')
+            ->willReturn($this->baseSwgohggData);
+        $this->mockPlayerRepository->method('findOneBy')
+            ->willReturn(null);
+        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
+            ->willReturn($errorOmicronSchema);
+        $caseErrorOmicronSchema = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
+        $this->assertSame($errorOmicronSchema, $caseErrorOmicronSchema);
+    }
+
     public function testEverythingIsFine(): void
     {
         $result = true;

@@ -66,7 +66,10 @@ class SwgohGg
         
     }
 
-    public function fetchHeroOrShip($type)
+    /**
+     * @return array<string, mixed>
+     */
+    public function fetchHeroOrShip($type): array
     {
         try {
             return $this->client->request(
@@ -76,7 +79,7 @@ class SwgohGg
         } catch (Exception $e) {
             return array(
                 'error_code' => $e->getCode(),
-                'error_message' => $e->getMessage()
+                'error_message_api_swgoh' => $e->getMessage()
             );
         }
         

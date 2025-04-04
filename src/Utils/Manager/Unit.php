@@ -4,6 +4,7 @@ namespace App\Utils\Manager;
 
 use App\Entity\Hero;
 use App\Entity\Unit as UnitEntity;
+use App\Utils\Factory\Unit as UnitFactory;
 use App\Utils\Service\Api\SwgohGg;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
@@ -12,8 +13,10 @@ class Unit
 {
     private $entityManagerInterface;
 
-    public function __construct(EntityManagerInterface $entityManagerInterface,
+    public function __construct(
+        EntityManagerInterface $entityManagerInterface,
         private SwgohGg $swgohGg,
+        private UnitFactory $unitFactory
     )
     {
         $this->entityManagerInterface = $entityManagerInterface;
@@ -21,47 +24,29 @@ class Unit
 
     public function updateUnit(string $type) :bool|array
     {
-        $entityName = "\App\Entity\\".$type;
-        $data = $this->swgohGg->fetchHeroOrShip($type);
-        if (!isset($data['error_message'])) {
-            $count = 0;
-            foreach ($data as $key => $value) {
-                $count++;
-                $unit = $this->entityManagerInterface
-                    ->getRepository(UnitEntity::class)
-                    ->findOneBy(
-                        [
-                            'base_id' => $data[$key]['base_id']
-                        ]
-                    );
-                if (empty($unit)) {
-                    $unit = new $entityName;
-                    $this->entityManagerInterface->persist($unit);
+        $dataUnits = $this->swgohGg->fetchHeroOrShip($type);
+        if (!isset($dataUnits['error_message_api_swgoh'])) {
+            $this->entityManagerInterface->beginTransaction();
+            try {
+                foreach ($dataUnits as $key => $dataUnit) {
+                    $unit = $this->unitFactory->getEntityByApiResponse($dataUnit, $type);
+                    if (!is_array($unit)) {
+                        $this->entityManagerInterface->persist($unit);
+                    } else {
+                        throw new \Exception($unit['error_message']);
+                    }
                 }
-                $this->fillUnit($unit, $data[$key]);
-                if ($count > 1000) {
-                    $count = 0;
-                    $this->entityManagerInterface->flush();
-                }
+                $this->entityManagerInterface->flush();
+                $this->entityManagerInterface->commit();
+                return true;
+            } catch(\Exception $e) {
+                $this->entityManagerInterface->rollback();
+                return [
+                    'error_message' => $e->getMessage()
+                ];
             }
-            $this->entityManagerInterface->flush();
-            return true;
         }
-        return $data;
-    }
-
-    public function fillUnit(UnitEntity $unit, array $data) :UnitEntity
-    {
-        $reflection = new ReflectionClass($unit);
-        $className = $reflection->getShortName();
-        $unit->setBaseId($data['base_id']);
-        $unit->setName($data['name']);
-        $unit->setImage($data['image']);
-        $unit->setCategories($data['categories']);
-        /*if ($className == 'Hero') {
-            $unit->setIdSwgoh($data['pk']);
-        }*/
-        return $unit;
+        return $dataUnits;
     }
 
     public function getEntityByRoute(string $route)
