@@ -55,8 +55,11 @@ class Player extends BaseManager
             $player = PlayerMapper::FromDTO($player, $playerDto, $guild);
             if (is_array($playerData['units'])) {
                 $resultActionsPlayerUnits = $this->unitPlayerManager->updateUnitsPlayer($player, $playerData['units']);
-                $this->playerRepository->save($player, true);
-                return true;
+                if (!is_array($resultActionsPlayerUnits)) {
+                    $this->playerRepository->save($player, true);
+                    return true;
+                }
+                return $resultActionsPlayerUnits;
             }
         }
         return ['error_message' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite'];

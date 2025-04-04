@@ -2,8 +2,9 @@
 
 namespace App\Utils\Mapper;
 
-use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Entity\Player as PlayerEntity;
+use App\Entity\ShipPlayer as ShipPlayerEntity;
+use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Entity\Unit as UnitEntity;
 use App\Dto\Api\UnitPlayer as UnitPlayerDto;
 use App\Utils\Mapper\UnitPlayer as UnitPlayerMapper;
@@ -15,7 +16,7 @@ class ShipPlayer extends UnitPlayerMapper
         UnitPlayerDto $shipPlayerDto,
         PlayerEntity $player = null,
         UnitEntity $unit = null
-    ): UnitPlayerEntity {
+    ): ShipPlayerEntity {
         return parent::fromDTO($shipPlayerEntity, $shipPlayerDto, $player, $unit);
     }
 }

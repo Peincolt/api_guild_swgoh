@@ -3,6 +3,7 @@
 namespace App\Dto\Api;
 
 use App\Dto\Api\UnitPlayer as UnitPlayerDto;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class HeroPlayer extends UnitPlayerDto
 {

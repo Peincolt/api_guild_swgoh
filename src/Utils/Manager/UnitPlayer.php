@@ -3,42 +3,35 @@
 namespace App\Utils\Manager;
 
 use Exception;
-use App\Entity\Unit;
+use App\Entity\Unit as UnitEntity;
 use ReflectionClass;
-use App\Entity\Guild;
-use App\Entity\Squad;
-use App\Entity\Player;
-use App\Entity\HeroPlayer;
+use App\Entity\Guild as GuildEntity;
+use App\Entity\Squad as SquadEntity;
+use App\Entity\Player as PlayerEntity;
+use App\Entity\HeroPlayer as HeroPlayerEntity;
 use App\Repository\UnitRepository;
-use Symfony\Component\Serializer\v;
-use App\Repository\HeroPlayerRepository;
-use App\Repository\ShipPlayerRepository;
 use App\Repository\UnitPlayerRepository;
+use App\Utils\Factory\Unit as UnitFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class UnitPlayer extends BaseManager
 {
-    protected $normalizers;
 
     public function __construct(
         EntityManagerInterface $entityManagerInterface,
-        private HeroPlayerRepository $heroPlayerRepository,
-        private ShipPlayerRepository $shipPlayerRepository,
         private HeroPlayerAbilityRepository $heroPlayerAbilityRepository,
+        private UnitFactory $unitFactory,
         private UnitRepository $unitRepository,
         private UnitPlayerRepository $unitPlayerRepository,
-        private SerializerInterface $serializer,
         private TranslatorInterface $translator 
     ) {
         parent::__construct($entityManagerInterface);
     }
 
-    public function getGuildPlayerUnitBySquad(Guild $guild, Squad $squad)
+    public function getGuildPlayerUnitBySquad(GuildEntity $guild, SquadEntity $squad)
     {
         $arrayData = array();
         foreach ($squad->getUnits() as $squadUnit) {
@@ -53,7 +46,7 @@ class UnitPlayer extends BaseManager
         return $arrayData;
     }
 
-    public function getPlayerUnitByPlayerAndUnit(Player $player, Unit $unit)
+    public function getPlayerUnitByPlayerAndUnit(Player $player, UnitEntity $unit)
     {
         
         $unitPlayerData = $this->unitPlayerRepository->findOneBy(
@@ -105,7 +98,7 @@ class UnitPlayer extends BaseManager
         );
     }
 
-    public function getUnitPlayerOmicron(HeroPlayer $heroPlayer)
+    public function getUnitPlayerOmicron(HeroPlayerEntity $heroPlayer)
     {
         return $this->heroPlayerAbilityRepository
             ->getTwOmicron($heroPlayer);
@@ -124,31 +117,26 @@ class UnitPlayer extends BaseManager
         return $unitPlayer;
     }
 
-    public function updateUnitsPlayer(Player $player, array $dataPlayerUnits): array|bool
+    /**
+     * @return array<string,string>|bool
+     */
+    public function updateUnitsPlayer(PlayerEntity $player, array $dataPlayerUnits): array|bool
     {
         foreach ($playerData['units'] as $unit) {
             if (is_array($unit)) {
                 $result = null;
                 if (is_array($unit['data'])) {
-                    switch ($unit['data']['combat_type']) {
-                        case 1:
-                            $result = $this->heroPlayerManager->createHeroPlayer(
-                                $player,
-                                $unit['data'],
-                            );
-                        break;
-                        case 2:
-                            $result = $this->shipPlayerManager->createShiplayer(
-                                $player,
-                                $unit['data']
-                            );
-                        break;
-                    }
-    
-                    if (is_array($result)) {
-                        return $result;
+                    $unit = $this->unitFactory->getEntityByApiResponse($unit['data'], $player);
+                    if (!is_array($unit)) {
+                        $this->unitRepository->save($unit);
+                    } else {
+                        return $unit;
                     }
                 }
+            } else {
+                return [
+                    'error_message' => 'Erreur lors de la synchronisation des unités du joueur. Une modification de l\'API a du être faite'
+                ];
             }
         }
         return true;

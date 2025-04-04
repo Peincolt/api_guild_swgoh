@@ -15,11 +15,11 @@ abstract class UnitPlayer
         PlayerEntity $player = null,
         UnitEntity $unit = null
     ): UnitPlayerEntity {
-        if (!empty($unitPlayer->getPlayer())) {
+        if (!empty($player)) {
             $unitPlayer->setPlayer($player);
         }
 
-        if (!empty($unitPlayer->getUnit())) {
+        if (empty($unit)) {
             $unitPlayer->setUnit($unit);
         }
 

@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class HeroPlayerTest extends KernelTestCase
 {
-    public function testGuildMapper(): void
+    public function testHeroPlayerMapper(): void
     {
         self::bootKernel();
 
@@ -193,20 +193,13 @@ class HeroPlayerTest extends KernelTestCase
 
         $heroPlayer = HeroPlayerMapper::fromDto($heroPlayer, $heroPlayerDto, $player, $unit);
 
-        /*$dtoHeroPlayer = new DtoHeroPlayer($fakeDataApi);
-        $this->assertSame(85, $dtoHeroPlayer->level);
-        $this->assertSame(7, $dtoHeroPlayer->number_stars);
-        $this->assertSame(49710, $dtoHeroPlayer->galactical_power);
-        $this->assertSame(113228, $dtoHeroPlayer->life);
-        $this->assertSame(185355, $dtoHeroPlayer->protection);
-        $this->assertSame(544, $dtoHeroPlayer->speed);*/
-
-
         $this->assertSame(85, $heroPlayer->getLevel());
         $this->assertSame(7, $heroPlayer->getNumberStars());
         $this->assertSame(49710, $heroPlayer->getGalacticalPower());
         $this->assertSame(113228, $heroPlayer->getLife());
         $this->assertSame(185355, $heroPlayer->getProtection());
         $this->assertSame(544, $heroPlayer->getSpeed());
+        $this->assertSame(9, $heroPlayer->getRelicLevel());
+        $this->assertSame(13, $heroPlayer->getGearLevel());
     }
 }

@@ -147,6 +147,51 @@ class PlayerTest extends KernelTestCase
         $this->assertSame($errorUpdateSchemaApi, $caseUpdateSchemaSwgohgg);
     }
 
+    public function testSchemeUpdatePlayerUnits(): void
+    {
+        $errorUpdatePlayerUnits = [
+            'error_message' => 'Erreur lors de la synchronisation des unités du joueur. Une modification de l\'API a du être faite'
+        ];
+        $this->mockSwgogGgApi->method('fetchPlayer')
+            ->willReturn($this->baseSwgohggData);
+        $this->mockPlayerRepository->method('findOneBy')
+            ->willReturn(null);
+        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
+            ->willReturn($errorUpdatePlayerUnits);
+        $caseSchemeUpdatePlayerUnits = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
+        $this->assertSame($errorUpdatePlayerUnits, $caseSchemeUpdatePlayerUnits);
+    }
+
+    public function testFailAssertUnitPlayerDto(): void
+    {
+        $errorAssertPlayerUnitDto = [
+            'error_message' => 'Une erreur est survenue lors de la mise à jour des informations de l\'unité du joueur. Cela est surement dû à un changement du format de l\'API'
+        ];
+        $this->mockSwgogGgApi->method('fetchPlayer')
+            ->willReturn($this->baseSwgohggData);
+        $this->mockPlayerRepository->method('findOneBy')
+            ->willReturn(null);
+        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
+            ->willReturn($errorAssertPlayerUnitDto);
+        $caseErrorAssertPlayerUnitDto = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
+        $this->assertSame($errorAssertPlayerUnitDto, $caseErrorAssertPlayerUnitDto);
+    }
+
+    public function testMissingUnitPlayerDto(): void
+    {
+        $errorMissingUnit = [
+            'error_message' => 'L\'unité VADER n\'a pas été retrouvée dans la base de données. Veuillez mettre à jour les unités avant de mettre à jour les informations des joueurs.'
+        ];
+        $this->mockSwgogGgApi->method('fetchPlayer')
+            ->willReturn($this->baseSwgohggData);
+        $this->mockPlayerRepository->method('findOneBy')
+            ->willReturn(null);
+        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
+            ->willReturn($errorMissingUnit);
+        $caseErrorMissingUnit = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
+        $this->assertSame($errorMissingUnit, $caseErrorMissingUnit);
+    }
+
     public function testEverythingIsFine(): void
     {
         $result = true;

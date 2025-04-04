@@ -2,6 +2,7 @@
 
 namespace App\Utils\Mapper;
 
+use App\Entity\HeroPlayer as HeroPlayerEntity;
 use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Entity\Player as PlayerEntity;
 use App\Entity\Unit as UnitEntity;
@@ -15,7 +16,7 @@ class HeroPlayer extends UnitPlayerMapper
         UnitPlayerDto $heroPlayerDto,
         PlayerEntity $player = null,
         UnitEntity $unit = null
-    ): UnitPlayerEntity {
+    ): HeroPlayerEntity {
         parent::fromDTO($heroPlayerEntity, $heroPlayerDto, $player, $unit);
         $heroPlayerEntity->setRelicLevel($heroPlayerDto->relic_level);
         $heroPlayerEntity->setGearLevel($heroPlayerDto->gear_level);
