@@ -66,9 +66,9 @@ abstract class UnitPlayer
         $this->level = $apiUnitPlayerData['level'];
         $this->galactical_power = $apiUnitPlayerData['power'];
         $this->number_stars = $apiUnitPlayerData['rarity'];
-        $this->speed = $apiUnitPlayerData['stats'][5] ?? null;
-        $this->life = $apiUnitPlayerData['stats'][1] ?? null;
-        $this->protection = $apiUnitPlayerData['stats'][28] ?? null;
+        $this->speed = $apiUnitPlayerData['stats'][5] ?? 0;
+        $this->life = $apiUnitPlayerData['stats'][1] ?? 0;
+        $this->protection = $apiUnitPlayerData['stats'][28] ?? 0;
         $this->combat_type = $apiUnitPlayerData['combat_type'];
     }
 }

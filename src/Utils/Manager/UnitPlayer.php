@@ -123,16 +123,16 @@ class UnitPlayer extends BaseManager
      */
     public function updateUnitsPlayer(PlayerEntity $player, array $dataPlayerUnits): array|bool
     {
-        foreach ($playerData['units'] as $unit) {
+        foreach ($dataPlayerUnits as $unit) {
             if (is_array($unit)) {
                 $result = null;
                 if (is_array($unit['data'])) {
-                    $unitPlayer = $this->unitPlayerFactory->getEntityByApiResponse($unit['data'], $player);
+                    $unitPlayer = $this->unitPlayerFactory->getEntityByApiResponse($unit, $player);
                     if (!is_array($unitPlayer)) {
-                        $this->unitRepository->save($unitPlayer, false);
+                        $this->unitPlayerRepository->save($unitPlayer, false);
                         if (
-                            is_array($data['omicron_abilities']) &&
-                            count($data['omicron_abilities']) > 0
+                            is_array($unit['data']['omicron_abilities']) &&
+                            count($unit['data']['omicron_abilities']) > 0
                         ) {
                             $resultUpdateOmicron = $this->heroPlayerAbilityManager->setHeroPlayerOmicrons($unitPlayer, $unit['data']);
                             if (is_array($resultUpdateOmicron)) {
@@ -140,7 +140,7 @@ class UnitPlayer extends BaseManager
                             }
                         }
                     } else {
-                        $this->unitRepository->save($unitPlayer, true);
+                        $this->unitPlayerRepository->save($unitPlayer, true);
                         return $unitPlayer;
                     }
                 }

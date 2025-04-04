@@ -46,7 +46,7 @@ class Player extends BaseManager
         $player = $this->playerRepository->findOneBy(['id_swgoh' => $allyCode]);
         if (empty($player)) {
             $player = new PlayerEntity();
-            $this->playerRepository->save($player);
+            $this->playerRepository->save($player, false);
         }
 
         $playerDto = new PlayerDto($playerData);
@@ -138,17 +138,17 @@ class Player extends BaseManager
      * @param array<string,array<string, mixed>> $dataGuild
      * @return string[]|array<string, string>|bool
      */
-    public function updateGuildPlayers(Guild $guild, array $dataGuild): array|bool
+    public function updateGuildPlayers(Guild $guild, array $dataGuildMembers): array|bool
     {
         $actualMembers = [];
         $playerNotSync = ['error_messages' => []];
-        foreach ($dataGuild['data']['members'] as $key => $guildPlayerData) {
+        foreach ($dataGuildMembers as $key => $guildPlayerData) {
             if (
                 is_array($guildPlayerData) &&
                 isset($guildPlayerData['player_name']) && 
                 isset($guildPlayerData['ally_code']) &&
                 is_string($guildPlayerData['player_name']) &&
-                is_string($guildPlayerData['ally_code'])
+                is_int($guildPlayerData['ally_code'])
             ) {
                 array_push($actualMembers, $guildPlayerData['player_name']);
                 $result = $this->updatePlayerWithApi($guildPlayerData['ally_code'], $guild);

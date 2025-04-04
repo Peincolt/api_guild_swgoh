@@ -30,6 +30,61 @@ class Guild
     ) {
     }
 
+    /*public function updateAllGuild(
+        string $idGuild,
+        OutputInterface $outputInterface = null
+    ) :mixed {
+        $dataGuild = $this->swgohGg->fetchGuild($idGuild);
+        if (is_array($dataGuild)) {
+            if (!isset($dataGuild['error_message_api_swgoh'])) {
+                $this->entityManagerInterface->beginTransaction();
+                try {
+                    $guild = $this->updateGuild($idGuild, $dataGuild);
+                    if (
+                        isset($dataGuild['data']['members']) &&
+                        is_array($dataGuild['data']['members'])
+                    ) {
+                        foreach ($dataGuild['data']['members'] as $key => $guildPlayerData) {
+                            $player = $this->playerManager
+                                ->updateGuildPlayer(
+                                    $guild,
+                                    $guildPlayerData,
+                                    $this->entityManagerInterface,
+                                    $outputInterface
+                                );
+
+                            if (
+                                isset($guildPlayerData['units']) &&
+                                is_array($guildPlayerData['units'])
+                            ) {
+                                foreach ($guildPlayerData['units'] as $unit) {
+                                    $heroPlayer = $this->unitPlayerFactory->getEntityByApiResponse($unit['data'], $player, $this->entityManagerInterface);
+                                    if (is_array($unit['data'])) {
+                                        $unitPlayer = $this->unitPlayerFactory->getEntityByApiResponse($unit['data'], $player, $this->entityManagerInterface);
+                                        if (
+                                            is_array($unit['data']['omicron_abilities']) &&
+                                            count($unit['data']['omicron_abilities']) > 0
+                                        ) {
+                                            $this->heroPlayerAbilityManager->setHeroPlayerOmicrons($unitPlayer, $unit['data'], $this->entityManagerInterface);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        throw new \Exception('Message erreur');
+                    }
+                } catch (\Exception $e) {
+                    $this->entityManagerInterface->rollback();
+                    return [
+                        'error_message' => $e->getMessage()
+                    ];
+                }
+            }
+            return $dataGuild;
+        }
+    }*/
+
     public function updateGuild(
         string $idGuild,
         OutputInterface $outputInterface = null
@@ -51,17 +106,16 @@ class Guild
                     if (count($errors) === 0) {
                         $guild = $this->guildRepository->findOneBy(
                             [
-                                'id_swgoh' => (string) $dataGuild['data']['guild_id']
+                                'id_swgoh' => $dataGuild['data']['guild_id']
                             ]
                         );
     
                         if (empty($guild)) {
                             $guild = new GuildEntity();
+                            $this->entityManagerInterface->persist($guild);
                         }
 
                         $guild = GuildMapper::fromDTO($guild, $guildDto);
-                        $this->guildRepository->save($guild, true);
-
                         if (!empty($outputInterface)) {
                             $outputInterface->writeln(
                                 [

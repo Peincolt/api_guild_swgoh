@@ -26,46 +26,54 @@ class Ability
     {
         $data = $this->swgohgg->fetchAbilities();
         if (!isset($data['error_message_api_swgoh'])) {
-            $errorsMessages = ['error_messages' => []];
-            $count = 0;
-            foreach ($data as $key => $arrayData) {
-                if (is_array($arrayData)) {
-                    $abilityDto = new AbilityDto($arrayData);
-                    $errors = $this->validator->validate($abilityDto);
-                    if (count($errors) === 0) {
-                        $ability = $this->abilityRepository->findOneBy(
-                            [
-                                'base_id' => $abilityDto->base_id
-                            ]
-                        );
-                        $hero = $this->heroRepository->findOneBy(
-                            [
-                                'base_id' => $abilityDto->character_base_id
-                            ]
-                        );
-                        if (!empty($hero)) {
-                            if (empty($ability)) {
-                                $ability = new AbilityEntity();
-                                $ability->setHero($hero);
-                                $this->entityManagerInterface->persist($ability);
+            $this->entityManagerInterface->beginTransaction();
+            try {
+                foreach ($data as $key => $arrayData) {
+                    if (
+                        is_array($arrayData) &&
+                        isset($arrayData['combat_type']) &&
+                        is_int($arrayData['combat_type'])
+                    ) {
+                        if ($arrayData['combat_type'] === 1) {
+                            $abilityDto = new AbilityDto($arrayData);
+                            $errors = $this->validator->validate($abilityDto);
+                            if (count($errors) === 0) {
+                                $ability = $this->abilityRepository->findOneBy(
+                                    [
+                                        'base_id' => $abilityDto->base_id
+                                    ]
+                                );
+                                $hero = $this->heroRepository->findOneBy(
+                                    [
+                                        'base_id' => $abilityDto->character_base_id
+                                    ]
+                                );
+                                if (!empty($hero)) {
+                                    if (empty($ability)) {
+                                        $ability = new AbilityEntity();
+                                        $ability->setHero($hero);
+                                        $this->entityManagerInterface->persist($ability);
+                                    }
+                                    $ability = AbilityMapper::fromDto($ability, $abilityDto); 
+                                } else {
+                                    throw new \Exception('Erreur lors de la synchronisation de l\'abilité '.$key.'. Le héro '.$abilityDto->character_base_id.' n\'existe pas dans la base de données');
+                                }
+                            } else  {
+                                throw new \Exception('Erreur lors de la synchronisation de l\'abilité '.$key);
                             }
-                            $ability = AbilityMapper::fromDto($ability, $abilityDto); 
-                            if ($count >= 1000) {
-                                $this->entityManagerInterface->flush();
-                                $count = 0;
-                            }
-                            $count++;
-                        } else {
-                            $errorsMessages['error_messages'][] = 'Erreur lors de la synchronisation de l\'abilité '.$key.'. Le héro '.$abilityDto->character_base_id.' n\'existe pas dans la base de données';
                         }
-                    } else  {
-                        $errorsMessages['error_messages'][] = 'Erreur lors de la synchronisation de l\'abilité '.$key;
+                    } else {
+                        throw new \Exception('Erreur lors de la synchronisation de l\'abilité '.$key);
                     }
                 }
-            }
-            $this->entityManagerInterface->flush();
-            if (count($errorsMessages['error_messages']) > 0) {
-                return $errorsMessages;
+                $this->entityManagerInterface->flush();
+                $this->entityManagerInterface->commit();
+                return true;
+            } catch (\Exception $e) {
+                $this->entityManagerInterface->rollback();
+                return [
+                    'error_message' => $e->getMessage()
+                ];
             }
             return true;
         }

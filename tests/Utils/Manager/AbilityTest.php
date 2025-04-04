@@ -50,6 +50,25 @@ class AbilityTest extends KernelTestCase
             "ship_base_id"=> null,
             "omicron_battle_types"=> []
         ];
+        $this->baseSwgohDataShip = [
+            "base_id"=> "basicskill_TIEFIGHTERFIRSTORDER",
+            "ability_id"=> "basicability_tiefighterfirstorder",
+            "name"=> "Target Acquired",
+            "image"=> "https://game-assets.swgoh.gg/textures/tex.ability_firstorder_tiefighter_basic.png",
+            "url"=> "/units/first-order-tie-fighter/",
+            "tier_max"=> 8,
+            "is_zeta"=> false,
+            "is_omega"=> true,
+            "is_omicron"=> false,
+            "is_ultimate"=> false,
+            "description"=> "Deal Physical damage with a 50% chance to attack again. Each hit has a 60% chance to inflict Target Lock for 2 turns.",
+            "combat_type"=> 2,
+            "omicron_mode"=> 1,
+            "type"=> 1,
+            "character_base_id"=> null,
+            "ship_base_id"=> "TIEFIGHTERFIRSTORDER",
+            "omicron_battle_types"=> []
+        ];
         $this->validatorInterface = $container->get(ValidatorInterface::class);
         $this->mockAbilityRepository = $this->createMock(AbilityRepository::class);
         $this->mockHeroRepository = $this->createMock(HeroRepository::class);
@@ -84,9 +103,7 @@ class AbilityTest extends KernelTestCase
     public function testSchemUpdataSwgohggApi() :void
     {
         $errorUpdateSchemaApi = [
-            'error_messages' => [
-                'Erreur lors de la synchronisation de l\'abilité 0'
-            ]
+            'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0'
         ];
         $upateBaseSwgohggData = $this->baseSwgohggData;
         $upateBaseSwgohggData['ability_name'] = $upateBaseSwgohggData['name'];
@@ -101,9 +118,7 @@ class AbilityTest extends KernelTestCase
     {
         $missingHeroSwgohggData = $this->baseSwgohggData;
         $errorHeroMissing = [
-            'error_messages' => [
-                'Erreur lors de la synchronisation de l\'abilité 0. Le héro JHIN n\'existe pas dans la base de données'
-            ]
+            'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0. Le héro JHIN n\'existe pas dans la base de données'
         ];
         $missingHeroSwgohggData['character_base_id'] = "JHIN";
         $this->mockSwgogGgApi->method('fetchAbilities')
@@ -139,5 +154,14 @@ class AbilityTest extends KernelTestCase
         $this->mockHeroRepository->method('findOneBy')->willReturn($heroMock);
         $caseEverythingIsFineWithAbility = $this->abilityManager->updateAbilities();
         $this->assertTrue($caseEverythingIsFineWithAbility);
+    }
+
+    public function testEverythingIsFineWithShipAbility(): void
+    {
+        $ok = true;
+        $this->mockSwgogGgApi->method('fetchAbilities')
+            ->willReturn([$this->baseSwgohDataShip]);
+        $EverythingIsFineWithShipAbility = $this->abilityManager->updateAbilities();
+        $this->assertTrue($EverythingIsFineWithShipAbility);
     }
 }

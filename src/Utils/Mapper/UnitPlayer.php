@@ -19,7 +19,7 @@ abstract class UnitPlayer
             $unitPlayer->setPlayer($player);
         }
 
-        if (empty($unit)) {
+        if (!empty($unit)) {
             $unitPlayer->setUnit($unit);
         }
 

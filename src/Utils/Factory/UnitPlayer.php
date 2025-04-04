@@ -29,12 +29,12 @@ class UnitPlayer
             case 1:
                 $dto = new HeroPlayerDto($apiResponse);
                 $classMapper = '\App\Utils\Mapper\HeroPlayer';
-                $classEntity = 'HeroPlayerEntity';
+                $classEntity = '\App\Entity\HeroPlayer';
                 break;
             case 2:
                 $dto = new ShipPlayerDto($apiResponse);
                 $classMapper = '\App\Utils\Mapper\ShipPlayer';
-                $classEntity = 'ShipPlayerEntity';
+                $classEntity = '\App\Entity\ShipPlayer';
                 break;
             default:
                 return [
