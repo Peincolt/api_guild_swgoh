@@ -41,7 +41,7 @@ class GuildCommand extends Command
         );
 
         $result = $this->guildManager
-            ->updateGuild((string)$input->getArgument('id'), $output);
+            ->updateAllGuild((string)$input->getArgument('id'), $output);
 
         if (is_array($result)) {
             if (

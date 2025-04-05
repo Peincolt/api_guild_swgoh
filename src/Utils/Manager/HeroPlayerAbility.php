@@ -3,9 +3,11 @@
 namespace App\Utils\Manager;
 
 
-use App\Entity\UnitPlayer as UnitPlayerEntity;
-use App\Entity\HeroPlayerAbility as HeroPlayerAbilityEntity;
 use App\Repository\AbilityRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Ability as AbilityEntity;
+use App\Entity\HeroPlayerAbility as HeroPlayerAbilityEntity;
+use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Repository\HeroPlayerAbilityRepository;
 
 class HeroPlayerAbility
@@ -18,66 +20,64 @@ class HeroPlayerAbility
 
     }
 
-    public function setHeroPlayerOmicrons(UnitPlayerEntity $unitPlayer, array $data)
-    {
+    public function setHeroPlayerOmicrons(
+        UnitPlayerEntity $unitPlayer,
+        array $data,
+        EntityManagerInterface $entityManagerInterface
+    ): bool {
         foreach ($data['omicron_abilities'] as $omicronAbilityName) {
-            if (is_string($omicronAbilityName)) {
-                $omicronAbility = $this->abilityRepository->findOneBy(
+            if (!is_string($omicronAbilityName)) {
+                throw new \Exception('Une erreur est survenue lors de la mise à jours des capacités de l\'unité '.$unitPlayer->getUnit()->getName().' Une modification de l\'API a du être faite');
+            }
+
+            $omicronAbility = $entityManagerInterface->getRepository(AbilityEntity::class)
+                ->findOneBy(
                     [
                         'hero' => $unitPlayer->getUnit(),
                         'base_id' => $omicronAbilityName
                     ]
                 );
-                if ($omicronAbility) {
-                    $heroPlayerOmicronAbility = $this->heroPlayerAbilityRepository
-                    ->findOneby(
-                        [
-                            'ability' => $omicronAbility,
-                            'heroPlayer' => $unitPlayer->getId()
-                        ]
-                    );
 
-                    if (empty($heroPlayerOmicronAbility)) {
-                        $databaseHeroPlayerOmicronAbility = new HeroPlayerAbilityEntity();
-                        $this->heroPlayerAbilityRepository->save(
-                            $databaseHeroPlayerOmicronAbility,
-                            false
-                        );
-                        $databaseHeroPlayerOmicronAbility
-                            ->setAbility($omicronAbility);
-                        $databaseHeroPlayerOmicronAbility
-                            ->setHeroPlayer($unitPlayer);
-                        $databaseHeroPlayerOmicronAbility
-                            ->setIsOmicronLearned(true);
-                        if (
-                            isset($data['ability_data']) &&
-                            is_array($data['ability_data'])
-                        ) {
-                            foreach ($data['ability_data'] as $abilityData) {
-                                if (is_array($abilityData)) {
-                                    if (
-                                        isset($abilityData['id']) &&
-                                        is_string($abilityData['id']) &&
-                                        $abilityData['id'] === $omicronAbilityName
-                                    ) {
-                                        $databaseHeroPlayerOmicronAbility
-                                        ->setIsZetaLearned(
-                                            ($abilityData['is_zeta'] == 'true' ? true : false)
-                                        );
-                                    }
-                                }
+            if (empty($omicronAbility)) {
+                throw new \Exception('Impossible de trouver la capacité '.$omicronAbilityName.' dans la base de données. Veuillez mettre à jour les unités puis les capacités avant de mettre à jour les joueurs');
+            }
+
+            $heroPlayerOmicronAbility = $entityManagerInterface->getRepository(HeroPlayerAbilityEntity::class)
+                ->findOneby(
+                    [
+                        'ability' => $omicronAbility,
+                        'heroPlayer' => $unitPlayer->getId()
+                    ]
+                );
+
+            if (empty($heroPlayerOmicronAbility)) {
+                $databaseHeroPlayerOmicronAbility = new HeroPlayerAbilityEntity();
+                $entityManagerInterface->persist($databaseHeroPlayerOmicronAbility);
+                $databaseHeroPlayerOmicronAbility
+                    ->setAbility($omicronAbility);
+                $databaseHeroPlayerOmicronAbility
+                    ->setHeroPlayer($unitPlayer);
+                $databaseHeroPlayerOmicronAbility
+                    ->setIsOmicronLearned(true);
+                if (
+                    isset($data['ability_data']) &&
+                    is_array($data['ability_data'])
+                ) {
+                    foreach ($data['ability_data'] as $abilityData) {
+                        if (is_array($abilityData)) {
+                            if (
+                                isset($abilityData['id']) &&
+                                is_string($abilityData['id']) &&
+                                $abilityData['id'] === $omicronAbilityName
+                            ) {
+                                $databaseHeroPlayerOmicronAbility
+                                    ->setIsZetaLearned(
+                                        ($abilityData['is_zeta'] == 'true' ? true : false)
+                                    );
                             }
                         }
                     }
-                    return true;
                 }
-                return [
-                    'error_message' => 'Impossible de mettre à jour les capacités omicron de l\'unité '.$unitPlayer->getUnit()->getName().' du joueur'
-                ];
-            } else {
-                return [
-                    'error_message' => 'Une erreur est survenue lors de la mise à jours des capacités de l\'unité. Une modification de l\'API a du être faite'
-                ];
             }
         }
         return true;

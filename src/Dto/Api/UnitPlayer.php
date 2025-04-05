@@ -40,16 +40,6 @@ abstract class UnitPlayer
     public readonly ?int $combat_type;
 
     /**
-     * @var array<string, mixed>
-     */
-    /*public array $defaults = [
-        'level' => null,
-        'power' => null,
-        'rarity' => null,
-        "combat_type" => null
-    ];*/
-
-    /**
      * @param array<mixed> $apiUnitPlayerData
      */
     public function __construct(array $apiUnitPlayerData)

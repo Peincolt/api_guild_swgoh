@@ -24,6 +24,9 @@ class Guild
     #[Assert\GreaterThanOrEqual(0)]
     public readonly ?int $number_players;
 
+    #[Assert\NotNull]
+    public readonly ?array $members;
+
     // Propriétés présentent dans le retour API mais non utilisées pour le moment
     /*
     public readonly ?string $external_message;
@@ -41,12 +44,14 @@ class Guild
             'name' => null,
             'id_swgoh' => null,
             'galactic_power' => null,
-            'number_players' => null
+            'number_players' => null,
+            'members' => []
         ];
         $apiGuildData = array_merge($defaults, $apiGuildData['data']);
         $this->name = $apiGuildData['name'];
         $this->id_swgoh = $apiGuildData['guild_id'];
         $this->galactic_power = $apiGuildData['galactic_power'];
         $this->number_players = $apiGuildData['member_count'];
+        $this->members = $apiGuildData['members'];
     }
 }

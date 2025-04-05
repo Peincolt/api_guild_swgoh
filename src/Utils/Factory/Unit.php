@@ -6,10 +6,12 @@ use App\Dto\Api\Hero as HeroDto;
 use App\Dto\Api\Ship as ShipDto;
 use App\Entity\Hero as HeroEntity;
 use App\Entity\Ship as ShipEntity;
-use App\Entity\Player as PlayerEntity;
-use App\Entity\UnitPlayer as UnitPlayerEntity;
-use App\Repository\UnitPlayerRepository;
+use App\Entity\Unit as UnitEntity;
 use App\Repository\UnitRepository;
+use App\Entity\Player as PlayerEntity;
+use App\Repository\UnitPlayerRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\UnitPlayer as UnitPlayerEntity;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Unit
@@ -22,7 +24,7 @@ class Unit
     /**
      * @return UnitEntity|array<string,string>
      */
-    public function getEntityByApiResponse(array $apiResponse, string $classeName)
+    public function getEntityByApiResponse(array $apiResponse, string $classeName, EntityManagerInterface $entityManagerInterface)
     {
         switch ($classeName) {
             case "Hero":
@@ -36,26 +38,26 @@ class Unit
                 $fullClassName = '\App\Entity\Ship';
                 break;
             default:
-                return [
-                    'error_message' => 'Une erreur est survenue lors de la mise à jour des unités. Cela est surement dû à un changement du format de l\'API'
-                ];
+                throw new \Exception('Une erreur est survenue lors de la mise à jour des unités. Cela est surement dû à un changement du format de l\'API');
         }
 
         $errors = $this->validator->validate($dto);
-        if (count($errors) === 0) {
-            $unit = $this->unitRepository
-                ->findOneBy(
-                    [
-                        'base_id' => $dto->base_id
-                    ]
-                );
-            if (empty($unit)) {
-                $unit = new $fullClassName();
-            }
-            return $classMapper::fromDto($unit, $dto);
+        if (count($errors) > 0) {
+            throw new \Exception('Une erreur est survenue lors de la mise à jour des informations de l\'unité. Cela est surement dû à un changement du format de l\'API');
         }
-        return [
-            'error_message' => 'Une erreur est survenue lors de la mise à jour des informations de l\'unité. Cela est surement dû à un changement du format de l\'API'
-        ];
+
+        $unit = $entityManagerInterface->getRepository(UnitEntity::class)
+            ->findOneBy(
+                [
+                    'base_id' => $dto->base_id
+                ]
+            );
+        
+        if (empty($unit)) {
+            $unit = new $fullClassName();
+            $entityManagerInterface->persist($unit);
+        }
+        
+        return $classMapper::fromDto($unit, $dto);
     }
 }
