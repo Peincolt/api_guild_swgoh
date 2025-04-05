@@ -34,7 +34,6 @@ class UnitPlayer
                 $classEntity = '\App\Entity\HeroPlayer';
                 break;
             case 2:
-                die('ship');
                 $dto = new ShipPlayerDto($apiResponse);
                 $classMapper = '\App\Utils\Mapper\ShipPlayer';
                 $classEntity = '\App\Entity\ShipPlayer';

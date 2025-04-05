@@ -51,6 +51,67 @@ class UnitPlayerTest extends KernelTestCase
         );
     }
 
+    /**
+     * @dataProvider errorMessages
+     */
+    public function testGetEntityByApiResponseErrorMessages(string $errorMessage, array $heroPlayerData): void
+    {
+        $this->mockObjectRepository
+            ->method('findOneBy')
+            ->willReturn(null);
+        $this->mockEntityManagerInterface
+            ->method('getRepository')
+            ->with(UnitEntity::class)
+            ->willReturn($this->mockObjectRepository);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage($errorMessage);
+        $this->unitPlayerFactory->getEntityByApiResponse($heroPlayerData, $this->mockPlayerEntity, $this->mockEntityManagerInterface);
+    }
+
+    /**
+     * @dataProvider everythingIsFine
+     */
+    public function testGetEntityByApiResponseEverythingIsFineForHeroAndShip(array $unitData, UnitPlayerEntity $unitEntityPlayer, string $classType): void
+    {
+        $this->mockObjectRepository
+            ->method('findOneBy')
+            ->willReturnCallback(function ($params) {
+                if (isset($params['base_id'])) {
+                    return new UnitEntity();
+                }
+
+                if (isset($params['player']) && isset($params['unit'])) {
+                    return null;
+                }
+            });
+        $this->mockEntityManagerInterface
+            ->method('getRepository')
+            ->willReturnCallback(function ($class) {
+                if ($class === UnitEntity::class || $class === UnitPlayerEntity::class) {
+                    return $this->mockObjectRepository;
+                }
+            });
+
+        $this->mockUnitPlayerRepository->method('findOneBy')->willReturn((new HeroPlayerEntity()));
+        $this->mockUnitRepository->method('findOneBy')->willReturn((new UnitEntity()));
+        $unitPlayer = $this->unitPlayerFactory->getEntityByApiResponse($unitData, $this->mockPlayerEntity, $this->mockEntityManagerInterface);
+        $this->assertInstanceOf($classType, $unitPlayer);
+        $this->assertSame($unitEntityPlayer->getLevel(), $unitPlayer->getLevel());
+        $this->assertSame($unitEntityPlayer->getNumberStars(), $unitPlayer->getNumberStars());
+        $this->assertSame($unitEntityPlayer->getGalacticalPower(), $unitPlayer->getGalacticalPower());
+        $this->assertSame($unitEntityPlayer->getLife(), $unitPlayer->getLife());
+        $this->assertSame($unitEntityPlayer->getProtection(), $unitPlayer->getProtection());
+        $this->assertSame($unitEntityPlayer->getSpeed(), $unitPlayer->getSpeed());
+        if ($classType === '\App\Entity\HeroPlayer') {
+            $this->assertSame($unitEntityPlayer->getRelicLevel(), $unitPlayer->getRelicLevel());
+            $this->assertSame($unitEntityPlayer->getGearLevel(), $unitPlayer->getGearLevel());
+        }
+    }
+
+    /**
+     * Fonction de configuration
+     */
+
     private function getHeroPlayerData(): void
     {
         if (self::$heroPlayerData === null) {
@@ -88,6 +149,31 @@ class UnitPlayerTest extends KernelTestCase
         }
     }
 
+    public function everythingIsFine(): array
+    {
+        if (self::$heroPlayerData === null) {
+            $this->getHeroPlayerData();
+        }
+
+        if (self::$shipPlayerData === null) {
+            $this->getShipPlayerData();
+        }
+
+        return [
+            [
+                'unitData' => self::$heroPlayerData,
+                'unitPlayerEntity' => $this->getHeroPlayerEntity(),
+                'classType' => '\App\Entity\HeroPlayer'
+            ],
+            [
+                'unitData' => self::$shipPlayerData,
+                'unitPlayerEntity' => $this->getShipPlayerEntity(),
+                'classType' => '\App\Entity\ShipPlayer'
+            ]
+        ];
+    }
+
+
     public function errorMessages(): array
     {
         if (self::$heroPlayerData === null) {
@@ -112,84 +198,30 @@ class UnitPlayerTest extends KernelTestCase
             ]
         ];
     }
-
-    /**
-     * @dataProvider errorMessages
-     */
-    public function testGetEntityByApiResponseErrorMessages($errorMessage, $heroPlayerData): void
+    
+    private function getShipPlayerEntity(): ShipPlayerEntity
     {
-        $this->mockObjectRepository
-            ->method('findOneBy')
-            ->willReturn(null);
-        $this->mockEntityManagerInterface
-            ->method('getRepository')
-            ->with(UnitEntity::class)
-            ->willReturn($this->mockObjectRepository);
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage($errorMessage);
-        $this->unitPlayerFactory->getEntityByApiResponse($heroPlayerData, $this->mockPlayerEntity, $this->mockEntityManagerInterface);
+        $shipPlayerEntity = new ShipPlayerEntity();
+        $shipPlayerEntity->setLevel(85)
+            ->setNumberStars(7)
+            ->setGalacticalPower(84389)
+            ->setLife(0)
+            ->setProtection(0)
+            ->setSpeed(192);
+        return $shipPlayerEntity;
     }
 
-    /*public function testMissingCombatType(): void
+    private function getHeroPlayerEntity(): HeroPlayerEntity
     {
-        $errorMessageMissingCombatType = [
-            'error_message' => 'Une erreur est survenue lors de la mise à jour des informations de l\'unité. Cela est surement dû à un changement du format de l\'API'
-        ];
-        $updateShipPlayerData = $this->shipPlayerData;
-        $updateShipPlayerData['data']['combat_type'] = 3;
-        $caseMissingCombatType = $this->unitPlayerFactory->getEntityByApiResponse($updateShipPlayerData, $this->mockPlayerEntity);
-        $this->assertSame($errorMessageMissingCombatType, $caseMissingCombatType);
+        $heroPlayerEntity = new HeroPlayerEntity();
+        $heroPlayerEntity->setLevel(85)
+            ->setNumberStars(7)
+            ->setGalacticalPower(49710)
+            ->setLife(113228)
+            ->setProtection(185355)
+            ->setSpeed(544)
+            ->setRelicLevel(9)
+            ->setGearLevel(13);
+        return $heroPlayerEntity;
     }
-
-    public function testInvalidDto(): void
-    {
-        $wrongHeroPlayerData = $this->heroPlayerData;
-        unset($wrongHeroPlayerData['data']['base_id']);
-        $errorInvalidHeroDto = [
-            'error_message' => 'Une erreur est survenue lors de la mise à jour des informations de l\'unité du joueur. Cela est surement dû à un changement du format de l\'API'
-        ];
-        $caseInvalidDto = $this->unitPlayerFactory->getEntityByApiResponse($wrongHeroPlayerData, $this->mockPlayerEntity);
-        $this->assertSame($errorInvalidHeroDto, $caseInvalidDto);
-    }
-
-    public function testMissingUnit(): void
-    {
-        $missingHeroPlayerData = $this->heroPlayerData;
-        $missingHeroPlayerData['data']['base_id'] = 'MISSING';
-        $errorMissingHero = [
-            'error_message' => 'L\'unité MISSING n\'a pas été retrouvée dans la base de données. Veuillez mettre à jour les unités avant de mettre à jour les informations des joueurs.'
-        ];
-        $caseMissingUnit = $this->unitPlayerFactory->getEntityByApiResponse($missingHeroPlayerData, $this->mockPlayerEntity);
-        $this->assertSame($errorMissingHero, $caseMissingUnit);
-    }
-
-    public function testEverythingIsFineForHero(): void
-    {
-        $this->mockUnitPlayerRepository->method('findOneBy')->willReturn((new HeroPlayerEntity()));
-        $this->mockUnitRepository->method('findOneBy')->willReturn((new UnitEntity()));
-        $caseEverythingIsFineForHero = $this->unitPlayerFactory->getEntityByApiResponse($this->heroPlayerData, $this->mockPlayerEntity);;
-        $this->assertInstanceOf('\App\Entity\HeroPlayer', $caseEverythingIsFineForHero);
-        $this->assertSame(85, $caseEverythingIsFineForHero->getLevel());
-        $this->assertSame(7, $caseEverythingIsFineForHero->getNumberStars());
-        $this->assertSame(49710, $caseEverythingIsFineForHero->getGalacticalPower());
-        $this->assertSame(113228, $caseEverythingIsFineForHero->getLife());
-        $this->assertSame(185355, $caseEverythingIsFineForHero->getProtection());
-        $this->assertSame(544, $caseEverythingIsFineForHero->getSpeed());
-        $this->assertSame(9, $caseEverythingIsFineForHero->getRelicLevel());
-        $this->assertSame(13, $caseEverythingIsFineForHero->getGearLevel());
-    }
-
-    public function testEverythingIsFineForShip(): void
-    {
-        $this->mockUnitPlayerRepository->method('findOneBy')->willReturn((new ShipPlayerEntity()));
-        $this->mockUnitRepository->method('findOneBy')->willReturn((new UnitEntity()));
-        $caseEverythingIsFineForShip = $this->unitPlayerFactory->getEntityByApiResponse($this->shipPlayerData, $this->mockPlayerEntity);
-        $this->assertInstanceOf('\App\Entity\ShipPlayer', $caseEverythingIsFineForShip);
-        $this->assertSame(85, $caseEverythingIsFineForShip->getLevel());
-        $this->assertSame(7, $caseEverythingIsFineForShip->getNumberStars());
-        $this->assertSame(84389, $caseEverythingIsFineForShip->getGalacticalPower());
-        $this->assertSame(0, $caseEverythingIsFineForShip->getLife());
-        $this->assertSame(0, $caseEverythingIsFineForShip->getProtection());
-        $this->assertSame(192, $caseEverythingIsFineForShip->getSpeed());
-    }*/
 }
