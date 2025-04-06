@@ -15,6 +15,7 @@ use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Utils\Factory\UnitPlayer as UnitPlayerFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Tests\Utils\JsonFileLoader;
 
 class UnitPlayerTest extends KernelTestCase
 {
@@ -109,54 +110,35 @@ class UnitPlayerTest extends KernelTestCase
     }
 
     /**
-     * Fonction de configuration
+     * Fonctions de configuration
      */
 
-    private function getHeroPlayerData(): void
-    {
-        if (self::$heroPlayerData === null) {
-            $filePathHeroPlayerData = __DIR__ . '/../../Data/HeroPlayer.json';
-            $jsonHeroPlayerContent = file_get_contents($filePathHeroPlayerData);
-            if ($jsonHeroPlayerContent !== false) {
-                $this->assertNotEmpty($jsonHeroPlayerContent);
-                $heroPlayerData = json_decode($jsonHeroPlayerContent, true);
-                if ($heroPlayerData !== null) {
-                    self::$heroPlayerData = $heroPlayerData;
-                } else {
-                    $this->fail('Une erreur est survenue lors du décodage des informations de LORD VADER');
-                }
-            } else {
-                $this->fail("Impossible de lire les données contenant les informations de l'unité LORD VADER");
-            }
-        }
-    }
-
-    private function getShipPlayerData(): void
-    {
-        if (self::$shipPlayerData === null) {
-            $filePathShipPlayerData = __DIR__ . '/../../Data/ShipPlayer.json';
-            $jsonShipPlayerContent = file_get_contents($filePathShipPlayerData);
-            if ($jsonShipPlayerContent !== false) {
-                $shipPlayerData = json_decode($jsonShipPlayerContent, true);
-                if ($shipPlayerData !== null) {
-                    self::$shipPlayerData = $shipPlayerData;
-                } else {
-                    $this->fail('Une erreur est survenue lors du décodage des informations de l\'EXECUTOR');
-                }
-            }
-        } else {
-            $this->fail("Impossible de lire les données contenant les informations de l\'EXECUTOR");
-        }
-    }
+     private function getUnitData(string $unitType): void
+     {
+         $variableName = lcfirst($unitType).'Data';
+         
+         if (!property_exists(self::class, $variableName)) {
+             $this->fail('La propriété '.$variableName.' n\'existe pas');
+         }
+ 
+         if (self::$$variableName === null) {
+             $unitData  = JsonFileLoader::getArrayFromJson(__DIR__ . '/../../Data/'.$unitType.'.json');
+             if (is_array($unitData )) {
+                 self::$$variableName  = $unitData;
+                 return;
+             }
+             $this->fail($unitData);
+         }
+     }
 
     public function everythingIsFine(): array
     {
         if (self::$heroPlayerData === null) {
-            $this->getHeroPlayerData();
+            $this->getUnitData('HeroPlayer');
         }
 
         if (self::$shipPlayerData === null) {
-            $this->getShipPlayerData();
+            $this->getUnitData('ShipPlayer');
         }
 
         return [
@@ -177,7 +159,7 @@ class UnitPlayerTest extends KernelTestCase
     public function errorMessages(): array
     {
         if (self::$heroPlayerData === null) {
-            $this->getHeroPlayerData();
+            $this->getUnitData('HeroPlayer');
         }
         $wrongCombatType = $missingAttribute = $missingUnit = self::$heroPlayerData;
         unset($missingAttribute['data']['base_id']);
