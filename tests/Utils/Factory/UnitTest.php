@@ -6,24 +6,24 @@ use App\Entity\Hero as HeroEntity;
 use App\Entity\Ship as ShipEntity;
 use App\Entity\Unit as UnitEntity;
 use App\Repository\UnitRepository;
+use App\Tests\Trait\DataTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Utils\Factory\Unit as UnitFactory;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use App\Tests\Utils\JsonFileLoader;
 
 class UnitTest extends KernelTestCase
 {
+    use DataTrait;
+
     private UnitRepository $mockUnitRepository;
     private EntityManagerInterface $mockEntityManagerInterface;
     private ObjectRepository $mockObjectRepository;
     private ValidatorInterface $validatorInterface;
     private UnitFactory $unitFactory;
-    private static ?array $heroData = null;
-    private static ?array $shipData = null;
-
-
+    private static ?array $heroData = [];
+    private static ?array $shipData = [];
 
     protected function setUp(): void
     {
@@ -59,11 +59,11 @@ class UnitTest extends KernelTestCase
         UnitEntity $unitEntity
     ): void {
 
-        $this->mockEntityManagerInterface
-            ->method('getRepository')
+        $this->mockEntityManagerInterface->method('getRepository')
             ->with(UnitEntity::class)
             ->willReturn($this->mockObjectRepository);
-        $this->mockObjectRepository->method('findOneBy')->willReturn(null);
+        $this->mockObjectRepository->method('findOneBy')
+            ->willReturn(null);
         $unit = $this->unitFactory->getEntityByApiResponse($unitData, $className, $this->mockEntityManagerInterface);
         $this->assertInstanceOf($unitEntity::class, $unit);
         $this->assertSame($unitEntity->getName(), $unit->getName());
@@ -73,31 +73,13 @@ class UnitTest extends KernelTestCase
     }
 
     /**
-     * Fonction de configuration
+     * Fonctions de configuration
      */
-
-    private function getUnitData(string $unitType): void
-    {
-        $variableName = lcfirst($unitType).'Data';
-        
-        if (!property_exists(self::class, $variableName)) {
-            $this->fail('La propriété '.$variableName.' n\'existe pas');
-        }
-
-        if (self::$$variableName === null) {
-            $unitData  = JsonFileLoader::getArrayFromJson(__DIR__ . '/../../Data/'.$unitType.'.json');
-            if (is_array($unitData )) {
-                self::$$variableName  = $unitData;
-                return;
-            }
-            $this->fail($unitData);
-        }
-    }
 
     public function errorMessages(): array
     {
-        if (self::$heroData === null) {
-            $this->getUnitData('Hero');
+        if (empty(self::$heroData)) {
+            $this->getData('Hero');
         }
 
         $wrongHeroData = self::$heroData;
@@ -119,12 +101,12 @@ class UnitTest extends KernelTestCase
 
     public function everythingIsFine(): array
     {
-        if (self::$heroData === null) {
-            $this->getUnitData('Hero');
+        if (empty(self::$heroData)) {
+            $this->getData('Hero');
         }
 
-        if (self::$shipData === null) {
-            $this->getUnitData('Ship');
+        if (empty(self::$shipData)) {
+            $this->getData('Ship');
         }
 
         return [

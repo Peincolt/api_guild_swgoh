@@ -2,9 +2,10 @@
 
 namespace App\Tests\Utils\Manager;
 
-use App\Entity\Ability;
 use App\Entity\Hero;
+use App\Entity\Ability;
 use App\Repository\HeroRepository;
+use App\Tests\Trait\DataTrait;
 use App\Repository\AbilityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Utils\Manager\Ability as AbilityManager;
@@ -14,69 +15,33 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AbilityTest extends KernelTestCase
 {
+    use DataTrait;
+    
+    private static ?array $heroAbilityData = [];
+    private static ?array $shipAbilityData = [];
     private AbilityRepository $mockAbilityRepository;
     private HeroRepository $mockHeroRepository;
     private EntityManagerInterface $mockEntityManagerInterface;
     private SwgohGgApi $mockSwgogGgApi;
     private AbilityManager $abilityManager;
     private ValidatorInterface $validatorInterface;
-    /**
-     * @var string[]
-     */
-    private $baseSwgohggData;
     
     // On set up toutes les variables/mocks commun pour tous les tests
     protected function setUp(): void
     {
         $kernel = self::bootKernel();
         $container = static::getContainer();
-        $this->baseSwgohggData = 
-        [
-            "base_id" => "specialskill_VADER03",
-            "ability_id" => "specialability_vader03",
-            "name"=> "Merciless Massacre",
-            "image"=> "https://game-assets.swgoh.gg/textures/tex.ability_darthvader_special03.png",
-            "url"=> "/units/darth-vader/",
-            "tier_max"=> 8,
-            "is_zeta"=> true,
-            "is_omega"=> false,
-            "is_omicron"=> false,
-            "is_ultimate"=> false,
-            "description"=> "Gain Merciless and take a bonus turn after this one. All enemies gain Merciless Target, which can't be evaded or resisted. When Darth Vader uses an ability, Merciless Target is removed from the target enemy and Darth Vader takes a bonus turn. If the target did not have Merciless Target, Merciless expires and Merciless Target is removed from all remaining enemies. Darth Vader can ignore taunt effects when targeting enemies with Merciless Target.\\n\\nMerciless: +50% Offense (does not stack with Offense Up), +50% Critical Chance, and +50% Critical Damage; immune to Fear, Stun, and Turn Meter manipulation and Darth Vader's bonus turns do not trigger other characters' effects based on bonus turns or Turn Meter gain\\n\\nMerciless Target: Darth Vader must target a unit with this or a taunt effect, can ignore Taunt to target this unit, and takes a bonus turn after using an ability while targeting this unit",
-            "combat_type"=> 1,
-            "omicron_mode"=> 1,
-            "type"=> 2,
-            "character_base_id"=> "VADER",
-            "ship_base_id"=> null,
-            "omicron_battle_types"=> []
-        ];
-        $this->baseSwgohDataShip = [
-            "base_id"=> "basicskill_TIEFIGHTERFIRSTORDER",
-            "ability_id"=> "basicability_tiefighterfirstorder",
-            "name"=> "Target Acquired",
-            "image"=> "https://game-assets.swgoh.gg/textures/tex.ability_firstorder_tiefighter_basic.png",
-            "url"=> "/units/first-order-tie-fighter/",
-            "tier_max"=> 8,
-            "is_zeta"=> false,
-            "is_omega"=> true,
-            "is_omicron"=> false,
-            "is_ultimate"=> false,
-            "description"=> "Deal Physical damage with a 50% chance to attack again. Each hit has a 60% chance to inflict Target Lock for 2 turns.",
-            "combat_type"=> 2,
-            "omicron_mode"=> 1,
-            "type"=> 1,
-            "character_base_id"=> null,
-            "ship_base_id"=> "TIEFIGHTERFIRSTORDER",
-            "omicron_battle_types"=> []
-        ];
+
         $this->validatorInterface = $container->get(ValidatorInterface::class);
         $this->mockAbilityRepository = $this->createMock(AbilityRepository::class);
         $this->mockHeroRepository = $this->createMock(HeroRepository::class);
-        $this->mockEntityManagerInterface = $this->createMock(EntityManagerInterface::class);
         $this->mockSwgogGgApi = $this->createMock(SwgohGgApi::class);
-        $this->mockEntityManagerInterface = $this->createMock(EntityManagerInterface::class);
-        $this->mockEntityManagerInterface->method('persist')->willReturn(null);
-        $this->mockEntityManagerInterface->method('flush')->willReturn(null);
+        $this->mockEntityManagerInterface = $this->createConfiguredMock(EntityManagerInterface::class,
+            [
+                'persist' => null,
+                'flush' => null
+            ]
+        );
         $this->abilityManager = new AbilityManager(
             $this->mockSwgogGgApi,
             $this->mockAbilityRepository,
@@ -86,82 +51,112 @@ class AbilityTest extends KernelTestCase
         );
     }
 
-    public function testFailSwgohggApi(): void
+    /**
+     * @dataProvider errorMessages
+     */
+    public function testUpdateAbilitiesErrorMessages(array $errorMessage, array $abilityData): void
     {
-        $errorSwgohApiData = [
-            'error_code' => 500,
-            'error_message_api_swgoh' => 'Jungle diff'
-        ];
-
         $this->mockSwgogGgApi->method('fetchAbilities')
-            ->willReturn($errorSwgohApiData);
+            ->willReturn($abilityData);
         
-        $caseSwgohggApiError = $this->abilityManager->updateAbilities();
-        $this->assertSame($errorSwgohApiData, $caseSwgohggApiError);
+        $caseErrorMessages = $this->abilityManager->updateAbilities();
+        $this->assertSame($errorMessage, $caseErrorMessages);
     }
 
-    public function testSchemUpdataSwgohggApi() :void
+    /**
+     * @dataProvider everythingIsFine
+     */
+    public function testUpdateAbilitiesEverythingIsRight(array $abilityData): void
     {
-        $errorUpdateSchemaApi = [
-            'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0'
+        $abilityMock = $this->createConfiguredMock(
+            Ability::class,
+            [
+                'getId' => 1
+            ]
+        );
+
+        $heroMock = $this->createConfiguredMock(
+            Hero::class,
+            [
+                'getId' => 1
+            ]
+        );
+
+        $this->mockSwgogGgApi->method('fetchAbilities')
+            ->willReturn($abilityData);
+
+        $this->mockAbilityRepository->method('findOneBy')
+            ->willReturn($abilityMock);
+
+        $this->mockHeroRepository->method('findOneBy')
+            ->willReturn($heroMock);
+
+        $resultUpdateAbility = $this->abilityManager->updateAbilities();
+        $this->assertTrue($resultUpdateAbility);
+    }
+
+    /**
+     * Fonctions de configuration
+     */
+
+    public function errorMessages(): array
+    {
+        if (empty(self::$heroAbilityData)) {
+            $this->getData('HeroAbility');
+        }
+        $wrongCombatType = $missingAttribute = $missingUnit = self::$heroAbilityData;
+        unset($missingAttribute['name']);
+        $wrongCombatType['combat_type'] = "54";
+        $missingUnit['character_base_id'] = "JHIN";
+        return [
+            [
+                'arrayErrorMessage' => [
+                    'error_message_api_swgoh' => 'ERREUR',
+                    'error_code' => 500
+                ],
+                'abilityData' => [
+                    'error_message_api_swgoh' => 'ERREUR',
+                    'error_code' => 500
+                ]
+            ],
+            [
+                'arrayErrorMessage' => [
+                    'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0. Une modification de l\'API a du être faite'
+                ],
+                'abilityData' => [$wrongCombatType]
+            ],
+            [
+                'arrayErrorMessage' => [
+                    'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0'
+                ],
+                'abilityData' => [$missingAttribute]
+            ],
+            [
+                'arrayErrorMessage' => [
+                    'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0. Le héro JHIN n\'existe pas dans la base de données'
+                ],
+                'abilityData' => [$missingUnit]
+            ]
         ];
-        $upateBaseSwgohggData = $this->baseSwgohggData;
-        $upateBaseSwgohggData['ability_name'] = $upateBaseSwgohggData['name'];
-        unset($upateBaseSwgohggData['name']);
-        $this->mockSwgogGgApi->method('fetchAbilities')
-            ->willReturn([$upateBaseSwgohggData]);
-        $caseUpdateSchemaSwgohgg = $this->abilityManager->updateAbilities();
-        $this->assertSame($errorUpdateSchemaApi, $caseUpdateSchemaSwgohgg);
     }
 
-    public function testHeroMissing() :void
+    public function everythingIsFine(): array
     {
-        $missingHeroSwgohggData = $this->baseSwgohggData;
-        $errorHeroMissing = [
-            'error_message' => 'Erreur lors de la synchronisation de l\'abilité 0. Le héro JHIN n\'existe pas dans la base de données'
+        if (empty(self::$heroAbilityData)) {
+            $this->getData('HeroAbility');
+        }
+
+        if (empty(self::$shipAbilityData)) {
+            $this->getData('ShipAbility');
+        }
+
+        return [
+            [
+                'abilityData' => [self::$heroAbilityData]
+            ],
+            [
+                'abilityData' => [self::$shipAbilityData]
+            ]
         ];
-        $missingHeroSwgohggData['character_base_id'] = "JHIN";
-        $this->mockSwgogGgApi->method('fetchAbilities')
-            ->willReturn([$missingHeroSwgohggData]);
-        $this->mockHeroRepository->method('findBy')->willReturn(null);
-        $caseHeroMissingSwgohgg = $this->abilityManager->updateAbilities();
-        $this->assertSame($errorHeroMissing, $caseHeroMissingSwgohgg);
-    }
-
-    public function testEverythingIsFineWithoutAbility(): void
-    {
-        $ok = true;
-        $heroMock = $this->createMock(Hero::class);
-        $heroMock->method('getId')->willReturn(1);
-        $heroMock->method('getId')->willReturn(1);
-        $this->mockSwgogGgApi->method('fetchAbilities')
-            ->willReturn([$this->baseSwgohggData]);
-        $this->mockHeroRepository->method('findOneBy')->willReturn($heroMock);
-        $caseEverythingIsFine = $this->abilityManager->updateAbilities();
-        $this->assertTrue($caseEverythingIsFine);
-    }
-
-    public function testEverythingIsFineWithAbility(): void
-    {
-        $ok = true;
-        $abilityMock = $this->createMock(Ability::class);
-        $heroMock = $this->createMock(Hero::class);
-        $abilityMock->method('getId')->willReturn(1);
-        $heroMock->method('getId')->willReturn(1);
-        $this->mockSwgogGgApi->method('fetchAbilities')
-            ->willReturn([$this->baseSwgohggData]);
-        $this->mockAbilityRepository->method('findOneBy')->willReturn($abilityMock);
-        $this->mockHeroRepository->method('findOneBy')->willReturn($heroMock);
-        $caseEverythingIsFineWithAbility = $this->abilityManager->updateAbilities();
-        $this->assertTrue($caseEverythingIsFineWithAbility);
-    }
-
-    public function testEverythingIsFineWithShipAbility(): void
-    {
-        $ok = true;
-        $this->mockSwgogGgApi->method('fetchAbilities')
-            ->willReturn([$this->baseSwgohDataShip]);
-        $EverythingIsFineWithShipAbility = $this->abilityManager->updateAbilities();
-        $this->assertTrue($EverythingIsFineWithShipAbility);
     }
 }

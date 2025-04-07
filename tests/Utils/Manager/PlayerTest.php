@@ -4,219 +4,155 @@ namespace App\Tests\Utils\Manager;
 
 use App\Entity\Guild;
 use App\Dto\Api\PlayerDto;
-use App\Entity\PlayerEntity;
+use App\Entity\Player as PlayerEntity;
+use App\Tests\Trait\DataTrait;
 use PHPUnit\Framework\TestCase;
-use App\Repository\PlayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use App\Utils\Manager\Player as PlayerManager;
 use App\Utils\Service\Api\SwgohGg as SwgohGgApi;
+use Symfony\Component\Serializer\SerializerInterface;
 use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PlayerTest extends KernelTestCase
 {
+    use DataTrait;
+    
     private Guild $mockGuild;
+    private EntityManagerInterface $entityManagerInterface;
+    private ObjectRepository $objectRepository;
     private PlayerManager $playerManager;
-    private SwgohGgApi $mockSwgogGgApi;
-    private UnitPlayerManager $mockUnitPlayerManager;
-    private PlayerRepository $mockPlayerRepository;
+    private SwgohGgApi $mockSwgohGgApi;
     private SerializerInterface $serializer;
     private ValidatorInterface $validatorInterface;
-    private string $allyCode;
+    private static ?array $playerData = [];
+    private string $allyCode = "xxxx";
 
     protected function setUp(): void
     {
         $kernel = self::bootKernel();
         $container = static::getContainer();
-        $this->allyCode = "xxxx";
-        $this->baseSwgohggData =
-        [
-            "data"=> [
-                "ally_code"=> 246639295,
-                "arena_leader_base_id"=> "GLLEIA",
-                "arena_rank"=> 118,
-                "level"=> 85,
-                "name"=> "Wyøming",
-                "last_updated"=> "2025-03-31T17:19:41.220361",
-                "galactic_power"=> 11395612,
-                "character_galactic_power"=> 6863189,
-                "ship_galactic_power"=> 4532423,
-                "ship_battles_won"=> 1439,
-                "pvp_battles_won"=> 3654,
-                "pve_battles_won"=> 356766,
-                "pve_hard_won"=> 109642,
-                "galactic_war_won"=> 33949,
-                "guild_raid_won"=> 1574,
-                "guild_contribution"=> 2745312,
-                "guild_exchange_donations"=> 296,
-                "season_full_clears"=> 243,
-                "season_successful_defends"=> 1310,
-                "season_league_score"=> 734060,
-                "season_undersized_squad_wins"=> 954,
-                "season_promotions_earned"=> 70,
-                "season_banners_earned"=> 756146,
-                "season_offensive_battles_won"=> 4545,
-                "season_territories_defeated"=> 1350,
-                "url"=> "/p/246639295/",
-                "arena"=> [
-                    "rank"=> 118,
-                    "leader"=> "GLLEIA",
-                    "members"=> [
-                        "R2D2_LEGENDARY",
-                        "CAPTAINDROGAN",
-                        "CAPTAINREX",
-                        "OLDBENKENOBI"
-                    ]
-                ],
-                "fleet_arena"=> [
-                    "rank"=> 16,
-                    "leader"=> "CAPITALLEVIATHAN",
-                    "members"=> [
-                        "SITHBOMBER",
-                        "FURYCLASSINTERCEPTOR",
-                        "SITHFIGHTER"
-                    ],
-                    "reinforcements"=> [
-                        "SITHSUPREMACYCLASS",
-                        "TIEDAGGER",
-                        "SITHINFILTRATOR"
-                    ]
-                ],
-                "skill_rating"=> 2807,
-                "league_name"=> "Chromium",
-                "league_frame_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_chromium.png",
-                "league_blank_image"=> "https://game-assets.swgoh.gg/textures/tex.league_icon_chromium_blank.png",
-                "league_image"=> "https://game-assets.swgoh.gg/textures/tex.league_icon_chromium.png",
-                "division_number"=> 1,
-                "division_image"=> "https://game-assets.swgoh.gg/textures/_1.png",
-                "portrait_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_kalani.png",
-                "title"=> "Bitter Pill Company",
-                "guild_id"=> "uuwcpRBoStWfogZersAvJA",
-                "guild_name"=> "HGamers II",
-                "guild_url"=> "/g/uuwcpRBoStWfogZersAvJA/",
-                "mods"=> []
-            ],
-            'units' => []
-        ];
 
         $this->validatorInterface = $container->get(ValidatorInterface::class);
         $this->serializer = $container->get(SerializerInterface::class);
-        $this->mockSwgogGgApi = $this->createMock(SwgohGgApi::class);
-        $this->mockUnitPlayerManager = $this->createMock(UnitPlayerManager::class);
-        $this->mockPlayerRepository = $this->createMock(PlayerRepository::class);
+        $this->mockEntityManagerInterface = $this->createMock(EntityManagerInterface::class);
+        $this->mockObjectRepository = $this->createConfiguredMock(ObjectRepository::class,
+            [
+                'findOneby' => null
+            ]
+        );
+        $this->mockEntityManagerInterface->method('getRepository')->willReturn($this->mockObjectRepository);
+        $this->mockSwgohGgApi = $this->createMock(SwgohGgApi::class);
         $this->mockGuild = $this->createMock(Guild::class);
         $this->playerManager = new PlayerManager(
             $this->createMock(EntityManagerInterface::class),
-            $this->mockSwgogGgApi,
-            $this->mockUnitPlayerManager,
-            $this->mockPlayerRepository,
+            $this->mockSwgohGgApi,
             $this->serializer,
             $this->validatorInterface
         );
     }
 
-    public function testFailSwgohggApi()
+    /**
+     * @dataProvider updateGuildPlayerErrorMessages
+     */
+    public function testUpdateGuildPlayerErrorMessages(string $errorMessage, array $playerData, array $fetchData): void
     {
-        $errorSwgohApiData = [
-            'error_code' => 500,
-            'error_message_api_swgoh' => 'Sup diff'
-        ];
-
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($errorSwgohApiData);
-        $caseSwgohggApiError = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-
-        $this->assertEquals('Sup diff', $caseSwgohggApiError['error_message_api_swgoh']);
+        $this->mockSwgohGgApi->method('fetchPlayer')->willReturn($fetchData);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage($errorMessage);
+        $this->playerManager
+            ->updateGuildPlayer(
+                $this->mockGuild,
+                $playerData,
+                $this->mockEntityManagerInterface
+            );
     }
 
-    public function testSchemUpdataSwgohggApi(): void
+    /**
+     * @dataProvider updateGuildPlayerEverythingIsNice
+     */
+    public function testUpdateGuildPlayerEverythingIsNice(array $playerData, array $fetchData, PlayerEntity $playerEntityDataProvider): void
     {
-        $errorUpdateSchemaApi = [
-            'error_message' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite'
-        ];
-        $upateBaseSwgohggData = $this->baseSwgohggData;
-        $upateBaseSwgohggData['data']['allyCode'] = $upateBaseSwgohggData['data']['ally_code'];
-        unset($upateBaseSwgohggData['data']['ally_code']);
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($upateBaseSwgohggData);
-        $this->mockPlayerRepository->method('findOneBy')
-            ->willReturn(null);
-        $caseUpdateSchemaSwgohgg = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-        $this->assertSame($errorUpdateSchemaApi, $caseUpdateSchemaSwgohgg);
+        $this->mockSwgohGgApi->method('fetchPlayer')->willReturn($fetchData);
+        [$resultPlayerEntity, $resultPlayerData] = $this->playerManager
+            ->updateGuildPlayer(
+                $this->mockGuild,
+                $playerData,
+                $this->mockEntityManagerInterface
+            );
+        $this->assertSame($resultPlayerEntity->getName(), $playerEntityDataProvider->getName());
+        $this->assertSame($resultPlayerEntity->getIdSwgoh(), $playerEntityDataProvider->getIdSwgoh());
+        $this->assertSame($resultPlayerEntity->getGalacticalPower(), $playerEntityDataProvider->getGalacticalPower());
+        $this->assertSame($resultPlayerEntity->getHeroesGalacticPower(), $playerEntityDataProvider->getHeroesGalacticPower());
+        $this->assertSame($resultPlayerEntity->getShipsGalacticPower(), $playerEntityDataProvider->getShipsGalacticPower());
+        $this->assertSame($resultPlayerEntity->getLevel(), $playerEntityDataProvider->getLevel());
+        $this->assertSame($resultPlayerEntity->getGearGiven(), $playerEntityDataProvider->getGearGiven());
+        $this->assertSame($resultPlayerEntity->getLastUpdate()->format('Y/m/d H:i'), $playerEntityDataProvider->getLastUpdate()->format('Y/m/d H:i'));
     }
 
-    public function testSchemeUpdatePlayerUnits(): void
+    public function updateGuildPlayerEverythingIsNice(): array
     {
-        $errorUpdatePlayerUnits = [
-            'error_message' => 'Erreur lors de la synchronisation des unités du joueur. Une modification de l\'API a du être faite'
+        if (empty(self::$playerData)) {
+            $this->getData('Player');
+        }
+
+        return [
+            [
+                'playerData' => self::$playerData['data'],
+                'fetchData' => self::$playerData,
+                'playerEntityDataProvider' => $this->getPlayerEntity()
+            ]
         ];
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockPlayerRepository->method('findOneBy')
-            ->willReturn(null);
-        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
-            ->willReturn($errorUpdatePlayerUnits);
-        $caseSchemeUpdatePlayerUnits = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-        $this->assertSame($errorUpdatePlayerUnits, $caseSchemeUpdatePlayerUnits);
     }
 
-    public function testFailAssertUnitPlayerDto(): void
+    public function updateGuildPlayerErrorMessages(): array
     {
-        $errorAssertPlayerUnitDto = [
-            'error_message' => 'Une erreur est survenue lors de la mise à jour des informations de l\'unité du joueur. Cela est surement dû à un changement du format de l\'API'
+        if (empty(self::$playerData)) {
+            $this->getData('Player');
+        }
+
+        $missingAllyCode = $missingData = self::$playerData;
+        unset($missingAllyCode['data']['ally_code']);
+        unset($missingData['data']['name']); 
+
+        return [
+            [
+                'errorMessage' => 'Une erreur est survenue lors de la synchronisation des joueurs de la guilde. Une modification de l\'API a du être faite',
+                'playerData' => $missingAllyCode['data'],
+                'fetchData' => $missingAllyCode
+            ],
+            [
+                'errorMessage' => 'Sup diff',
+                'playerData' => self::$playerData['data'],
+                'fetchData' => [
+                    'error_message_api_swgoh' => 'Sup diff'
+                ]
+            ],
+            [
+                'errorMessage' => 'Erreur lors de la synchronisation des informations du joueur. Une modification de l\'API a du être faite',
+                'playerData' => $missingData['data'],
+                'fetchData' => $missingData
+            ]
         ];
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockPlayerRepository->method('findOneBy')
-            ->willReturn(null);
-        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
-            ->willReturn($errorAssertPlayerUnitDto);
-        $caseErrorAssertPlayerUnitDto = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-        $this->assertSame($errorAssertPlayerUnitDto, $caseErrorAssertPlayerUnitDto);
     }
 
-    public function testMissingUnitPlayerDto(): void
+    public function getPlayerEntity(): PlayerEntity
     {
-        $errorMissingUnit = [
-            'error_message' => 'L\'unité VADER n\'a pas été retrouvée dans la base de données. Veuillez mettre à jour les unités avant de mettre à jour les informations des joueurs.'
-        ];
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockPlayerRepository->method('findOneBy')
-            ->willReturn(null);
-        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
-            ->willReturn($errorMissingUnit);
-        $caseErrorMissingUnit = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-        $this->assertSame($errorMissingUnit, $caseErrorMissingUnit);
-    }
-
-    public function testOmicronCapacitiesUpdateScheme(): void
-    {
-        $errorOmicronSchema = [
-            'error_message' => 'Une erreur est survenue lors de la mise à jours des capacités de l\'unité. Une modification de l\'API a du être faite'
-        ];
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockPlayerRepository->method('findOneBy')
-            ->willReturn(null);
-        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
-            ->willReturn($errorOmicronSchema);
-        $caseErrorOmicronSchema = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-        $this->assertSame($errorOmicronSchema, $caseErrorOmicronSchema);
-    }
-
-    public function testEverythingIsFine(): void
-    {
-        $result = true;
-        $this->mockSwgogGgApi->method('fetchPlayer')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockPlayerRepository->method('findOneBy')
-            ->willReturn(null);
-        $this->mockUnitPlayerManager->method('updateUnitsPlayer')
-            ->willReturn(true);
-        $caseEverythingIsFine = $this->playerManager->updatePlayerWithApi($this->allyCode, $this->mockGuild);
-        $this->assertSame($result, $caseEverythingIsFine);
+        if (empty(self::$playerData)) {
+            $this->getData('Player');
+        }
+        $date = new \DateTime(self::$playerData['data']['last_updated']);
+        $player = new PlayerEntity();
+        $player->setName(self::$playerData['data']['name'])
+            ->setIdSwgoh(self::$playerData['data']['ally_code'])
+            ->setGalacticalPower(self::$playerData['data']['galactic_power'])
+            ->setHeroesGalacticPower(self::$playerData['data']['character_galactic_power'])
+            ->setShipsGalacticPower(self::$playerData['data']['ship_galactic_power'])
+            ->setLevel(self::$playerData['data']['level'])
+            ->setGearGiven(self::$playerData['data']['guild_exchange_donations'])
+            ->setLastUpdate($date);
+        return $player;
     }
 }

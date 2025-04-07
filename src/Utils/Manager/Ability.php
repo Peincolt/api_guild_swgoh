@@ -36,7 +36,7 @@ class Ability
                     !isset($arrayData['combat_type']) ||
                     !is_int($arrayData['combat_type'])
                 ) {
-                    throw new \Exception('Erreur lors de la synchronisation de l\'abilité '.$key).'. Une modification de l\'API a du être faite';
+                    throw new \Exception('Erreur lors de la synchronisation de l\'abilité '.$key.'. Une modification de l\'API a du être faite');
                 }
 
                 if ($arrayData['combat_type'] === 1) {

@@ -2,158 +2,150 @@
 
 namespace App\Utils\Manager;
 
-use App\Repository\GuildRepository;
-use App\Repository\PlayerRepository;
+use App\Tests\Trait\DataTrait;
+use App\Entity\Guild as GuildEntity;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Utils\Service\Api\SwgohGg as SwgohGgApi;
+use Doctrine\Persistence\ObjectRepository;
 use App\Utils\Manager\Guild as GuildManager;
 use App\Utils\Manager\Player as PlayerManager;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\Utils\Service\Api\SwgohGg as SwgohGgApi;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class GuildTest extends KernelTestCase
 {
-    private GuildRepository $mockGuildRepository;
-    private PlayerManager $mockPlayerManager;
-    private EntityManagerInterface $mockEntityManagerInterface;
+    use DataTrait;
+    
     private SwgohGgApi $mockSwgogGgApi;
-    private PlayerRepository $mockPlayerRepository;
-    private ValidatorInterface $validatorInterface;
+    private EntityManagerInterface $mockEntityManagerInterface;
+    private UnitPlayerManager $mockUnitPlayerManager;
+    private PlayerManager $mockPlayerManager;
     private SerializerInterface $serializer;
-    /**
-     * @var string[]
-     */
-    private $baseSwgohggData;
+    private ValidatorInterface $validatorInterface;
+    
+    private static ?array $guildData = [];
 
     // On set up toutes les variables/mocks commun pour tous les tests
     protected function setUp(): void
     {
         $kernel = self::bootKernel();
         $container = static::getContainer();
-        $this->baseSwgohggData = [
-            "data"=> [
-                "guild_id"=> "uuwcpRBoStWfogZersAvJA",
-                "name"=> "HGamers II",
-                "external_message"=> "Guilde actif.Discord obligatoire(https://discord.gg/vZ8AeM3) naboo caisse 90M. BT ROTE 33*",
-                "banner_color_id"=> "cyan_purple",
-                "banner_logo_id"=> "guild_icon_blast",
-                "enrollment_status"=> 2,
-                "galactic_power"=> 526709498,
-                "guild_type"=> null,
-                "level_requirement"=> 85,
-                "member_count"=> 49,
-                "members" => [
-                    [
-                        "galactic_power"=> 11395612,
-                        "guild_join_time"=> "2021-10-03T20:52:48Z",
-                        "lifetime_season_score"=> 734060,
-                        "member_level"=> 3,
-                        "ally_code"=> 246639295,
-                        "player_level"=> 85,
-                        "player_name"=> "Wyøming",
-                        "league_id"=> "CHROMIUM",
-                        "league_name"=> "Chromium",
-                        "league_frame_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_chromium.png",
-                        "portrait_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_kalani.png",
-                        "title"=> "Bitter Pill Company",
-                        "squad_power"=> 176324
-                    ]
-                ]
-            ]
-        ];
 
-        $this->validatorInterface = $container->get(ValidatorInterface::class);
-        $this->serializer = $container->get(SerializerInterface::class);
-        $this->mockPlayerRepository = $this->createMock(PlayerRepository::class);
-        $this->mockGuildRepository = $this->createMock(GuildRepository::class);
-        $this->mockEntityManagerInterface = $this->createMock(EntityManagerInterface::class);
         $this->mockSwgogGgApi = $this->createMock(SwgohGgApi::class);
-        $this->mockEntityManagerInterface = $this->createMock(EntityManagerInterface::class);
+        $this->mockEntityManagerInterface = $this->createConfiguredMock(EntityManagerInterface::class,
+            [
+                'persist' => null,
+                'flush' => null
+            ]
+        );
+        $this->mockUnitPlayerManager = $this->createMock(UnitPlayerManager::class);
         $this->mockPlayerManager = $this->createMock(PlayerManager::class);
-        $this->mockEntityManagerInterface->method('persist')->willReturn(null);
-        $this->mockEntityManagerInterface->method('flush')->willReturn(null);
-        $this->mockPlayerRepository->method('remove')->willReturnCallback(fn() => null);
+        $this->serializer = $container->get(SerializerInterface::class);
+        $this->validatorInterface = $container->get(ValidatorInterface::class);
+
         $this->guildManager = new GuildManager(
             $this->mockSwgogGgApi,
             $this->mockEntityManagerInterface,
-            $this->mockGuildRepository,
             $this->mockPlayerManager,
-            $this->mockPlayerRepository,
+            $this->mockUnitPlayerManager,
             $this->serializer,
             $this->validatorInterface
         );
     }
 
-    public function testFailSwgohggApi(): void
-    {
-        $errorSwgohApiData = [
-            'error_code' => 500,
-            'error_message_api_swgoh' => 'Bot diff'
-        ];
+    /**
+     * FONCTIONS DE VERIFICATION DE LA FONCTION UpdateGuild
+     */
 
-        $this->mockSwgogGgApi->method('fetchGuild')
-            ->willReturn($errorSwgohApiData);
-        
-        $caseSwgohggApiError = $this->guildManager->updateGuild(4);
-        $this->assertSame($errorSwgohApiData, $caseSwgohggApiError);
+    /**
+     * @dataProvider updateGuildErrorMessages
+     */
+    public function testUpdateGuildErrorMessages(string $errorMessage, array $guildData): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage($errorMessage);
+        $this->guildManager
+            ->updateGuild(
+                'xxxx',
+                $guildData,
+                $this->mockEntityManagerInterface
+            );
     }
 
-    public function testSchemUpdataSwgohggApi(): void
+    /**
+     * @dataProvider updateGuildEverythingIsNice
+     */
+    public function testUpdateGuildEverythingIsNice(array $guildData, GuildEntity $guildDataProvider): void
     {
-        $errorUpdateSchemaApi = [
-            'error_message' => 'Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite'
-        ];
-        $upateBaseSwgohggData = $this->baseSwgohggData;
-        $upateBaseSwgohggData['data']['guildId'] = $upateBaseSwgohggData['data']['guild_id'];
-        unset($upateBaseSwgohggData['data']['guild_id']);
-        $this->mockSwgogGgApi->method('fetchGuild')
-            ->willReturn($upateBaseSwgohggData);
-        $caseUpdateSchemaSwgohgg = $this->guildManager->updateGuild(4);
-        $this->assertSame($errorUpdateSchemaApi, $caseUpdateSchemaSwgohgg);
+        $mockObjectRepository = $this->createConfiguredMock(ObjectRepository::class,
+            [
+                'findOneby' => null
+            ]
+        );
+        $this->mockEntityManagerInterface->method('getRepository')->willReturn($mockObjectRepository);
+        $result = $this->guildManager
+            ->updateGuild(
+                'xxxx',
+                $guildData,
+                $this->mockEntityManagerInterface
+            );
+        $this->assertInstanceOf(GuildEntity::class, $result);
+        $this->assertSame($guildDataProvider->getName(), $result->getName());
+        $this->assertSame($guildDataProvider->getIdSwgoh(), $result->getIdSwgoh());
+        $this->assertSame($guildDataProvider->getGalacticPower(), $result->getGalacticPower());
     }
 
-    public function testPlayersDataMissing(): void
+    public function updateGuildEverythingIsNice():array
     {
-        $errorPlayersDataMissing = [
-            'error_message' => 'Une erreur est survenue lors de la récupération des informations des joueurs de la guilde'
-        ];
-        $upateBaseSwgohggData = $this->baseSwgohggData;
-        unset($upateBaseSwgohggData['data']['members']);
-        $this->mockSwgogGgApi->method('fetchGuild')
-            ->willReturn($upateBaseSwgohggData);
-        $this->mockGuildRepository->method('findOneBy')->willReturn(null);
-        $this->mockGuildRepository->method('save')->willReturnCallback(fn() => null);
-        $casePlayerDataMissing = $this->guildManager->updateGuild(4);
-        $this->assertSame($errorPlayersDataMissing, $casePlayerDataMissing);
-        
-    }
+        if (empty(self::$guildData)) {
+            $this->getData('Guild');
+        }
 
-    public function testFailUpdateGuildPlayers(): void
-    {
-        $errorsUpdatePlayer = [
-            'error_messages' => [
-                'Une erreur est survenue lors de la synchronisation du joueur numéro 0'
+        return [
+            [
+                'guildData' => self::$guildData,
+                'guildDataProvider' => $this->getGuildEntity()
             ]
         ];
-        $this->mockSwgogGgApi->method('fetchGuild')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockGuildRepository->method('findOneBy')->willReturn(null);
-        $this->mockGuildRepository->method('save')->willReturnCallback(fn() => null);
-        $this->mockPlayerManager->method('updateGuildPlayers')->willReturn($errorsUpdatePlayer);
-        $caseFailUpdateGuildPlayer = $this->guildManager->updateGuild(4);
-        $this->assertSame($errorsUpdatePlayer, $caseFailUpdateGuildPlayer);
     }
 
-    public function testEverythingIsNice(): void
+    public function updateGuildErrorMessages(): array
     {
-        $everythingIsFine= true;
-        $this->mockSwgogGgApi->method('fetchGuild')
-            ->willReturn($this->baseSwgohggData);
-        $this->mockGuildRepository->method('findOneBy')->willReturn(null);
-        $this->mockGuildRepository->method('save')->willReturnCallback(fn() => null);
-        $this->mockPlayerManager->method('updateGuildPlayers')->willReturn(true);
-        $caseFailUpdateGuildPlayer = $this->guildManager->updateGuild(4);
-        $this->assertSame($everythingIsFine, $caseFailUpdateGuildPlayer);
+        if (empty(self::$guildData)) {
+            $this->getData('Guild');
+        }
+
+        $missingDataField = $missingData = self::$guildData;
+        unset($missingDataField['data']['guild_id']);
+        unset($missingData['data']); 
+
+        return [
+            [
+                'errorMessage' => 'Bot diff',
+                'guildData' => [
+                    'error_message_api_swgoh' => 'Bot diff'
+                ]
+            ],
+            [
+                'errorMessage' => 'Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite',
+                'guildData' => $missingData
+            ],
+            [
+                'errorMessage' => 'Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite',
+                'guildData' => $missingDataField
+            ]
+        ];
+    }
+
+    public function getGuildEntity(): GuildEntity
+    {
+        $guild = new GuildEntity();
+        $guild->setName("HGamers II")
+            ->setIdSwgoh("uuwcpRBoStWfogZersAvJA")
+            ->setGalacticPower(528125179)
+            ->setNumberPlayers(49);
+        return $guild;
     }
 }

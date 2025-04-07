@@ -4,7 +4,7 @@ namespace App\Tests\Utils;
 
 class JsonFileLoader
 {
-    public static function getArrayFromJson(string $filePath): array
+    public static function getArrayFromJson(string $filePath): array|string
     {
         if (!file_exists($filePath)) {
             return "Le fichier suivant n'existe pas : ".$filePath;

@@ -4,6 +4,7 @@ namespace App\Tests\Utils\Factory;
 
 use App\Entity\Unit as UnitEntity;
 use App\Repository\UnitRepository;
+use App\Tests\Trait\DataTrait;
 use App\Entity\Player as PlayerEntity;
 use App\Repository\UnitPlayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,10 +16,11 @@ use App\Entity\UnitPlayer as UnitPlayerEntity;
 use App\Utils\Factory\UnitPlayer as UnitPlayerFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use App\Tests\Utils\JsonFileLoader;
 
 class UnitPlayerTest extends KernelTestCase
 {
+    use DataTrait;
+
     private EntityManagerInterface $entityManagerInterface;
     private ObjectRepository $mockObjectRepository;
     private UnitPlayerRepository $mockUnitPlayerRepository;
@@ -28,8 +30,8 @@ class UnitPlayerTest extends KernelTestCase
     private UnitPlayerFactory $UnitPlayerFactory;
     private PlayerEntity $mockPlayerEntity;
     private string $projectDir;
-    private static ?array $heroPlayerData = null;
-    private static ?array $shipPlayerData = null;
+    private static ?array $heroPlayerData = [];
+    private static ?array $shipPlayerData = [];
 
     protected function setUp(): void
     {
@@ -41,10 +43,14 @@ class UnitPlayerTest extends KernelTestCase
         $this->mockObjectRepository = $this->createMock(ObjectRepository::class);
         $this->mockUnitPlayerRepository = $this->createMock(UnitPlayerRepository::class);
         $this->mockUnitRepository = $this->createMock(UnitRepository::class);
-        $this->mockPlayerEntity = $this->createMock(PlayerEntity::class);
+        $this->mockPlayerEntity = $this->createConfiguredMock(
+            PlayerEntity::class,
+            [
+                'getId' => 1,
+                'getName' => 'William'
+            ]
+        );
         $this->mockedUnitEntity = $this->createMock(UnitEntity::class);
-        $this->mockPlayerEntity->method('getId')->willReturn(1);
-        $this->mockPlayerEntity->method('getName')->willReturn('William');
         $this->unitPlayerFactory = new UnitPlayerFactory(
             $this->validatorInterface,
             $this->mockUnitPlayerRepository,
@@ -112,33 +118,14 @@ class UnitPlayerTest extends KernelTestCase
     /**
      * Fonctions de configuration
      */
-
-     private function getUnitData(string $unitType): void
-     {
-         $variableName = lcfirst($unitType).'Data';
-         
-         if (!property_exists(self::class, $variableName)) {
-             $this->fail('La propriété '.$variableName.' n\'existe pas');
-         }
- 
-         if (self::$$variableName === null) {
-             $unitData  = JsonFileLoader::getArrayFromJson(__DIR__ . '/../../Data/'.$unitType.'.json');
-             if (is_array($unitData )) {
-                 self::$$variableName  = $unitData;
-                 return;
-             }
-             $this->fail($unitData);
-         }
-     }
-
     public function everythingIsFine(): array
     {
-        if (self::$heroPlayerData === null) {
-            $this->getUnitData('HeroPlayer');
+        if (empty(self::$heroPlayerData)) {
+            $this->getData('HeroPlayer');
         }
 
-        if (self::$shipPlayerData === null) {
-            $this->getUnitData('ShipPlayer');
+        if (empty(self::$shipPlayerData)) {
+            $this->getData('ShipPlayer');
         }
 
         return [
@@ -158,8 +145,8 @@ class UnitPlayerTest extends KernelTestCase
 
     public function errorMessages(): array
     {
-        if (self::$heroPlayerData === null) {
-            $this->getUnitData('HeroPlayer');
+        if (empty(self::$heroPlayerData)) {
+            $this->getData('HeroPlayer');
         }
         $wrongCombatType = $missingAttribute = $missingUnit = self::$heroPlayerData;
         unset($missingAttribute['data']['base_id']);

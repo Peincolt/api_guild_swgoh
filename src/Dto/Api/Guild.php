@@ -42,9 +42,9 @@ class Guild
     public function __construct(array $apiGuildData) {
         $defaults = [
             'name' => null,
-            'id_swgoh' => null,
+            'guild_id' => null,
             'galactic_power' => null,
-            'number_players' => null,
+            'member_count' => null,
             'members' => []
         ];
         $apiGuildData = array_merge($defaults, $apiGuildData['data']);
