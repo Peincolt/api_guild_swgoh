@@ -31,6 +31,7 @@
         "symfony/yaml": "6.1.*"
     },
     "require-dev": {
+        "phpunit/phpunit": "*",
         "symfony/maker-bundle": "^1.47"
     },
     "config": {
