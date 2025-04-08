@@ -9,12 +9,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<HeroPlayerAbility>
- *
- * @method HeroPlayerAbility|null find($id, $lockMode = null, $lockVersion = null)
- * @method HeroPlayerAbility|null findOneBy(array $criteria, array $orderBy = null)
- * @method HeroPlayerAbility[]    findAll()
- * @method HeroPlayerAbility[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
+*/
 class HeroPlayerAbilityRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -40,7 +35,7 @@ class HeroPlayerAbilityRepository extends ServiceEntityRepository
         }
     }
 
-    public function getTwOmicron(HeroPlayer $heroPlayer)
+    public function getTwOmicron(HeroPlayer $heroPlayer): mixed
     {
         return $this->createQueryBuilder('hpa')
             ->join('hpa.ability', 'a', 'WITH', 'hpa.ability = a and a.omicron_mode = 8')

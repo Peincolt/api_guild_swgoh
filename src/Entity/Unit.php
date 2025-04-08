@@ -27,6 +27,9 @@ class Unit
     #[ORM\Column(length: 255)]
     private ?string $base_id = null;
 
+    /**
+     * @var string[]
+     */
     #[ORM\Column]
     private array $categories = [];
 
@@ -63,12 +66,18 @@ class Unit
         return $this;
     }
 
+    /**
+     * @return array<string>
+     */
     #[Groups(['api_unit'])]
     public function getCategories(): array
     {
         return $this->categories;
     }
 
+    /**
+     * @param array<string> $categories
+     */
     public function setCategories(array $categories): self
     {
         $this->categories = $categories;
@@ -107,7 +116,7 @@ class Unit
     }
 
     /**
-     * @return Collection<int, PlayerUnit>
+     * @return Collection<int, UnitPlayer>
      */
     public function getPlayerUnits(): Collection
     {

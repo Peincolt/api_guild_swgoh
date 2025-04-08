@@ -5,6 +5,7 @@ namespace App\Controller\Api\Unit;
 use App\Entity\Hero;
 use App\Entity\Ship;
 use App\Entity\Unit;
+use App\Dto\UnitResponseApi;
 use App\Repository\HeroRepository;
 use App\Repository\ShipRepository;
 use App\Controller\Api\ApiBaseController;
@@ -82,14 +83,18 @@ class UnitController extends AbstractController
         );
     }
 
-    private function serializeUnit(Unit $unit): array
+    private function serializeUnit(Unit $unit): mixed
     {
-        return $this->serializer->normalize(
-            $unit,
-            'json',
-            [
-                'groups' => ['api_unit']
-            ]
-        );
+        try {
+            return $this->serializer->normalize(
+                $unit,
+                'json',
+                [
+                    'groups' => ['api_unit']
+                ]
+            );
+        } catch (\Exception $e) {
+            return ['error_message' => 'Une erreur est survenue lors de le récupération des données du héros '.$unit->getName()];
+        }
     }
 }

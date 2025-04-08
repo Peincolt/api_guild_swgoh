@@ -14,7 +14,7 @@ trait LevelPowerGalacticTrait
     #[ORM\Column]
     private ?int $galactical_power = null;
 
-    #[Groups('api_player', 'api_player_unit')]
+    #[Groups(['api_player', 'api_player_unit'])]
     public function getLevel(): ?int
     {
         return $this->level;
@@ -27,7 +27,7 @@ trait LevelPowerGalacticTrait
         return $this;
     }
 
-    #[Groups('api_player', 'api_player_unit')]
+    #[Groups(['api_player', 'api_player_unit'])]
     public function getGalacticalPower(): ?int
     {
         return $this->galactical_power;

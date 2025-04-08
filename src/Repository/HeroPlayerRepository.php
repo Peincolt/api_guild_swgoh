@@ -8,12 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<HeroPlayer>
- *
- * @method HeroPlayer|null find($id, $lockMode = null, $lockVersion = null)
- * @method HeroPlayer|null findOneBy(array $criteria, array $orderBy = null)
- * @method HeroPlayer[]    findAll()
- * @method HeroPlayer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
+*/
 class HeroPlayerRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)

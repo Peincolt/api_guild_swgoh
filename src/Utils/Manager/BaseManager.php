@@ -3,28 +3,32 @@
 namespace App\Utils\Manager;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 
 class BaseManager
 {
-    protected $repository;
-    protected $entityManager;
+    protected ObjectRepository $repository;
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(EntityManagerInterface $entityManagerInterface)
     {
         $this->entityManager = $entityManagerInterface;
     }
 
-    public function getEntityManager()
+    public function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
     }
 
-    public function setRepositoryByClass($class)
+    /**
+     * @param class-string<object> $class
+     */
+    public function setRepositoryByClass($class): void
     {
         $this->repository = $this->entityManager->getRepository($class);
     }
 
-    public function getRepository()
+    public function getRepository(): ObjectRepository
     {
         return $this->repository;
     }

@@ -8,12 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<SquadUnit>
- *
- * @method SquadUnit|null find($id, $lockMode = null, $lockVersion = null)
- * @method SquadUnit|null findOneBy(array $criteria, array $orderBy = null)
- * @method SquadUnit[]    findAll()
- * @method SquadUnit[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
+*/
 class SquadUnitRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)

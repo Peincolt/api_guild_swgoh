@@ -21,7 +21,7 @@ class GuildCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument(
             'id',
@@ -30,7 +30,7 @@ class GuildCommand extends Command
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln(
             [
@@ -40,29 +40,40 @@ class GuildCommand extends Command
             ]
         );
 
-        // TESTER RETOUR CODE QUAND MET RIEN
-        /*if (emptyu($input->getArgument('id'))) {
-            $output->writeln(
-                [
-                    '<fg=red>Début de la commande',
-                    '===========================</fg>',
-                ]
-            );
-        }*/
-
         $result = $this->guildManager
-            ->updateGuild($input->getArgument('id'), $output);
+            ->updateAllGuild((string)$input->getArgument('id'), $output);
 
         if (is_array($result)) {
-            $output->writeln(
-                [
-                    '<fg=red>Erreur lors de la synchronisation',
-                    '===========================',
-                    'Voilà le message d\'erreur :',
-                    $result['error_message'].'</>'
-                ]
-            );
-            return Command::FAILURE;
+            if (
+                isset($result['error_message']) &&
+                is_string($result['error_message'])
+            ) {
+                $output->writeln(
+                    [
+                        '<fg=red>Erreur lors de la synchronisation',
+                        '===========================',
+                        'Voilà le message d\'erreur :',
+                        $result['error_message'].'</>'
+                    ]
+                );
+                return Command::FAILURE;
+            }
+
+            if (
+                isset($result['error_messages']) &&
+                is_array($result['error_messages'])
+            ) {
+                $output->writeln(
+                    [
+                        '<fg=red>Une erreur est survenue lors de la synchronisation des joueurs suivants :</>',
+                        '===========================',
+                    ]
+                );
+                foreach($result['error_messages'] as $key) {
+                    $output->writeln($key.'</>');
+                }
+                return Command::SUCCESS;
+            }
         }
 
         $output->writeln(

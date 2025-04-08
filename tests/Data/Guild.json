@@ -1,0 +1,31 @@
+{
+    "data": {
+        "guild_id": "uuwcpRBoStWfogZersAvJA",
+        "name": "HGamers II",
+        "external_message": "Guilde actif.Discord obligatoire(https://discord.gg/vZ8AeM3) naboo caisse 90M. BT ROTE 33*",
+        "banner_color_id": "cyan_purple",
+        "banner_logo_id": "guild_icon_blast",
+        "enrollment_status": 2,
+        "galactic_power": 528125179,
+        "guild_type": null,
+        "level_requirement": 85,
+        "member_count": 49,
+        "members": [
+            {
+                "galactic_power": 10973154,
+                "guild_join_time": "2018-01-08T19:04:43Z",
+                "lifetime_season_score": 603364,
+                "member_level": 2,
+                "ally_code": 842173848,
+                "player_level": 85,
+                "player_name": "Jay Jay",
+                "league_id": "KYBER",
+                "league_name": "Kyber",
+                "league_frame_image": "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_kyber.png",
+                "portrait_image": "https://game-assets.swgoh.gg/textures/tex.vanity_greedo.png",
+                "title": "Spice Freighter Navigator",
+                "squad_power": 178396
+            }
+        ]
+    }
+}

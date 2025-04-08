@@ -32,7 +32,7 @@ class Player
     private ?int $ships_galactic_power = null;
 
     #[ORM\Column]
-    private ?int $heroes_gelactic_power = null;
+    private ?int $heroes_galactic_power = null;
 
     #[ORM\ManyToOne(inversedBy: 'players')]
     #[ORM\JoinColumn(nullable: false)]
@@ -90,14 +90,14 @@ class Player
     }
 
     #[Groups('api_player')]
-    public function getHeroesGelacticPower(): ?int
+    public function getHeroesGalacticPower(): ?int
     {
-        return $this->heroes_gelactic_power;
+        return $this->heroes_galactic_power;
     }
 
-    public function setHeroesGelacticPower(int $heroes_gelactic_power): self
+    public function setHeroesGalacticPower(int $heroes_galactic_power): self
     {
-        $this->heroes_gelactic_power = $heroes_gelactic_power;
+        $this->heroes_galactic_power = $heroes_galactic_power;
 
         return $this;
     }

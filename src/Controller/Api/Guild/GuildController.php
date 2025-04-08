@@ -4,6 +4,7 @@ namespace App\Controller\Api\Guild;
 
 use App\Entity\Guild;
 use App\Entity\Squad;
+use App\Dto\FileResponseData;
 use App\Repository\SquadRepository;
 use App\Utils\Service\Extract\ExcelSquad;
 use App\Utils\Manager\Guild as GuildManager;
@@ -38,7 +39,7 @@ class GuildController extends AbstractController
     public function getGuildSquads(Guild $guild): JsonResponse
     {
         return $this->json(
-            $this->squadManager->getSquadDataByGuild($guild, false)
+            $this->squadManager->getSquadDataByGuild($guild)
         );
     }
 
@@ -70,7 +71,10 @@ class GuildController extends AbstractController
         Request $request,
         SquadRepository $squadRepository,
         ExcelSquad $excelSquad
-    ) {
+    ): JsonResponse|BinaryFileResponse {
+        if (empty($guild)) {
+            return new JsonResponse(['error_message' => 'Erreur lors de la récupération des informations de la guilde dans la base de données'], 400);
+        }
         $routeName = $request->attributes->get('_route');
         $form = $this->createForm(SearchSquadType::class);
         $form->handleRequest($request);
@@ -80,30 +84,37 @@ class GuildController extends AbstractController
             $form->submit($request->query->all());
         }
         $formData = $form->getData();
-        foreach ($formData as $key => $value) {
-            if (empty($value)) {
-                unset($formData[$key]);
+        if (!empty($formData) && is_array($formData)) {
+            foreach ($formData as $key => $value) {
+                if (empty($value)) {
+                    unset($formData[$key]);
+                }
+            }
+            if ($routeName === 'api_guild_search_squads') {
+                $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData);
+                return $this->json($resultFilter);
+            } else {
+                $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData, false);
+                if (!empty($resultFilter)) {
+                    $resultCreateFile = $excelSquad->constructSpreadShitViaSquads($guild, $resultFilter);
+                    return $this->generateFileResponse($resultCreateFile);
+                }
             }
         }
-        if ($routeName === 'api_guild_search_squads') {
-            $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData);
-            return $this->json($resultFilter);
-        } else {
-            $resultFilter = $squadRepository->getGuildSquadByFilter($guild, $formData, false);
-            if (!empty($resultFilter)) {
-                $resultCreateFile = $excelSquad->constructSpreadShitViaSquads($guild, $resultFilter);
-                return $this->generateFileResponse($resultCreateFile);
-            }
-        }
+        return new JsonResponse(['error_message' => 'Erreur lors de la récupération des informations de la guilde dans la base de données'], 400);
     }
 
-    private function generateFileResponse(array $responseElements)
+    private function generateFileResponse(FileResponseData $fileResponseData): BinaryFileResponse|JsonResponse
     {
-        $reponse = new BinaryFileResponse($responseElements[0]);
+        if (!file_exists($fileResponseData->filePath)) {
+            return new JsonResponse(['error_message' => 'Une erreur est suvenue lors de la génération du fichier Excel']);
+        }
+
+        $reponse = new BinaryFileResponse($fileResponseData->filePath);
         $reponse->headers->set('Content-Type', 'application/vnd.ms-excel');
         $reponse->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $responseElements[1]
+            $fileResponseData->fileName
         );
         $reponse->deleteFileAfterSend();
         return $reponse;

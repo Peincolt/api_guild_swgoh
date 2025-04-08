@@ -23,46 +23,31 @@ class UnitCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addOption(
-                'heros',
-                'r',
-                InputOption::VALUE_NONE,
-                'Récupération des héros'
-            )
-            ->addOption(
-                'ships',
-                's',
-                InputOption::VALUE_NONE,
-                'Récupération des vaisseaux'
-            )
-            ->addOption(
-                'all',
-                'a',
-                InputOption::VALUE_NONE,
-                'Récupération des héros et des vaisseaux'
+                'type',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Quel type d\'unité souhaitez vous mettre à jour ? Héros (heros), vaisseaux (ships), les deux (all)',
+                'all'
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) :int
     {
-        $userOptions = $input->getOptions(
-            [
-                'heros',
-                'ships',
-                'all'
-            ]
-        );
+        $typeUnit = $input->getOption('type');
 
-        if (empty($userOptions['ships'])
-            && empty($userOptions['heros'])
-            && empty($userOptions['all'])
+        if (
+            empty($typeUnit) ||
+            !is_string($typeUnit) ||
+            !in_array($typeUnit, ['heros', 'ships', 'all'], true)
         ) {
-            $userOptions['all'] = true;
+            $typeUnit = 'all';
         }
 
+        $types = ($typeUnit === 'all') ? ['heros', 'ships'] : [$typeUnit];
         $output->writeln(
             [
                 '<fg=yellow>Début de la commande',
@@ -70,21 +55,19 @@ class UnitCommand extends Command
             ]
         );
 
-        if ($userOptions['all'] || $userOptions['hero']) {
-            $output->writeln(
-                [
-                    'Vous avez choisi de synchroniser les héros'.
-                    (!empty($userOptions['all']) ? 'et les vaisseaux':''),
-                    '===========================',
-                    'Début de la synchronisation des héros ...</>',
-                ]
-            );
-
-            $result = $this->unitManager->updateUnit('Hero');
-        }
-
-        if ($userOptions['all'] || $userOptions['ship']) {
-            if (!empty($result) && is_array($result)) {
+        foreach($types as $type) {
+            if ($type === 'heros') {
+                $output->writeln('Début de la synchronisation des héros ...</>');
+                $result = $this->unitManager->updateUnit('Hero');
+            } elseif($type === 'ships') {
+                $output->writeln('Début de la synchronisation des vaisseaux ...</>');
+                $result = $this->unitManager->updateUnit('Ship');
+            }
+            if (
+                !empty($result) &&
+                is_array($result) &&
+                is_string($result['error_message'])
+            ) {
                 $output->writeln(
                     [
                         '<fg=red>Erreur lors de la synchronisation',
@@ -94,35 +77,17 @@ class UnitCommand extends Command
                     ]
                 );
                 return Command::FAILURE;
+            } else {
+                $output->writeln('<fg=green>Fin de la synchronisation des '.($type === 'heros' ? 'héros' : 'vaisseaux').'.</>');
             }
-            $output->writeln(
-                [
-                    '<fg=yellow>Vous avez choisi de synchroniser les vaisseaux',
-                    '===========================',
-                    'Début de la synchronisation des vaisseaux ...</>',
-                ]
-            );
-            $result = $this->unitManager->updateUnit('Ship');
         }
 
-        if (!empty($result) && !is_array(($result))) {
-            $output->writeln(
-                [
-                    '<fg=green>Fin de la synchronisation',
-                    '===========================',
-                    'Fin de la commande</>'
-                ]
-            );
-            return Command::SUCCESS;
-        }
         $output->writeln(
             [
-                '<fg=red>Erreur lors de la synchronisation',
-                '===========================',
-                'Voilà le message d\'erreur :',
-                $result['error_message'].'</>'
+                '<fg=green>===========================',
+                'Fin de la commande</>'
             ]
         );
-        return Command::FAILURE;
+        return Command::SUCCESS;
     }
 }

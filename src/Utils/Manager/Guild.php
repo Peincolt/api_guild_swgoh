@@ -3,53 +3,105 @@
 namespace App\Utils\Manager;
 
 use Exception;
-use App\Entity\Unit;
+use App\Dto\Api\Guild as GuildDto;
+use App\Mapper\Guild as GuildMapper;
 use App\Utils\Service\Api\SwgohGg;
-use App\Repository\GuildRepository;
 use App\Entity\Guild as GuildEntity;
-use App\Repository\PlayerRepository;
-use App\Repository\SquadRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Utils\Manager\Player as playerManager;
+use App\Utils\Manager\UnitPlayer as UnitPlayerManager;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Guild
 {
     public function __construct(
         private SwgohGg $swgohGg,
         private EntityManagerInterface $entityManagerInterface,
-        private GuildRepository $guildRepository,
         private PlayerManager $playerManager,
-        private PlayerRepository $playerRepository,
-        private SerializerInterface $serializer
+        private UnitPlayerManager $unitPlayerManager,
+        private SerializerInterface $serializer,
+        private ValidatorInterface $validatorInterface
     ) {
+    }
+
+    public function updateAllGuild(
+        string $idGuild,
+        OutputInterface $outputInterface = null
+    ) :mixed {
+        $index = 0;
+        $maxTransactionNumber = 10;
+        $dataGuild = $this->swgohGg->fetchGuild($idGuild);
+        if (is_array($dataGuild)) {
+            $actualMembers = [];
+            $this->entityManagerInterface->beginTransaction();
+            try {
+                $guild = $this->updateGuild($idGuild, $dataGuild, $this->entityManagerInterface, $outputInterface);
+                foreach ($dataGuild['data']['members'] as $key => $guildPlayerData) {
+                    [$playerEntity, $playerInformations] = $this->playerManager
+                        ->updateGuildPlayer(
+                            $guild,
+                            $guildPlayerData,
+                            $this->entityManagerInterface,
+                            $outputInterface
+                    );
+                    array_push($actualMembers, $playerEntity->getName());
+                    $this->unitPlayerManager->updatePlayerUnits($playerEntity, $playerInformations, $this->entityManagerInterface, $outputInterface);
+                    if (($index % $maxTransactionNumber) === 10) {
+                        $this->entityManagerInterface->flush();
+                        $this->entityManagerInterface->clear();
+                    }
+                    $index++;
+                }
+
+                if (!empty($actualMembers)) {
+                    $this->deleteOlderMembers($actualMembers, $guild);
+                }
+                $this->entityManagerInterface->flush();
+                $this->entityManagerInterface->commit();
+            } catch (\Exception $e) {
+                $this->entityManagerInterface->rollback();
+                return [
+                    'error_message' => $e->getMessage()
+                ];
+            }
+            return $dataGuild;
+        }
     }
 
     public function updateGuild(
         string $idGuild,
+        array $dataGuild,
+        EntityManagerInterface $entityManagerInterface,
         OutputInterface $outputInterface = null
-    ) {
-        $actualMembers = array();
-        $dataGuild = $this->swgohGg->fetchGuild($idGuild);
-        $count = 0;
-        if (isset($dataGuild['error_message'])) {
-            return $dataGuild;
+    ) :GuildEntity {
+        if (isset($dataGuild['error_message_api_swgoh'])) {
+            throw new \Exception($dataGuild['error_message_api_swgoh']);
         }
 
-        $guild = $this->guildRepository->findOneBy(
+        if (!isset($dataGuild['data']) || !is_array($dataGuild['data'])) {
+            throw new \Exception('Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite');
+        }
+
+        $guildDto = new GuildDto($dataGuild);
+        $errors = $this->validatorInterface->validate($guildDto);
+        if (count($errors) > 0) {
+            throw new \Exception('Erreur lors de la synchronisation des informations de la guilde. Une modification de l\'API a du être faite');
+        }
+
+        $guild = $entityManagerInterface->getRepository(GuildEntity::class)->findOneBy(
             [
-                'id_swgoh' => $dataGuild['data']['guild_id']
+                'id_swgoh' => $guildDto->id_swgoh
             ]
         );
 
         if (empty($guild)) {
             $guild = new GuildEntity();
+            $entityManagerInterface->persist($guild);
         }
 
-        $guild = $this->fillGuild($guild, $dataGuild['data']);
-        $this->guildRepository->save($guild, true);
-
+        $guild = GuildMapper::fromDTO($guild, $guildDto);
         if (!empty($outputInterface)) {
             $outputInterface->writeln(
                 [
@@ -60,31 +112,11 @@ class Guild
                 ]
             );
         }
-
-        foreach ($dataGuild['data']['members'] as $guildPlayerData) {
-            array_push($actualMembers, $guildPlayerData['player_name']);
-            $result = $this->playerManager
-                ->updatePlayerWithApi($guildPlayerData['ally_code'], $guild);
-            if (is_array($result)) {
-                return $result;
-            }
-        }
-        $this->deleteOlderMembers($actualMembers, $guild);
-        $this->guildRepository->save($guild, true);
-    }
-
-    public function fillGuild(GuildEntity $guild, array $data) :GuildEntity
-    {
-        $guild->setName($data['name']);
-        $guild->setNumberPlayers($data['member_count']);
-        $guild->setIdSwgoh($data['guild_id']);
-        $guild->setGalacticPower($data['galactic_power']);
         return $guild;
     }
 
-    public function getGuildDataApi(GuildEntity $guild)
+    public function getGuildDataApi(GuildEntity $guild): mixed
     {
-        $arrayReturn = array();
         $arrayReturn = $this->serializer->normalize(
             $guild,
             null,
@@ -94,21 +126,31 @@ class Guild
                 ]
             ]
         );
+
+        if (!is_array($arrayReturn)) {
+            return [];
+        }
+
+        $arrayReturn['players'] = [];
+
         foreach ($guild->getPlayers() as $player) {
             $arrayReturn['players'][] = $this->playerManager
                 ->getPlayerDataApi($player);
         }
+
         return $arrayReturn;
     }
 
-    private function deleteOlderMembers(array $actualMembers, GuildEntity $guild)
+    /**
+     * @param string[] $actualMembers
+     */
+    private function deleteOlderMembers(array $actualMembers, GuildEntity $guild): void
     {
         $allMembers = $guild->getPlayers();
         foreach ($allMembers as $member) {
             if (!in_array($member->getName(), $actualMembers)) {
-                $this->playerRepository->remove($member);
+                $this->entityManagerInterface->remove($member);
             }
         }
-        $this->entityManagerInterface->flush();
     }
 }

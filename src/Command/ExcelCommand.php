@@ -24,13 +24,13 @@ class ExcelCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument('id', InputArgument::REQUIRED, 'Id de la guilde a utilisé afin de générer les exports CSV')
             ->addOption('type', 'ty', InputOption::VALUE_OPTIONAL, 'Souhaitez les teams de défenses ou les teams d\'attaque ? (d : défense ,a : attaque, an: analyse, tb: tb, t : tout)');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln(
             [
@@ -57,15 +57,18 @@ class ExcelCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln(
-            [
-                'Vous souhaitez générer un fichier Excel à partir des informations de la guilde '.
-                $guild->getName(),
-                '===========================',
-            ]
-        );
+        if (!empty($guild->getName())) {
+            $output->writeln(
+                [
+                    'Vous souhaitez générer un fichier Excel à partir des informations de la guilde '.
+                    $guild->getName(),
+                    '===========================',
+                ]
+            );
+        }
 
-        if (!empty($input->getOption('type'))) {
+        $type = $input->getOption('type');
+        if (!empty($type) && is_string($type)) {
             $type = $input->getOption('type');
             switch ($type) {
                 case "a":
@@ -96,13 +99,17 @@ class ExcelCommand extends Command
             $type
         );
 
-        if (is_array($result)) {
+        if (
+            is_array($result) &&
+            isset($result['error_message']) &&
+            is_string($result['error_message'])
+        ) {
             $output->writeln(
                 [
                     '<fg=red>Erreur lors de la génération du fichier Excel',
                     '===========================',
                     'Voilà le message d\'erreur :',
-                    $result['error_message'].'</>'
+                    strval($result['error_message']).'</>'
                 ]
             );
             return Command::FAILURE;

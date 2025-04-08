@@ -23,7 +23,7 @@ class Ship extends Unit
     /**
      * @return Collection<int, ShipPlayer>
      */
-    public function getShipPlayers(): Collection
+    /*public function getShipPlayers(): Collection
     {
         return $this->shipPlayers;
     }
@@ -48,5 +48,5 @@ class Ship extends Unit
         }
 
         return $this;
-    }
+    }*/
 }

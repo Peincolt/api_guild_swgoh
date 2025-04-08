@@ -4,8 +4,8 @@ namespace App\Controller\Api\Squad;
 
 use App\Entity\Squad;
 use App\Form\SquadType;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use App\Utils\Manager\Squad as SquadManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,8 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class SquadController extends AbstractController
 {
     public function __construct(
-        private SquadManager $squadManager,
-        private SerializerInterface $serializer
+        private SquadManager $squadManager
     ) {
         
     }
@@ -35,7 +34,7 @@ class SquadController extends AbstractController
     public function getSquadUnits(Squad $squad): JsonResponse
     {
         return $this->json(
-            $this->squadManager->getSquadUnitsData($squad, true)
+            $this->squadManager->getSquadUnitsData($squad)
         );
     }
 
@@ -69,6 +68,7 @@ class SquadController extends AbstractController
                 return $this->json($this->generateErrorResponse($form));
             }
         }
+        return new JsonResponse(['error_message' => 'Mauvaise méthode'], 405);
     }
 
     #[Route('/squad/{unique_identifier}/delete', name: 'api_squad_delete', methods: ['DELETE'])]
@@ -80,11 +80,15 @@ class SquadController extends AbstractController
                 ['result' => ['message' => 'L\'escouade a bien été supprimée']]
             );
         }
+        return new JsonResponse(['error_message' => 'Mauvaise méthode'], 405);
     }
 
-    private function generateErrorResponse(Form $form)
+    /**
+     * @return array<string, array<array<string>>>
+     */
+    private function generateErrorResponse(FormInterface $form): array
     {
-        $arrayReturn = array();
+        $arrayReturn = [];
         foreach ($form->all() as $child) {
             if (!$child->isValid()) {
                 foreach ($child->getErrors(true, true) as $error) {

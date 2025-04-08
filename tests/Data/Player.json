@@ -1,0 +1,68 @@
+{
+    "data": {
+        "ally_code": 246639295,
+        "arena_leader_base_id": "GLLEIA",
+        "arena_rank": 118,
+        "level": 85,
+        "name": "Wyøming",
+        "last_updated": "2025-04-06T20:51:54.574446",
+        "galactic_power": 11426753,
+        "character_galactic_power": 6890288,
+        "ship_galactic_power": 4536465,
+        "ship_battles_won": 1439,
+        "pvp_battles_won": 3654,
+        "pve_battles_won": 357383,
+        "pve_hard_won": 109898,
+        "galactic_war_won": 33997,
+        "guild_raid_won": 1575,
+        "guild_contribution": 2747022,
+        "guild_exchange_donations": 296,
+        "season_full_clears": 244,
+        "season_successful_defends": 1315,
+        "season_league_score": 734060,
+        "season_undersized_squad_wins": 957,
+        "season_promotions_earned": 70,
+        "season_banners_earned": 758398,
+        "season_offensive_battles_won": 4561,
+        "season_territories_defeated": 1357,
+        "url": "/p/246639295/",
+        "arena": {
+            "rank": 118,
+            "leader": "GLLEIA",
+            "members": [
+                "R2D2_LEGENDARY",
+                "CAPTAINDROGAN",
+                "CAPTAINREX",
+                "OLDBENKENOBI"
+            ]
+        },
+        "fleet_arena": {
+            "rank": 16,
+            "leader": "CAPITALLEVIATHAN",
+            "members": [
+                "SITHBOMBER",
+                "FURYCLASSINTERCEPTOR",
+                "SITHFIGHTER"
+            ],
+            "reinforcements": [
+                "SITHSUPREMACYCLASS",
+                "TIEDAGGER",
+                "SITHINFILTRATOR"
+            ]
+        },
+        "skill_rating": 2807,
+        "league_name": "Chromium",
+        "league_frame_image": "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_chromium.png",
+        "league_blank_image": "https://game-assets.swgoh.gg/textures/tex.league_icon_chromium_blank.png",
+        "league_image": "https://game-assets.swgoh.gg/textures/tex.league_icon_chromium.png",
+        "division_number": 1,
+        "division_image": "https://game-assets.swgoh.gg/textures/_1.png",
+        "portrait_image": "https://game-assets.swgoh.gg/textures/tex.vanity_kalani.png",
+        "title": "Bitter Pill Company",
+        "guild_id": "uuwcpRBoStWfogZersAvJA",
+        "guild_name": "HGamers II",
+        "guild_url": "/g/uuwcpRBoStWfogZersAvJA/",
+        "mods": []
+    },
+    "units": []
+}
