@@ -13,6 +13,6 @@ class JenkinsTest extends TestCase
 
     public function testMauvais(): void
     {
-        $this->assertSale('1', true);
+        $this->assertSame('1', true);
     }
 }
