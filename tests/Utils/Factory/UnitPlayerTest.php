@@ -22,14 +22,13 @@ class UnitPlayerTest extends KernelTestCase
     use DataTrait;
 
     private EntityManagerInterface $entityManagerInterface;
+    private EntityManagerInterface $mockEntityManagerInterface;
     private ObjectRepository $mockObjectRepository;
     private UnitPlayerRepository $mockUnitPlayerRepository;
     private UnitRepository $mockUnitRepository;
-    private UnitEntity $mockUnitEntity;
     private ValidatorInterface $validatorInterface;
-    private UnitPlayerFactory $UnitPlayerFactory;
+    private UnitPlayerFactory $unitPlayerFactory;
     private PlayerEntity $mockPlayerEntity;
-    private string $projectDir;
     private static ?array $heroPlayerData = [];
     private static ?array $shipPlayerData = [];
 
@@ -37,7 +36,6 @@ class UnitPlayerTest extends KernelTestCase
     {
         $kernel = self::bootKernel();
         $container = static::getContainer();
-        $this->projetDir = $kernel->getProjectDir();
         $this->validatorInterface = $container->get(ValidatorInterface::class);
         $this->mockEntityManagerInterface = $this->createMock(EntityManagerInterface::class);
         $this->mockObjectRepository = $this->createMock(ObjectRepository::class);
@@ -50,7 +48,6 @@ class UnitPlayerTest extends KernelTestCase
                 'getName' => 'William'
             ]
         );
-        $this->mockedUnitEntity = $this->createMock(UnitEntity::class);
         $this->unitPlayerFactory = new UnitPlayerFactory(
             $this->validatorInterface,
             $this->mockUnitPlayerRepository,
