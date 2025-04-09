@@ -17,7 +17,7 @@ class UnitTest extends KernelTestCase
     
     private EntityManagerInterface $mockEntityManagerInterface;
     private UnitFactory $mockUnitFactory;
-    private SwgohGgApi $mockSwgohGg;
+    private SwgohGgApi $mockSwgohGgApi;
     private UnitManager $unitManager;
     private static ?array $shipData;
     private static ?array $heroData;

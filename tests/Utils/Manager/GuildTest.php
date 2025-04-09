@@ -21,6 +21,7 @@ class GuildTest extends KernelTestCase
     private SwgohGgApi $mockSwgogGgApi;
     private EntityManagerInterface $mockEntityManagerInterface;
     private UnitPlayerManager $mockUnitPlayerManager;
+    private GuildManager $guildManager;
     private PlayerManager $mockPlayerManager;
     private SerializerInterface $serializer;
     private ValidatorInterface $validatorInterface;
