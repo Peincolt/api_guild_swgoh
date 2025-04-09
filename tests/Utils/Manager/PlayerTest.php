@@ -21,8 +21,8 @@ class PlayerTest extends KernelTestCase
     use DataTrait;
     
     private Guild $mockGuild;
-    private EntityManagerInterface $entityManagerInterface;
-    private ObjectRepository $objectRepository;
+    private EntityManagerInterface $mockEntityManagerInterface;
+    private ObjectRepository $mockObjectRepository;
     private PlayerManager $playerManager;
     private SwgohGgApi $mockSwgohGgApi;
     private SerializerInterface $serializer;
