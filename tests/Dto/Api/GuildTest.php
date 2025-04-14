@@ -2,67 +2,44 @@
 
 namespace App\Tests\Dto\Api;
 
-use App\Dto\Api\Guild as GuildDto;
+use App\Tests\Trait\DataTrait;
 use PHPUnit\Framework\TestCase;
+use App\Dto\Api\Guild as GuildDto;
 
 class GuildTest extends TestCase
 {
+    use DataTrait;
+
+    private static ?array $guildData = [];
+    
     public function testAbilityDtoCreation(): void
     {
-        $fakeDataApi = [
-            "data" => [
-                "guild_id"=> "uuwcpRBoStWfogZersAvJA",
-                "name"=> "HGamers II",
-                "external_message"=> "Guilde actif.Discord obligatoire(https://discord.gg/vZ8AeM3) naboo caisse 90M. BT ROTE 33*",
-                "banner_color_id"=> "cyan_purple",
-                "banner_logo_id"=> "guild_icon_blast",
-                "enrollment_status"=> 2,
-                "galactic_power"=> 526709498,
-                "guild_type"=> null,
-                "level_requirement"=> 85,
-                "member_count"=> 49,
-                "members" => [
-                    [
-                        "galactic_power"=> 11399151,
-                        "guild_join_time"=> "2021-10-03T20:52:48Z",
-                        "lifetime_season_score"=> 734060,
-                        "member_level"=> 3,
-                        "ally_code"=> 246639295,
-                        "player_level"=> 85,
-                        "player_name"=> "Wyøming",
-                        "league_id"=> "CHROMIUM",
-                        "league_name"=> "Chromium",
-                        "league_frame_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_chromium.png",
-                        "portrait_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_kalani.png",
-                        "title"=> "Bitter Pill Company",
-                        "squad_power"=> 176324
-                    ]
-                ]
-            ]
-        ];
+        if (empty($guildData)) {
+            $this->getData('Guild');
+        }
 
-        $dtoGuild = new GuildDto($fakeDataApi);
+        $dtoGuild = new GuildDto(self::$guildData);
 
         $this->assertSame('uuwcpRBoStWfogZersAvJA', $dtoGuild->id_swgoh);
         $this->assertSame('HGamers II', $dtoGuild->name);
         $this->assertSame(49, $dtoGuild->number_players);
-        $this->assertSame(526709498, $dtoGuild->galactic_power);
+        $this->assertSame(528125179, $dtoGuild->galactic_power);
         $this->assertSame(
             [
                 [
-                    "galactic_power"=> 11399151,
-                    "guild_join_time"=> "2021-10-03T20:52:48Z",
-                    "lifetime_season_score"=> 734060,
-                    "member_level"=> 3,
-                    "ally_code"=> 246639295,
+                    "galactic_power" => 10973154,
+                    "guild_join_time" => "2018-01-08T19:04:43Z",
+                    "lifetime_season_score" => 603364,
+                    "member_level"=> 2,
+                    "ally_code"=> 842173848,
                     "player_level"=> 85,
-                    "player_name"=> "Wyøming",
-                    "league_id"=> "CHROMIUM",
-                    "league_name"=> "Chromium",
-                    "league_frame_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_chromium.png",
-                    "portrait_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_kalani.png",
-                    "title"=> "Bitter Pill Company",
-                    "squad_power"=> 176324
+                    "player_name"=> "Jay Jay",
+                    "league_id"=> "KYBER",
+                    "league_name"=> "Kyber",
+                    "league_frame_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_portrait_league_kyber.png",
+                    "portrait_image"=> "https://game-assets.swgoh.gg/textures/tex.vanity_greedo.png",
+                    "title"=> "Spice Freighter Navigator",
+                    "squad_power"=> 178396
                 ]
 
             ]
