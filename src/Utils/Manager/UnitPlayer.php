@@ -47,7 +47,7 @@ class UnitPlayer extends BaseManager
         return $guildPlayersUnits;
     }
 
-    public function getPlayerUnitByPlayerAndUnit(Player $player, UnitEntity $unit): array
+    public function getPlayerUnitByPlayerAndUnit(PlayerEntity $player, UnitEntity $unit): array
     {
         
         $unitPlayerData = $this->unitPlayerRepository->findOneBy(
