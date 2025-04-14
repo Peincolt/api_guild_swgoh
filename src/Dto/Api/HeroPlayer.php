@@ -27,6 +27,14 @@ class HeroPlayer extends UnitPlayerDto
         parent::__construct($apiUnitPlayerData);
         $mergeData = array_merge($defaultsHeroPlayer, $apiUnitPlayerData['data']);
         $this->gear_level = $mergeData['gear_level'];
-        $this->relic_level = $mergeData['relic_tier'];
+        if ($mergeData['gear_level'] == 13 && $mergeData['relic_tier'] == 2) {
+            $this->relic_level = $mergeData['relic_tier'];
+        } elseif ($mergeData['gear_level'] == 13 && $mergeData['relic_tier'] >= 3) {
+            if (is_int($mergeData['relic_tier'])) {
+                $this->relic_level = $mergeData['relic_tier'] - 2;
+            }
+        } else {
+            $this->relic_level = 0;
+        }
     }
 }

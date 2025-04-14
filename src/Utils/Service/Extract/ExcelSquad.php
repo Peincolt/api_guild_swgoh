@@ -51,7 +51,7 @@ class ExcelSquad
             $spreadSheet = $this->constructSpreadShit($guild, $squads);
             $writer = new Xlsx($spreadSheet);
             $writer->save($filePath);
-            return new FileReponseData($filePath, $filename);
+            return new FileResponseData($filePath, $filename);
         } catch (Exception $e) {
             return array(
                 'error_message_front' => 'Une erreur est survenue lors de la génération de la matrice Excel',

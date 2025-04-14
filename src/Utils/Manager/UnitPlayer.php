@@ -12,6 +12,7 @@ use App\Repository\UnitPlayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\HeroPlayer as HeroPlayerEntity;
 use App\Entity\UnitPlayer as UnitPlayerEntity;
+use App\Repository\HeroPlayerAbilityRepository;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Utils\Factory\UnitPlayer as UnitPlayerFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -25,6 +26,7 @@ class UnitPlayer extends BaseManager
         private HeroPlayerAbilityManager $heroPlayerAbilityManager,
         private UnitPlayerFactory $unitPlayerFactory,
         private UnitPlayerRepository $unitPlayerRepository,
+        private HeroPlayerAbilityRepository $heroPlayerAbilityRepository,
         private TranslatorInterface $translator,
     ) {
         parent::__construct($entityManagerInterface);
