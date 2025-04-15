@@ -7,7 +7,7 @@ pipeline {
                 // Utiliser withCredentials pour récupérer le fichier secret et le copier
                 withCredentials([file(credentialsId: 'secret_api_swgoh', variable: 'SECRET_ENV_FILE')]) {
                     // Le fichier secret est copié et disponible sous la variable $SECRET_ENV_FILE
-                    sh 'cp $SECRET_ENV_FILE ./api/.env'
+                    sh 'cp -f $SECRET_ENV_FILE ./api/.env'
                 }
             }
         }
