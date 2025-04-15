@@ -8,7 +8,8 @@ FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
     git unzip libicu-dev libonig-dev libzip-dev zip libpq-dev mariadb-client \
-    && docker-php-ext-install intl pdo pdo_mysql zip opcache
+    && docker-php-ext-configure gd --with-freetype --with-jpeg
+    && docker-php-ext-install intl pdo pdo_mysql zip opcache gd
 
 WORKDIR /var/www/html
 
