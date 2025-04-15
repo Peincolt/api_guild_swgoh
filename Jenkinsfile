@@ -22,8 +22,8 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                script {
-                    sh 'cd ./api && vendor/bin/phpunit'
+                dir('api') {
+                    sh './tests.sh'
                 }
             }
         }
