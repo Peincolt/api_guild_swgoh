@@ -23,7 +23,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker-compose -f docker-compose.prod.yml up --build -d'
+                    sh 'docker-compose -f docker-compose.yaml up --build -d'
                 }
             }
         }
@@ -31,7 +31,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh 'docker-compose -f docker-compose.prod.yml down && docker-compose -f docker-compose.prod.yml up -d'
+                    sh 'docker-compose -f docker-compose.yaml down && docker-compose -f docker-compose.yaml up -d'
                 }
             }
         }
