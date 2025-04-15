@@ -22,7 +22,6 @@ services:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
       DATABASE_URL: ${DATABASE_URL}
-      CORS: ${CORS}
       CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
     networks:
       - api-net
