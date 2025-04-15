@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/Peincolt/api_guild_swgoh.git'
-            }
-        }
-
         stage('Copy Secret File') {
             steps {
                 // Utiliser withCredentials pour récupérer le fichier secret et le copier
