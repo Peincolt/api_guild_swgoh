@@ -9,6 +9,7 @@
          convertDeprecationsToExceptions="false"
 >
     <php>
+        <ini name="error_reporting" value="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED"/>
         <env name="KERNEL_CLASS" value="App\Kernel"/>
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
