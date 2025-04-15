@@ -3,7 +3,7 @@ FROM php:8.2-fpm AS build
 
 # Installation des extensions PHP nécessaires et des dépendances
 RUN apt-get update && apt-get install -y \
-    git unzip libpng-dev libicu-dev libonig-dev libzip-dev zip libpq-dev mariadb-client \
+    git unzip libpng-dev libjpeg-dev libicu-dev libonig-dev libzip-dev zip libpq-dev mariadb-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install intl pdo pdo_mysql zip opcache gd
 
@@ -22,7 +22,7 @@ FROM php:8.2-fpm
 
 # Installation des extensions PHP nécessaires et des dépendances
 RUN apt-get update && apt-get install -y \
-    git unzip libpng-dev libicu-dev libonig-dev libzip-dev zip libpq-dev mariadb-client \
+    git unzip libpng-dev libjpeg-dev libicu-dev libonig-dev libzip-dev zip libpq-dev mariadb-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install intl pdo pdo_mysql zip opcache gd
 
