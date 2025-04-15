@@ -1,26 +1,19 @@
-FROM php:8.1-fpm
+FROM composer:2 AS vendor
+
+WORKDIR /app
+COPY ./composer.* ./
+RUN composer install --no-dev --prefer-dist --no-progress --no-scripts
+
+FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    unzip \
-    git \
-    curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql zip \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    git unzip libicu-dev libonig-dev libzip-dev zip libpq-dev mariadb-client \
+    && docker-php-ext-install intl pdo pdo_mysql zip opcache
 
 WORKDIR /var/www/html
 
-COPY . /var/www/html
-
-RUN composer install --no-interaction --no-progress --prefer-dist
-
-RUN chown -R www-data:www-data /var/www/html
+COPY --from=vendor /app/vendor/ ./vendor/
+COPY ./ ./
 
 EXPOSE 9000
 
