@@ -26,7 +26,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    sh 'cd ./api && composer install --no-interaction'
+                    sh 'cd ./api && composer install --no-interaction --no-dev --optimize-autoloader --no-scripts'
                 }
             }
         }
