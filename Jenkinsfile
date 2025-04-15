@@ -20,16 +20,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                dir('api') {
-                    sh '''
-                        exit 0
-                    '''
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
