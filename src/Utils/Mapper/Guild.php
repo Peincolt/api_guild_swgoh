@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mapper;
+namespace App\Utils\Mapper;
 
 use App\Dto\Api\Guild as GuildDto;
 use App\Entity\Guild as GuildEntity;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mapper;
+namespace App\Utils\Mapper;
 
 use App\Dto\Api\Player as PlayerDto;
 use App\Entity\Guild;
