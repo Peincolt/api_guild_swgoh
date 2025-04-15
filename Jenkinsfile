@@ -24,7 +24,7 @@ pipeline {
             steps {
                 dir('api') {
                     sh '''
-                        output=$(vendor/bin/phpunit --configuration phpunit.dist.xml)
+                        output=$(vendor/bin/phpunit --configuration phpunit.xml.dist)
                         echo "$output"
 
                         # Check for deprecated notices
