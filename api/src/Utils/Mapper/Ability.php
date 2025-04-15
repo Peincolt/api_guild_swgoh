@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mapper;
+namespace App\Utils\Mapper;
 
 use App\Dto\Api\Ability as AbilityDto;
 use App\Entity\Ability as AbilityEntity;
