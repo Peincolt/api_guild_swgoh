@@ -4,17 +4,10 @@ services:
   php:
     build:
       context: ./api
-    environment:
-      APP_ENV: ${APP_ENV}
-      APP_DEBUG: ${APP_DEBUG}
-      DATABASE_URL: ${DATABASE_URL}
-      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
     networks:
       - api-net
     depends_on:
       - db
-    env_file:
-      - .env
 
   nginx:
     image: nginx:stable
@@ -39,8 +32,6 @@ services:
       - db-data:/var/lib/mysql
     networks:
       - api-net
-    env_file:
-      - .env
 
 volumes:
   db-data:

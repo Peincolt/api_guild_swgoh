@@ -1,6 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        APP_ENV = 'prod'
+        APP_DEBUG = 'false'
+        DATABASE_URL = 'mysql://api-user:JGVbc\02YGBY4hsPKJTN@db:3306/api_guild_swgoh'
+        CORS_ALLOW_ORIGIN = *
+        MYSQL_DATABASE = 'api_guild_swgoh'
+        MYSQL_USER = 'api-user'
+        MYSQL_PASSWORD = 'JGVbc\02YGBY4hsPKJTN'
+        MYSQL_ROOT_PASSWORD = 'JGVbc\02YGBY4hsPKJTN'
+    }
+
     stages {
         stage('Copy Secret File') {
             steps {
