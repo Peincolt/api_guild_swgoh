@@ -25,14 +25,7 @@ pipeline {
                 dir('api') {
                     sh '''
                         output=$(vendor/bin/phpunit)
-                        echo "$output"
 
-                        # Check for deprecated notices
-                        if echo "$output" | grep -q 'DEPRECATED'; then
-                            echo "⚠️ Des dépréciations ont été détectées pendant les tests"
-                        fi
-
-                        # Check if tests passed
                         summary=$(echo "$output" | grep -E '^OK \\([0-9]+ tests?, [0-9]+ assertions?\\)')
                         if [ -n "$summary" ]; then
                             echo "✅ Tests passés avec succès"
