@@ -42,7 +42,7 @@ class HeroPlayerTest extends KernelTestCase
         $this->assertSame(113228, $heroPlayer->getLife());
         $this->assertSame(185355, $heroPlayer->getProtection());
         $this->assertSame(544, $heroPlayer->getSpeed());
-        $this->assertSame(9, $heroPlayer->getRelicLevel());
+        $this->assertSame(7, $heroPlayer->getRelicLevel());
         $this->assertSame(13, $heroPlayer->getGearLevel());
     }
 }

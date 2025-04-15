@@ -186,7 +186,7 @@ class UnitPlayerTest extends KernelTestCase
             ->setLife(113228)
             ->setProtection(185355)
             ->setSpeed(544)
-            ->setRelicLevel(9)
+            ->setRelicLevel(7)
             ->setGearLevel(13);
         return $heroPlayerEntity;
     }
